@@ -1,0 +1,14 @@
+#!/bin/bash
+
+cd ./src && make all -j 12 PLA=x86
+
+cd ../test
+
+test ${1:0-1} != f && make EXE EXE=$1 PLA=x86
+
+test ${1:0-1} = f && make FEXE FEXE=$1 PLA=x86
+
+test ${2:0-1} = 1 && ./$1 |&tee ./logs/log.$1-x86-$2
+
+test ${2:0-1} != 1 && bsub -I -q q_x86_expr -n $2 ./$1 |&tee ./logs/log.$1-x86-$2
+

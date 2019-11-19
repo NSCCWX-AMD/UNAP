@@ -1,0 +1,14 @@
+#!/bin/bash
+
+cd ./src && make all -j 12 PLA=sw
+
+cd ../test
+
+test ${1:0-1} != f && make EXE EXE=$1 PLA=sw
+
+test ${1:0-1} = f && make FEXE FEXE=$1 PLA=sw
+
+# rm -f ./logs/log.$1-sw-$2
+# bsub -debug -b -n $2 -cgsp 64 -share_size 4096 -host_stack 128 -o ./logs/log.$1-sw-$2 ./$1
+
+bsub -I -b -q q_sw_share -n $2 -cgsp 64 -share_size 7000 -host_stack 1024 ./$1 |&tee ./logs/log.$1-sw-$2
