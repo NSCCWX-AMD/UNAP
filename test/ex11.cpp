@@ -14,7 +14,7 @@
 #include <string.h>
 #include "printUNAP.hpp"
 
-#include "rcm.h"
+#include "rcmf.h"
 
 #ifdef SW_SLAVE
 #include "swAthread.h"

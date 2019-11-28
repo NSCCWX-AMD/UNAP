@@ -6,7 +6,7 @@
 #include <bits/stdc++.h>
 #include <iostream>
 #include "cooRCM.hpp"
-#include "rcm.h"
+#include "rcmf.h"
 
 using namespace COORCM;
 
@@ -22,10 +22,10 @@ using namespace COORCM;
     ptr = NULL; \
 }
 
-int findIndex(std::vector<std::pair<int, int> > a, int x)
+label findIndex(std::vector<std::pair<label, label> > a, label x)
 {
-    int nRet = -1;
-	for (int i = 0; i < a.size(); i++)
+    label nRet = -1;
+	for (label i = 0; i < a.size(); i++)
 	{
 		if (a[i].first == x)
 		{
@@ -37,21 +37,21 @@ int findIndex(std::vector<std::pair<int, int> > a, int x)
 }
 
 
-ReorderingSSM::ReorderingSSM(const int nnz, const int nRows, const int* row, const int* col)
+ReorderingSSM::ReorderingSSM(const label nnz, const label nRows, const label* row, const label* col)
 :
 	_nnz(nnz),
 	_nRows(nRows),
 	_row(row),
 	_col(col)
 {
-	_vetexOrderPtr = new std::vector<int>();
+	_vetexOrderPtr = new std::vector<label>();
 
-	_edgeOrderPtr = new std::vector<int>();
+	_edgeOrderPtr = new std::vector<label>();
 
-	int Max = 0;
-	for(int i=0; i<nnz ; i++)
+	label Max = 0;
+	for(label i=0; i<nnz ; i++)
 	{
-		int temp = abs(row[i] - col[i]);
+		label temp = abs(row[i] - col[i]);
 		if(temp > Max)
 		{
 			Max = temp;
@@ -68,9 +68,9 @@ ReorderingSSM::~ReorderingSSM()
 	DELETE_OBJECT_POINTER(_edgeOrderPtr);
 }
 
-std::vector<int> ReorderingSSM::_globalDegree;
+std::vector<label> ReorderingSSM::_globalDegree;
 
-bool ReorderingSSM::compareDegree(int i, int j)
+bool ReorderingSSM::compareDegree(label i, label j)
 {
 	return _globalDegree[i] - _globalDegree[j];
 }
@@ -79,16 +79,16 @@ void ReorderingSSM::degreeGenerator()
 {
 	std::cout << "in degreeGenerator" << std::endl;
 	_globalDegree.clear();
-	int* nColsInRow = new int[_nRows];
-	for(int i=0; i<_nRows; i++)
+	label* nColsInRow = new label[_nRows];
+	for(label i=0; i<_nRows; i++)
 	{
 		nColsInRow[i] = 0;
 	}
-	for(int i=0; i<_nnz; i++)
+	for(label i=0; i<_nnz; i++)
 	{
 		nColsInRow[_row[i]]++;
 	}
-	for(int i=0; i<_nRows; i++)
+	for(label i=0; i<_nRows; i++)
 	{
 		_globalDegree.push_back(nColsInRow[i]);
 	}
@@ -101,15 +101,15 @@ void ReorderingSSM::CuthillMckee()
 {
 	std::cout << "in CuthillMckee" << std::endl;
 	degreeGenerator();
-	std::queue<int>* Qptr = new std::queue<int>();
-	std::queue<int>& Q = *Qptr;
+	std::queue<label>* Qptr = new std::queue<label>();
+	std::queue<label>& Q = *Qptr;
 
-	std::vector<std::pair<int, int> >* notVisitedPtr = new std::vector<std::pair<int, int> >();
-	std::vector<std::pair<int, int> >& notVisited = *notVisitedPtr;
+	std::vector<std::pair<label, label> >* notVisitedPtr = new std::vector<std::pair<label, label> >();
+	std::vector<std::pair<label, label> >& notVisited = *notVisitedPtr;
 
-	std::vector<int>& R = *_vetexOrderPtr;
+	std::vector<label>& R = *_vetexOrderPtr;
 
-	for (int i = 0; i < _globalDegree.size(); i++)
+	for (label i = 0; i < _globalDegree.size(); i++)
 	{
 		notVisited.push_back(std::make_pair(i, _globalDegree[i]));
 	}
@@ -118,9 +118,9 @@ void ReorderingSSM::CuthillMckee()
 	// even when there are dijoind graphs
 	while (!notVisited.empty())
 	{
-		int minNodeIndex = 0;
+		label minNodeIndex = 0;
 
-		for (int i = 0; i < notVisited.size(); i++)
+		for (label i = 0; i < notVisited.size(); i++)
 		{
 			if (notVisited[i].second < notVisited[minNodeIndex].second)
 			{
@@ -135,11 +135,11 @@ void ReorderingSSM::CuthillMckee()
 		// Simple BFS
 		while (!Q.empty())
 		{
-			std::vector<int>* toSortPtr = new std::vector<int>();
-			std::vector<int>& toSort = *toSortPtr;
-			int y = Q.front();
+			std::vector<label>* toSortPtr = new std::vector<label>();
+			std::vector<label>& toSort = *toSortPtr;
+			label y = Q.front();
 
-			for(int i=0; i<_nnz; i++)
+			for(label i=0; i<_nnz; i++)
 			{
 				if(_row[i]==Q.front() && _row[i]!=_col[i] && findIndex(notVisited, _col[i]) != -1)
 				{
@@ -149,7 +149,7 @@ void ReorderingSSM::CuthillMckee()
 			}
 			sort(toSort.begin(), toSort.end(), compareDegree);
 
-			for (int i = 0; i < toSort.size(); i++)
+			for (label i = 0; i < toSort.size(); i++)
 			{
 				Q.push(toSort[i]);
 			}
@@ -169,9 +169,9 @@ void ReorderingSSM::ReverseCuthillMckee()
 {
 	std::cout << "in ReverseCuthillMckee" << std::endl;
 	CuthillMckee();
-	std::vector<int>& cuthill = *_vetexOrderPtr;
+	std::vector<label>& cuthill = *_vetexOrderPtr;
 
-	int n = cuthill.size();
+	label n = cuthill.size();
 
 	if (n % 2 == 0)
 	{
@@ -181,23 +181,23 @@ void ReorderingSSM::ReverseCuthillMckee()
 	n = n / 2;
 
 	//- reverse
-	for (int i = 0; i <= n; i++)
+	for (label i = 0; i <= n; i++)
 	{
-		int j = cuthill[cuthill.size() - 1 - i];
+		label j = cuthill[cuthill.size() - 1 - i];
 		cuthill[cuthill.size() - 1 - i] = cuthill[i];
 		cuthill[i] = j;
 	}
 
 	//-
-	int* ord = new int[_nRows];
-	for(int i=0; i<_nRows; i++)
+	label* ord = new label[_nRows];
+	for(label i=0; i<_nRows; i++)
 	{
 		ord[i] = i;
 	}
-	int otto;
-	for (int i = 0; i < _nRows - 1; i++)
+	label otto;
+	for (label i = 0; i < _nRows - 1; i++)
 	{
-        for (int j = _nRows - 1; j > i; j--)
+        for (label j = _nRows - 1; j > i; j--)
 		{
         	if (cuthill[j - 1] > cuthill[j])
         	{
@@ -211,18 +211,18 @@ void ReorderingSSM::ReverseCuthillMckee()
             }
         }
     }
-	for(int i=0; i<_nRows; i++)
+	for(label i=0; i<_nRows; i++)
 	{
 		cuthill[i] = ord[i];
 	}
 
-	int Max = 0;
-	for(int i=0; i<_nnz; i++)
+	label Max = 0;
+	for(label i=0; i<_nnz; i++)
    	{
-   	 	int newrow = cuthill[_row[i]];
-   	 	int newcol = cuthill[_col[i]];
+   	 	label newrow = cuthill[_row[i]];
+   	 	label newcol = cuthill[_col[i]];
 
-   	 	int otto = abs(newrow - newcol);
+   	 	label otto = abs(newrow - newcol);
         if(otto > Max)
         {
             Max = otto;
@@ -233,22 +233,22 @@ void ReorderingSSM::ReverseCuthillMckee()
 	std::cout << "end ReverseCuthillMckee" << std::endl;
 }
 
-std::vector<int>* ReorderingSSM::getVetexOrder()
+std::vector<label>* ReorderingSSM::getVetexOrder()
 {
 	return _vetexOrderPtr;
 }
 
-std::vector<int>* ReorderingSSM::getEdgeOrder()
+std::vector<label>* ReorderingSSM::getEdgeOrder()
 {
 	//need to change
-	std::vector<int>& edgeorder = *_edgeOrderPtr;
+	std::vector<label>& edgeorder = *_edgeOrderPtr;
 
-	int otto;
-	int* newrow = new int[_nnz];
-	int* newcol = new int[_nnz];
-	int* order = new int[_nnz];
+	label otto;
+	label* newrow = new label[_nnz];
+	label* newcol = new label[_nnz];
+	label* order = new label[_nnz];
 
-	for(int i=0; i<_nnz; i++)
+	for(label i=0; i<_nnz; i++)
 	{
 		edgeorder.push_back(i);
 		order[i] = i;
@@ -259,9 +259,9 @@ std::vector<int>* ReorderingSSM::getEdgeOrder()
 
 
 
-	for (int i = 0; i < _nnz - 1; i++)
+	for (label i = 0; i < _nnz - 1; i++)
 	{
-        for (int j = _nnz - 1; j > i; j--)
+        for (label j = _nnz - 1; j > i; j--)
 		{
         	if (newcol[j - 1] > newcol[j])
         	{
@@ -279,9 +279,9 @@ std::vector<int>* ReorderingSSM::getEdgeOrder()
             }
         }
     }
-	for (int i = 0; i < _nnz - 1; i++)
+	for (label i = 0; i < _nnz - 1; i++)
     {
-        for (int j = _nnz - 1; j > i; j--)
+        for (label j = _nnz - 1; j > i; j--)
         {
             if (newrow[j - 1] > newrow[j])
             {
@@ -298,9 +298,9 @@ std::vector<int>* ReorderingSSM::getEdgeOrder()
             }
         }
     }
-    for (int i = 0; i < _nnz - 1; i++)
+    for (label i = 0; i < _nnz - 1; i++)
     {
-        for (int j = _nnz - 1; j > i; j--)
+        for (label j = _nnz - 1; j > i; j--)
         {
             if (order[j - 1] > order[j])
             {
@@ -320,49 +320,49 @@ std::vector<int>* ReorderingSSM::getEdgeOrder()
 	return _edgeOrderPtr;
 }
 
-void rcmCOO_nowrite(const int nnz,
-					const int nRows,
-					const int *row,
-					const int *col,
-					int *postVetexOrder,
-					int *postValOrder)
+void rcmCOO_nowrite(const label nnz,
+					const label nRows,
+					const label *row,
+					const label *col,
+					label *postVetexOrder,
+					label *postValOrder)
 {
 	ReorderingSSM m(nnz, nRows, row, col);
 
-	std::vector<int>* CellorderPtr = m.getVetexOrder();
-	std::vector<int>& Cellorder = *(CellorderPtr);
-	std::vector<int>* EdgeorderPtr = m.getEdgeOrder();
-	std::vector<int>& Edgeorder = *(EdgeorderPtr);
+	std::vector<label>* CellorderPtr = m.getVetexOrder();
+	std::vector<label>& Cellorder = *(CellorderPtr);
+	std::vector<label>* EdgeorderPtr = m.getEdgeOrder();
+	std::vector<label>& Edgeorder = *(EdgeorderPtr);
 
-	for(int ij=0; ij < Cellorder.size(); ij++)
+	for(label ij=0; ij < Cellorder.size(); ij++)
 	{
 		postVetexOrder[ij] = Cellorder[ij];
 	}
-	for(int ik=0; ik < Edgeorder.size(); ik++)
+	for(label ik=0; ik < Edgeorder.size(); ik++)
 	{
 		postValOrder[ik] = Edgeorder[ik];
 	}
 }
 
-void rcmCOO_rewrite(const int nnz, const int nRows, int *row, int *col, double *val)
+void rcmCOO_rewrite(const label nnz, const label nRows, label *row, label *col, scalar *val)
 {
 	ReorderingSSM m(nnz, nRows, row, col);
 
-	std::vector<int>* CellorderPtr = m.getVetexOrder();
-	std::vector<int>& Cellorder = *(CellorderPtr);
-	std::vector<int>* EdgeorderPtr = m.getEdgeOrder();
-	std::vector<int>& Edgeorder = *(EdgeorderPtr);
+	std::vector<label>* CellorderPtr = m.getVetexOrder();
+	std::vector<label>& Cellorder = *(CellorderPtr);
+	std::vector<label>* EdgeorderPtr = m.getEdgeOrder();
+	std::vector<label>& Edgeorder = *(EdgeorderPtr);
 
-	int* ncol = new int[nnz];
-	int* nrow = new int[nnz];
-	double* newval = new double[nnz];
-    for(int j=0; j<nnz; j++)
+	label* ncol = new label[nnz];
+	label* nrow = new label[nnz];
+	scalar* newval = new scalar[nnz];
+    for(label j=0; j<nnz; j++)
     {
     	nrow[Edgeorder[j]] = Cellorder[row[j]];
     	ncol[Edgeorder[j]] = Cellorder[col[j]];
         newval[Edgeorder[j]] = val[j];
     }
-    for(int j=0; j<nnz; j++)
+    for(label j=0; j<nnz; j++)
     {
         col[j] = ncol[j];
         row[j] = nrow[j];
@@ -374,17 +374,17 @@ void rcmCOO_rewrite(const int nnz, const int nRows, int *row, int *col, double *
     DELETE_POINTER(newval);
 }
 
-void rcmCSR_nowrite(const int nnz,
-			 		const int nRows,
-			 		const int* rowsOffset,
-			 		const int* col,
-			 		int* postVetexOrder,
-			 		int* postValOrder,
-			 		int* newRowsOffset)
+void rcmCSR_nowrite(const label nnz,
+			 		const label nRows,
+			 		const label* rowsOffset,
+			 		const label* col,
+			 		label* postVetexOrder,
+			 		label* postValOrder,
+			 		label* newRowsOffset)
 {
-	int* row = new int[nnz];
-	int j = 0;
-	for(int i=0; i<nnz; i++)
+	label* row = new label[nnz];
+	label j = 0;
+	for(label i=0; i<nnz; i++)
 	{
 		if(i >= rowsOffset[j+1])
 		{
@@ -395,26 +395,26 @@ void rcmCSR_nowrite(const int nnz,
 
 	ReorderingSSM m(nnz, nRows, row, col);
 
-	std::vector<int>* CellorderPtr = m.getVetexOrder();
-	std::vector<int>& Cellorder = *(CellorderPtr);
-	std::vector<int>* EdgeorderPtr = m.getEdgeOrder();
-	std::vector<int>& Edgeorder = *(EdgeorderPtr);
+	std::vector<label>* CellorderPtr = m.getVetexOrder();
+	std::vector<label>& Cellorder = *(CellorderPtr);
+	std::vector<label>* EdgeorderPtr = m.getEdgeOrder();
+	std::vector<label>& Edgeorder = *(EdgeorderPtr);
 
-	for(int ij=0; ij < Cellorder.size(); ij++)
+	for(label ij=0; ij < Cellorder.size(); ij++)
 	{
 		postVetexOrder[ij] = Cellorder[ij];
 	}
-	for(int ik=0; ik < Edgeorder.size(); ik++)
+	for(label ik=0; ik < Edgeorder.size(); ik++)
 	{
 		postValOrder[ik] = Edgeorder[ik];
 	}
 	newRowsOffset[0] = 0;
 
-	for(int j=1; j<nRows+1; j++)
+	for(label j=1; j<nRows+1; j++)
 	{
 		newRowsOffset[Cellorder[j-1]+1] = rowsOffset[j] - rowsOffset[j-1];
 	}
-	for(int j=1; j<nRows+1; j++)
+	for(label j=1; j<nRows+1; j++)
 	{
 		newRowsOffset[j] += newRowsOffset[j-1];
 	}
@@ -422,11 +422,11 @@ void rcmCSR_nowrite(const int nnz,
 	DELETE_POINTER(row);
 }
 
-void rcmCSR_rewrite(const int nnz, const int nRows, int* rowsOffset, int* col, double* value)
+void rcmCSR_rewrite(const label nnz, const label nRows, label* rowsOffset, label* col, scalar* value)
 {
-	int* row = new int[nnz];
-	int k = 0;
-	for(int i=0; i<nnz; i++)
+	label* row = new label[nnz];
+	label k = 0;
+	for(label i=0; i<nnz; i++)
 	{
 		if(i >= rowsOffset[k+1])
 		{
@@ -436,33 +436,33 @@ void rcmCSR_rewrite(const int nnz, const int nRows, int* rowsOffset, int* col, d
 	}
 	ReorderingSSM m(nnz, nRows, row, col);
 
-	std::vector<int>* CellorderPtr = m.getVetexOrder();
-	std::vector<int>& Cellorder = *(CellorderPtr);
-	std::vector<int>* EdgeorderPtr = m.getEdgeOrder();
-	std::vector<int>& Edgeorder = *(EdgeorderPtr);
+	std::vector<label>* CellorderPtr = m.getVetexOrder();
+	std::vector<label>& Cellorder = *(CellorderPtr);
+	std::vector<label>* EdgeorderPtr = m.getEdgeOrder();
+	std::vector<label>& Edgeorder = *(EdgeorderPtr);
 
-	int* newcol = new int[nnz];
-	double* newval = new double[nnz];
+	label* newcol = new label[nnz];
+	scalar* newval = new scalar[nnz];
 
-	for(int j=0; j<nnz; j++)
+	for(label j=0; j<nnz; j++)
 	{
 		newcol[Edgeorder[j]] = Cellorder[col[j]];
 		newval[Edgeorder[j]] = value[j];
 	}
 
-	for(int j=0; j<nnz; j++)
+	for(label j=0; j<nnz; j++)
 	{
 		col[j] = newcol[j];
 		value[j] = newval[j];
 	}
 
-	int* newRowsOffset = new int[nRows+1];
+	label* newRowsOffset = new label[nRows+1];
 	newRowsOffset[0] = 0;
-	for(int j=1; j<nRows+1; j++)
+	for(label j=1; j<nRows+1; j++)
 	{
 		newRowsOffset[Cellorder[j-1]+1] = rowsOffset[j] - rowsOffset[j-1];
 	}
-	for(int j=1; j<nRows+1; j++)
+	for(label j=1; j<nRows+1; j++)
 	{
 		rowsOffset[j] = newRowsOffset[j] + newRowsOffset[j-1];
 	}
@@ -473,43 +473,43 @@ void rcmCSR_rewrite(const int nnz, const int nRows, int* rowsOffset, int* col, d
     DELETE_POINTER(newval);
 }
 
-void rcmLDU_nowrite(const int nnz,
-					const int nRows,
-					const int* row,
-					const int* col,
-					int* postVetexOrder,
-					int* postEdgeOrder)
+void rcmLDU_nowrite(const label nnz,
+					const label nRows,
+					const label* row,
+					const label* col,
+					label* postVetexOrder,
+					label* postEdgeOrder)
 {
-	int len = 2*nnz;
-	int* col2 = new int[len];
-	int* row2 = new int[len];
-	int* nColsInRow = new int[nRows];
-	int* colsOffset = new int[nRows+1];
+	label len = 2*nnz;
+	label* col2 = new label[len];
+	label* row2 = new label[len];
+	label* nColsInRow = new label[nRows];
+	label* colsOffset = new label[nRows+1];
 	colsOffset[0] = 0;
-	for(int i=0; i<nRows; i++)
+	for(label i=0; i<nRows; i++)
 	{
 		nColsInRow[i] = 0;
 		colsOffset[i+1] = 0;
 	}
-	for(int i=0; i<nnz; i++)
+	for(label i=0; i<nnz; i++)
 	{
-		int r=row[i];
-		int c=col[i];
+		label r=row[i];
+		label c=col[i];
 
 		nColsInRow[r]++;
 		nColsInRow[c]++;
 	}
 
-	for(int i=0; i<nRows; i++)
+	for(label i=0; i<nRows; i++)
 	{
 		colsOffset[i+1] = colsOffset[i] + nColsInRow[i];
 		nColsInRow[i] = 0;
 	}
 
-	for(int i=0; i<nnz; i++)
+	for(label i=0; i<nnz; i++)
 	{
-		int r=row[i];
-		int c=col[i];
+		label r=row[i];
+		label c=col[i];
 
 		row2[colsOffset[r]+nColsInRow[r]] = r;
 		col2[colsOffset[r]+nColsInRow[r]] = c;
@@ -524,27 +524,27 @@ void rcmLDU_nowrite(const int nnz,
 
 	ReorderingSSM m(len, nRows, row2, col2);
 
-	std::vector<int>* CellorderPtr = m.getVetexOrder();
-	std::vector<int>& Cellorder = *(CellorderPtr);
-	int* order = new int[nnz];
+	std::vector<label>* CellorderPtr = m.getVetexOrder();
+	std::vector<label>& Cellorder = *(CellorderPtr);
+	label* order = new label[nnz];
 
-	for(int it=0; it<nRows; it++)
+	for(label it=0; it<nRows; it++)
 	{
 		postVetexOrder[it] = Cellorder[it];
 	}
 
-	for(int it=0; it<nnz; it++)
+	for(label it=0; it<nnz; it++)
 	{
 		postEdgeOrder[it] = it;
 		order[it] = it;
 	}
 
 	//need to change
-	int* nrow = new int[nnz];
-	int* ncol = new int[nnz];
+	label* nrow = new label[nnz];
+	label* ncol = new label[nnz];
 
-	int otto;
-	for(int i=0; i<nnz; i++)
+	label otto;
+	for(label i=0; i<nnz; i++)
     {
     	nrow[i] = Cellorder[row[i]];
     	ncol[i] = Cellorder[col[i]];
@@ -557,15 +557,15 @@ void rcmLDU_nowrite(const int nnz,
 		}
     }
 
-    for(int i=0; i<nnz; i++)
+    for(label i=0; i<nnz; i++)
     {
 
     }
 
 
-	for (int i = 0; i < nnz - 1; i++)
+	for (label i = 0; i < nnz - 1; i++)
 	{
-        for (int j = nnz - 1; j > i; j--)
+        for (label j = nnz - 1; j > i; j--)
 		{
         	if (ncol[j - 1] > ncol[j])
         	{
@@ -583,9 +583,9 @@ void rcmLDU_nowrite(const int nnz,
             }
         }
     }
-	for (int i = 0; i < nnz - 1; i++)
+	for (label i = 0; i < nnz - 1; i++)
     {
-        for (int j = nnz - 1; j > i; j--)
+        for (label j = nnz - 1; j > i; j--)
         {
             if (nrow[j - 1] > nrow[j])
             {
@@ -604,7 +604,7 @@ void rcmLDU_nowrite(const int nnz,
          }
     }
 
-    for (int i = 0; i < nnz ; i++)
+    for (label i = 0; i < nnz ; i++)
     {
     	if(order[i] < 0)
     	{
@@ -612,9 +612,9 @@ void rcmLDU_nowrite(const int nnz,
     		postEdgeOrder[i] = -postEdgeOrder[i] -1;
 		}
 	}
-    for (int i = 0; i < nnz - 1; i++)
+    for (label i = 0; i < nnz - 1; i++)
     {
-        for (int j = nnz - 1; j > i; j--)
+        for (label j = nnz - 1; j > i; j--)
         {
             if (order[j - 1] > order[j])
             {
@@ -635,44 +635,44 @@ void rcmLDU_nowrite(const int nnz,
 	DELETE_POINTER(row2);
 }
 
-void rcmLDU_rewrite(const int nnz,
-					const int nRows,
-					int* row,
-					int* col,
-					double* diagVal,
-					double* upperVal,
-					double* lowerVal)
+void rcmLDU_rewrite(const label nnz,
+					const label nRows,
+					label* row,
+					label* col,
+					scalar* diagVal,
+					scalar* upperVal,
+					scalar* lowerVal)
 {
-	int len = 2*nnz;
-	int* col2 = new int[len];
-	int* row2 = new int[len];
-	int* nColsInRow = new int[nRows];
-	int* colsOffset = new int[nRows+1];
+	label len = 2*nnz;
+	label* col2 = new label[len];
+	label* row2 = new label[len];
+	label* nColsInRow = new label[nRows];
+	label* colsOffset = new label[nRows+1];
 	colsOffset[0] = 0;
-	for(int i=0; i<nRows; i++)
+	for(label i=0; i<nRows; i++)
 	{
 		nColsInRow[i] = 0;
 		colsOffset[i+1] = 0;
 	}
-	for(int i=0; i<nnz; i++)
+	for(label i=0; i<nnz; i++)
 	{
-		int r=row[i];
-		int c=col[i];
+		label r=row[i];
+		label c=col[i];
 
 		nColsInRow[r]++;
 		nColsInRow[c]++;
 	}
 
-	for(int i=0; i<nRows; i++)
+	for(label i=0; i<nRows; i++)
 	{
 		colsOffset[i+1] = colsOffset[i] + nColsInRow[i];
 		nColsInRow[i] = 0;
 	}
 
-	for(int i=0; i<nnz; i++)
+	for(label i=0; i<nnz; i++)
 	{
-		int r=row[i];
-		int c=col[i];
+		label r=row[i];
+		label c=col[i];
 
 		row2[colsOffset[r]+nColsInRow[r]] = r;
 		col2[colsOffset[r]+nColsInRow[r]] = c;
@@ -687,30 +687,30 @@ void rcmLDU_rewrite(const int nnz,
 
 	ReorderingSSM m(len, nRows, row2, col2);
 
-	std::vector<int>* CellorderPtr = m.getVetexOrder();
-	std::vector<int>& Cellorder = *(CellorderPtr);
+	std::vector<label>* CellorderPtr = m.getVetexOrder();
+	std::vector<label>& Cellorder = *(CellorderPtr);
 
-	int temp;
-	double tem;
-	int* newcol = new int[nnz];
-	int* newrow = new int[nnz];
-	double* newdiag = new double[nRows];
+	label temp;
+	scalar tem;
+	label* newcol = new label[nnz];
+	label* newrow = new label[nnz];
+	scalar* newdiag = new scalar[nRows];
 
-	for(int i=0; i<nRows; i++)
+	for(label i=0; i<nRows; i++)
 	{
 		newdiag[Cellorder[i]] = diagVal[i];
 	}
-	for(int i=0;i<nRows;i++)
+	for(label i=0;i<nRows;i++)
 	{
 		diagVal[i] = newdiag[i];
 	}
-	for(int i=0; i<nnz; i++)
+	for(label i=0; i<nnz; i++)
     {
     	newrow[i] = Cellorder[row[i]];
     	newcol[i] = Cellorder[col[i]];
     }
 
-	for(int j=0; j<nnz; j++)
+	for(label j=0; j<nnz; j++)
 	{
 		if(newrow[j] > newcol[j])
 		{
@@ -722,17 +722,17 @@ void rcmLDU_rewrite(const int nnz,
 			newcol[j] = temp;
 		}
 	}
-	for(int j=0; j<nnz; j++)
+	for(label j=0; j<nnz; j++)
     {
  		col[j] = newcol[j];
  		row[j] = newrow[j];
  	}
 
-	int otto;
-	double ott;
-	for (int i = 0; i < nnz - 1; i++)
+	label otto;
+	scalar ott;
+	for (label i = 0; i < nnz - 1; i++)
 	{
-        for (int j = nnz - 1; j > i; j--)
+        for (label j = nnz - 1; j > i; j--)
 		{
         	if (col[j - 1] > col[j])
         	{
@@ -753,9 +753,9 @@ void rcmLDU_rewrite(const int nnz,
             }
         }
     }
-	for (int i = 0; i < nnz - 1; i++)
+	for (label i = 0; i < nnz - 1; i++)
     {
-        for (int j = nnz - 1; j > i; j--)
+        for (label j = nnz - 1; j > i; j--)
         {
             if (row[j - 1] > row[j])
             {

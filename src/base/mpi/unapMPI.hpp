@@ -19,8 +19,8 @@ namespace UNAP
 class unapMPI
 {
 private:
-	static label myProcNo_;
-	static label nProcs_;
+	static int myProcNo_;
+	static int nProcs_;
 	static bool parRun_;
 	static MPI_Datatype unapLabel_;
 	static MPI_Datatype unapScalar_;

@@ -1,7 +1,7 @@
 #include "unapMPI.hpp"
 
-UNAP::label UNAP::unapMPI::myProcNo_ = 0;
-UNAP::label UNAP::unapMPI::nProcs_ = 1;
+int UNAP::unapMPI::myProcNo_ = 0;
+int UNAP::unapMPI::nProcs_ = 1;
 bool  UNAP::unapMPI::parRun_ = false;
 MPI_Datatype UNAP::unapMPI::unapLabel_ = MPI_INT;
 MPI_Datatype UNAP::unapMPI::unapScalar_ = MPI_DOUBLE;
