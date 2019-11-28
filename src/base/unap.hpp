@@ -28,13 +28,13 @@ namespace UNAP
 
 
 //- label
-#if defined(LABEL_INT)
+#if defined(LABEL_INT32)
 //- define label as a 32-bit int
 namespace UNAP
 {
 	typedef int label;
 }
-#elif defined(LABEL_LONG)
+#elif defined(LABEL_INT64)
 //- define label as a 64-bit int
 namespace UNAP
 {
@@ -49,13 +49,13 @@ namespace UNAP
 
 
 //- scalar
-#if defined(SCALAR_FLOAT)
+#if defined(SCALAR_FLOAT32)
 // define scalar as a float
 namespace UNAP
 {
 	typedef float scalar;
 }
-#elif defined(SCALAR_DOUBLE)
+#elif defined(SCALAR_FLOAT64)
 //- define scalar as a double
 namespace UNAP
 {

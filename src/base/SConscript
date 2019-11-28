@@ -1,0 +1,7 @@
+import GLOVAR as gl
+
+cxxfile = ['unap.cpp',
+		   'vectors/unapVectorOperations.cpp',
+		   'mpi/unapMPI.cpp']
+
+gl.add_files(cxxfile)

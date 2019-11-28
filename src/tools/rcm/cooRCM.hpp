@@ -4,23 +4,27 @@
 #define cooRCM_HPP_
 #include <bits/stdc++.h>
 
+#include "unap.hpp"
+
+using UNAP::label;
+
 namespace COORCM
 {
 class ReorderingSSM {
 private:
-	const int _nnz;    // number of non-zeros
-	const int _nRows;  // number of rows
-	const int* _row;   // array of rows
-	const int* _col;   // array of columns
+	const label _nnz;    // number of non-zeros
+	const label _nRows;  // number of rows
+	const label* _row;   // array of rows
+	const label* _col;   // array of columns
 
-	static std::vector<int> _globalDegree;
-	std::vector<int>* _vetexOrderPtr;
-	std::vector<int>* _edgeOrderPtr;
+	static std::vector<label> _globalDegree;
+	std::vector<label>* _vetexOrderPtr;
+	std::vector<label>* _edgeOrderPtr;
 
-	// int* _rowsOffset;
+	// label* _rowsOffset;
 
 	void degreeGenerator();
-    static bool compareDegree(int i, int j);
+    static bool compareDegree(label i, label j);
 
 	void CuthillMckee();
 
@@ -28,12 +32,12 @@ private:
 	void ReverseCuthillMckee();
 
 public:
-	ReorderingSSM(const int nnz,const int nRows, const int* row, const int* col);
+	ReorderingSSM(const label nnz,const label nRows, const label* row, const label* col);
 
 	~ReorderingSSM();
 
-	std::vector<int>* getVetexOrder();
-	std::vector<int>* getEdgeOrder();
+	std::vector<label>* getVetexOrder();
+	std::vector<label>* getEdgeOrder();
 };
 
 }

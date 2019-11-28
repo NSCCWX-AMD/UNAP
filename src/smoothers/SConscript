@@ -1,0 +1,7 @@
+import GLOVAR as gl
+
+cxxfile = ['lduSmoothers/lduGaussSeidelSmoother/lduGaussSeidelSmoother.cpp',
+		   'chebySmoother/chebySmoother.cpp'
+		  ]
+
+gl.add_files(cxxfile)
