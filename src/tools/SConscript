@@ -1,0 +1,13 @@
+import GLOVAR as gl
+
+cxxfile = ['fortranInterface/fortranInterface.cpp',
+		   'matrixConversion/coo2ldu.cpp',
+		   'matrixConversion/matrixConversion.cpp',
+		   'printData/printUNAP/printUNAP.cpp',
+		   'rcm/cooRCM.cpp',
+		   'readData/readFromOpenFOAM/readFromOpenFOAM.cpp',
+		   'readData/readFromHypre/readFromHypre.cpp',
+		   'timers/swTimer.cpp'
+		  ]
+
+gl.add_files(cxxfile)

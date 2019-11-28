@@ -1,0 +1,8 @@
+import GLOVAR as gl
+
+cxxfile = ['lduPreconditioners/lduDiagonal/lduDiagPrecond.cpp',
+		   'lduPreconditioners/lduDIC/lduDICPrecond.cpp',
+		   'lduPreconditioners/lduDILU/lduDILUPrecond.cpp'
+		  ]
+
+gl.add_files(cxxfile)

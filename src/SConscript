@@ -1,0 +1,20 @@
+import os
+import GLOVAR as gl
+
+Import('env')
+
+# copy parent environment so our alterations don't affect it
+env_local = env.Clone()
+
+# make all header files linked in the same dir: 'build/Include'
+gl.build_Include(env_local)
+
+env_local.SConscript('base/SConscript', duplicate = 0, exports = 'env')
+env_local.SConscript('matrix/SConscript', duplicate = 0, exports = 'env')
+env_local.SConscript('preconditioners/SConscript', duplicate = 0, exports = 'env')
+env_local.SConscript('smoothers/SConscript', duplicate = 0, exports = 'env')
+env_local.SConscript('solvers/SConscript', duplicate = 0, exports = 'env')
+env_local.SConscript('tools/SConscript', duplicate = 0, exports = 'env')
+
+
+env.StaticLibrary(gl.build_path + '/lib/libunap', source = gl.get_files() )

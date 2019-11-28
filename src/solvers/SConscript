@@ -1,0 +1,12 @@
+import GLOVAR as gl
+
+cxxfile = ['MG/MG.cpp',
+		   'MG/MGSolve.cpp',
+		   'MG/scalingFactor.cpp',
+		   'MG/solveCoarsestLevel.cpp',
+		   'MG/Vcycle.cpp',
+		   'PBiCGStab/PBiCGStab.cpp',
+		   'PCG/PCG.cpp'
+		  ]
+
+gl.add_files(cxxfile)
