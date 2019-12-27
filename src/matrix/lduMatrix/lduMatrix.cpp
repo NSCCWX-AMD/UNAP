@@ -425,6 +425,68 @@ const UNAP::labelField& UNAP::lduMatrix::losortStartAddr() const
 }
 
 
+void UNAP::lduMatrix::createInterfacesTopology
+(
+    const label   nNeiProcs,
+    const label*  destRank,
+    const label*  offDiagRows,
+    const label*  offDiagStarts
+)
+{
+    PtrList<patch>* patchesPtr = new PtrList<patch>(nNeiProcs);
+
+    forAll(intI, nNeiProcs)
+    {
+        const label neighborID = destRank[intI] - 1;
+        const label localSize = offDiagStarts[intI+1] - offDiagStarts[intI];
+        patch* patchIPtr = new patch(localSize, MYID, neighborID);
+
+        label* localFaceCells = new label[localSize];
+
+        forAll(faceI, localSize)
+        {
+            label start = offDiagStarts[intI] + faceI - 1;
+            localFaceCells[faceI] = offDiagRows[start] - 1;
+        }
+
+        labelField* locFaceCellsPtr = new labelField(localFaceCells, localSize, true);
+        scalarField* localDataPtr = new scalarField(localSize);
+
+        patchIPtr->faceCells(*locFaceCellsPtr);
+        patchIPtr->patchCoeffs(*localDataPtr);
+
+        patchesPtr->setLevel(intI, *patchIPtr);
+    }
+
+    interfaces* interfacesLocalPtr = new interfaces(*patchesPtr);
+    matrixInterfaces(*interfacesLocalPtr);
+}
+
+void UNAP::lduMatrix::fillInterfacesCofficients
+(
+    const label*   offDiagStarts,
+    const scalar*  offDiagCoeffs
+)
+{
+    interfaces& lduAInter = matrixInterfaces();
+
+    const label nNeiProcs = lduAInter.size();
+
+    forAll(intI, nNeiProcs)
+    {
+        patch& patchI = lduAInter.patchList(intI);
+        const label localSize = offDiagStarts[intI+1] - offDiagStarts[intI];
+        scalar* localData = patchI.patchCoeffs().begin();
+
+        forAll(faceI, localSize)
+        {
+            label start = offDiagStarts[intI] + faceI - 1;
+            localData[faceI] = offDiagCoeffs[start];
+        }
+    }
+}
+
+
 void UNAP::lduMatrix::initInterfaces(const scalarField& psi) const
 {
     if(PARRUN)

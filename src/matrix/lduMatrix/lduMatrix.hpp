@@ -267,6 +267,20 @@ public:
         interfacesPtr_ = new interfaces(*patchesPtr);
     }
 
+    void createInterfacesTopology
+    (
+        const label   nNeiProcs,
+        const label*  destRank,
+        const label*  offDiagRows,
+        const label*  offDiagStarts
+    );
+
+    void fillInterfacesCofficients
+    (
+        const label*   offDiagStarts,
+        const scalar*  offDiagCoeffs
+    );
+
     //- initialize interfaces
     virtual void initInterfaces(const scalarField& psi) const;
 

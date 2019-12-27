@@ -2,8 +2,8 @@
 // Reverse Cuthill Mckee Algorithm
 #ifndef cooRCM_HPP_
 #define cooRCM_HPP_
-#include <bits/stdc++.h>
 
+#include <vector>
 #include "unap.hpp"
 
 using UNAP::label;
