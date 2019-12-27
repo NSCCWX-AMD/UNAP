@@ -17,4 +17,6 @@ env_local.SConscript('solvers/SConscript', duplicate = 0, exports = 'env')
 env_local.SConscript('tools/SConscript', duplicate = 0, exports = 'env')
 
 
-env.StaticLibrary(gl.build_path + '/lib/libunap', source = gl.get_files() )
+env_local.StaticLibrary(gl.build_path + '/lib/libunap', source = gl.get_files() )
+
+# env_local.Install('$PREFIX/lib', gl.build_path + '/lib/libunap.a')
