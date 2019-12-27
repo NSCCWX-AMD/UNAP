@@ -3,10 +3,11 @@
 	datatime: 2019/8/19
 	email: miluan@bupt.cdu.cn
 */
-#include <bits/stdc++.h>
 #include <iostream>
 #include "cooRCM.hpp"
 #include "rcmf.h"
+#include <queue>
+#include <algorithm>
 
 using namespace COORCM;
 
