@@ -2,3 +2,6 @@
 build/*
 src/utilities/*
 *pyc
+exData/*
+.vscode/*
+*mod
