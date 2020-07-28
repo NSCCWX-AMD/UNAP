@@ -189,7 +189,8 @@ void UNAP::lduAgglomeration::agglomerateLduAddressing
         //- create
         PtrList<labelField> localAddressingList(interfacesSize);
         PtrList<labelField> neighbourAddressingList(interfacesSize);
-        MPI_Request sendRecvRequests[2*interfacesSize];
+
+        string sendRecvTaskName[interfacesSize];
 
         //- initialize transfer of restrict addressing on the interface
         forAll(inti, interfacesSize)
@@ -215,33 +216,20 @@ void UNAP::lduAgglomeration::agglomerateLduAddressing
 
             const label neighbProcNo = finePatchI.neighbProcNo();
 
-            MPI_Isend
-            (
-                localAddressing.begin(),
-                finePatchIFaceSize,
-                UNAPMPI_LABEL,
-                neighbProcNo,
-                1,
-                MPI_COMM_WORLD,
-                &sendRecvRequests[inti]
-            );
+            char ch[8];
+            sendRecvTaskName[inti] = "SendRecv_";
+            sprintf(ch,"%05d",inti);
+            sendRecvTaskName[inti] += ch;
 
-            MPI_Irecv
-            (
-                neighbourAddressing.begin(),
-                finePatchIFaceSize,
-                UNAPMPI_LABEL,
-                neighbProcNo,
-                1,
-                MPI_COMM_WORLD,
-                &sendRecvRequests[inti+interfacesSize]
-            );
+            UNAP::unapMPI::unapCommunicator().send(sendRecvTaskName[inti],localAddressing.begin(),finePatchIFaceSize*sizeof(label), neighbProcNo);
+            UNAP::unapMPI::unapCommunicator().recv(sendRecvTaskName[inti],neighbourAddressing.begin(),finePatchIFaceSize*sizeof(label), neighbProcNo);
+
+            
         }
-
-        MPI_Waitall(2*interfacesSize, &sendRecvRequests[0], MPI_STATUSES_IGNORE);
 
         forAll(inti, interfacesSize)
         {
+            UNAP::unapMPI::unapCommunicator().finishTask(sendRecvTaskName[inti]);
             //- get coarse patch members: faceCells
             //- get patchFaceRestrictAddressing_
 

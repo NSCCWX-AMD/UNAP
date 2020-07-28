@@ -48,7 +48,7 @@ int main()
 
    	if(PARRUN)
    	{
-   		MPI_Barrier(MPI_COMM_WORLD);
+   		UNAP::unapMPI::unapCommunicator().barrier() ;
    	}
 
    	if(!MYID)
@@ -75,7 +75,7 @@ int main()
 
    	if(PARRUN)
    	{
-   		MPI_Barrier(MPI_COMM_WORLD);
+   		UNAP::unapMPI::unapCommunicator().barrier() ;
    	}
 
    	if(!MYID)
@@ -218,5 +218,5 @@ int main()
 	swTimer::printTimer();
 #endif
 
-	MPI_Finalize();
+	// MPI_Finalize();
 }

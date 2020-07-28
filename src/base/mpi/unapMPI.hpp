@@ -22,12 +22,14 @@ private:
 	static int myProcNo_;
 	static int nProcs_;
 	static bool parRun_;
-	static MPI_Datatype unapLabel_;
-	static MPI_Datatype unapScalar_;
+	static CommData unapLabel_;
+	static CommData unapScalar_;
+    static Communicator unapCommunicator_;
 
 public:
 
 	static void initMPI();
+    static void initMPI(Communicator &otherCommunicator);
 
     static void exitMPI();
 
@@ -47,6 +49,10 @@ public:
     static label myProcNo()
     {
         return myProcNo_;
+    }
+
+    static Communicator& unapCommunicator(){
+        return unapCommunicator_;
     }
 
     //- int type
@@ -69,6 +75,7 @@ public:
 #define UNAPMPI_SCALAR unapMPI::unapScalar()
 #define NPROCS     unapMPI::nProcs()
 
+#define UNAPCOUT  if(!MYID) std::cout 
 
 template<typename T>
 void reduceSum(T& v)
@@ -76,7 +83,7 @@ void reduceSum(T& v)
 	if(PARRUN)
 	{
 		T vLocal = v;
-		MPI_Datatype myType;
+		CommData myType;
 		if(typeid(T) == typeid(label))
 		{
 			myType = UNAPMPI_LABEL;
@@ -85,9 +92,8 @@ void reduceSum(T& v)
 		{
 			myType = UNAPMPI_SCALAR;
 		}
-
-        // MPI_Barrier(MPI_COMM_WORLD);
-		MPI_Allreduce(&vLocal, &v, 1, myType, MPI_SUM, MPI_COMM_WORLD);
+        UNAP::unapMPI::unapCommunicator().allReduce("sum",&vLocal,&v,1,myType,COMM_SUM);
+        UNAP::unapMPI::unapCommunicator().finishTask("sum");
 	}
 }
 
@@ -103,7 +109,7 @@ void reduceSum(T* v, label n)
             vLocal[i] = v[i];
         }
 
-        MPI_Datatype myType;
+        CommData myType;
         if(typeid(T) == typeid(label))
         {
             myType = UNAPMPI_LABEL;
@@ -112,9 +118,8 @@ void reduceSum(T* v, label n)
         {
             myType = UNAPMPI_SCALAR;
         }
-
-        // MPI_Barrier(MPI_COMM_WORLD);
-        MPI_Allreduce(&vLocal[0], v, n, myType, MPI_SUM, MPI_COMM_WORLD);
+        UNAP::unapMPI::unapCommunicator().allReduce("sum",&vLocal[0],v,n,myType,COMM_SUM);
+        UNAP::unapMPI::unapCommunicator().finishTask("sum");
     }
 }
 

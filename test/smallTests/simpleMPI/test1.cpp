@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <typeinfo>
+#include "unap.hpp"
 
 using namespace std;
 
@@ -31,7 +32,8 @@ void reduce(T& v)
 		cout << "COMM_FLOAT" << endl;
 		mytype = COMM_FLOAT;
 	}
-	MPI_Allreduce(&vLocal, &v, 1, mytype, MPI_SUM, MPI_COMM_WORLD);
+	UNAP::unapMPI::unapCommunicator().allreduce("allreduce",&vLocal,&v,1,mytype,COMM_SUM);
+	UNAP::unapMPI::unapCommunicator().finishTask("allreduce");
 }
 
 

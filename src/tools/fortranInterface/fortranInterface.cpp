@@ -374,7 +374,7 @@ void UNAP::mgsolversolve_
 	// printLDUMatrix(lduA, "unap_A_p");
 	// printInterfaces(lduA, "unap_interfaces_p");
 
-	MPI_Barrier(MPI_COMM_WORLD);
+	UNAP::unapMPI::unapCommunicator().barrier();
 
 	label agglType = *agglTypePtr;
 
@@ -1032,13 +1032,7 @@ void UNAP::sw_solve_pbicgstab__
 
 	solver.SET_ifPrint(true);
 
-	// MPI_Barrier(MPI_COMM_WORLD);
-	// printLDUMatrix(lduA, "new_A_u");
-	// printInterfaces(lduA, "new_interfaces_u");
-	// printVector(b, "new_b");
-	// COUT << "finish writing" << ENDL;
-
-	// return;
+	
 
 #ifdef SW_SLAVE
 	lduA.reorderVector(b);

@@ -37,7 +37,8 @@ bool UNAP::lduAgglomeration::continueAgglomerating
     }
 
     bool contAggLocal = contAgg;
-    MPI_Allreduce(&contAggLocal, &contAgg, 1, MPI_CXX_BOOL, MPI_LOR, MPI_COMM_WORLD);
+	UNAP::unapMPI::unapCommunicator().allReduce("LOR",&contAggLocal,&contAgg,1,COMM_CXX_BOOL,COMM_LOR);
+	UNAP::unapMPI::unapCommunicator().finishTask("LOR");
 
     return contAgg;
 }

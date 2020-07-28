@@ -19,13 +19,7 @@
 #include "utilities.h"
 // #include "swMacro.h"
 
-namespace UNAP
-{
-	#define COUT std::cout
-	#define ENDL std::endl
-	#define EXIT exit(0)
-	#define ERROR_EXIT exit(1)
-}
+
 
 // define sw data type 
 typedef int    swInt;
@@ -65,9 +59,6 @@ namespace UNAP
         T& newObj = *ptr; \
         newObj = oldObj; \
     }
-
-    #define MAX(x, y) ( ((x) > (y)) ? (x) : (y) )
-    #define MIN(x, y) ( ((x) < (y)) ? (x) : (y) )
 
     template<typename T>
     T mag(T v)

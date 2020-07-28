@@ -24,6 +24,8 @@ private:
     //- mpi requests of sends and receives for updating interfaces
     mutable MPI_Request* sendRecvRequests_;
 
+    mutable string* sendRecvTaskName_;
+
     //- locPosition
     mutable label* locPosition_;
 

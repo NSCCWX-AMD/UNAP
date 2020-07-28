@@ -60,9 +60,11 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix& lduA, const char* fileName)
 
     if(PARRUN)
     {
-    	MPI_Barrier(MPI_COMM_WORLD);
-    	MPI_Allgather(&rStart, 1, UNAPMPI_LABEL, procStart.values(), 1, UNAPMPI_LABEL, MPI_COMM_WORLD);
-    	MPI_Allgather(&rEnd, 1, UNAPMPI_LABEL, procEnd.values(), 1, UNAPMPI_LABEL, MPI_COMM_WORLD);
+    	UNAP::unapMPI::unapCommunicator().barrier() ;
+		UNAP::unapMPI::unapCommunicator().allGather("allgather1",&rStart,1*sizeof(label),procStart.values(),1*sizeof(label));
+		UNAP::unapMPI::unapCommunicator().allGather("allgather2",&rEnd,1*sizeof(label),procEnd.values(),1*sizeof(label));
+		UNAP::unapMPI::unapCommunicator().finishTask("allgather1");
+		UNAP::unapMPI::unapCommunicator().finishTask("allgather2");
     }
 
     const label nCells = rEnd - rStart + 1;
@@ -243,7 +245,7 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix& lduA, const char* fileName)
     if(PARRUN)
     {
     	constructLDUInterfacesFromHypre(lduA, nNeiProcs, neiProcNo, faceStart, faceCells, valOffDiag);
-    	MPI_Barrier(MPI_COMM_WORLD);
+    	UNAP::unapMPI::unapCommunicator().barrier() ;
     	if(!MYID)
     	{
     		COUT << "start print interfaces" << ENDL;
