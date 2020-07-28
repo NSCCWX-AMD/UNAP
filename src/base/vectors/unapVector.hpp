@@ -104,11 +104,11 @@ public:
 	void SET_zero();
 };
 
-typedef Vector<label>  labelField;
-typedef Vector<scalar> scalarField;
+typedef Vector<label>  labelVector;
+typedef Vector<scalar> scalarVector;
 
-scalar dot(const scalarField &v1,
-		   const scalarField &v2);
+scalar dot(const scalarVector &v1,
+		   const scalarVector &v2);
 
 template <typename T>
 Vector<T>::Vector()

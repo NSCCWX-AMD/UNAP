@@ -56,17 +56,17 @@ public:
 
 	void agglomerateMatrixUpper
 	(
-		scalarField& coarseUpper,
-		scalarField& coarseDiag,
-		const scalarField& fineUpper,
+		scalarVector& coarseUpper,
+		scalarVector& coarseDiag,
+		const scalarVector& fineUpper,
 		const label fineLevelIndex
 	);
 
 	void initAggMatrixUpperStruct
 	(
-		scalarField& coarseUpper,
-		scalarField& coarseDiag,
-		const scalarField& fineUpper,
+		scalarVector& coarseUpper,
+		scalarVector& coarseDiag,
+		const scalarVector& fineUpper,
 		const label& fineLevelIndex
 	);
 };

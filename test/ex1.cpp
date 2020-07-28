@@ -39,7 +39,7 @@ int main()
 	UNAPCOUT << "v1 size is " << v1.size() << ", 5th is " << v1[5] << ENDL;
 	UNAPCOUT << "v5 size is " << v5.size() << ", 5th is " << v5[5] << ENDL;
 
-	scalarField v6(10);
+	scalarVector v6(10);
 	v6 = v1 -v4;
 	UNAPCOUT << "v6 size is " << v6.size() << ", 5th is " << v6[5] << ENDL;
 

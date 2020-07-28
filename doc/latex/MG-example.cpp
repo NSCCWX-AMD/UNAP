@@ -1,6 +1,6 @@
 //- using upper coefficients in matrix as the weights of coarsening in AMG
 //- alternative using face areas
-scalarField weights(nFaces);
+scalarVector weights(nFaces);
 forAll(i, nFaces)
 {
 	weights[i] = mag(lduA.upper()[i]);

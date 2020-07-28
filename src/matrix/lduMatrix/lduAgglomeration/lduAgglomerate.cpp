@@ -3,11 +3,11 @@
 
 void UNAP::lduAgglomeration::agglomerate
 (
-    const scalarField& faceWeights
+    const scalarVector& faceWeights
 )
 {
 	//- start geometric agglomeration from the given faceWeights
-	scalarField* faceWeightsPtr = const_cast<scalarField*>(&faceWeights);
+	scalarVector* faceWeightsPtr = const_cast<scalarVector*>(&faceWeights);
 
 	//- agglomerate until the required number of cells in the coarsest level
     //  is reached
@@ -19,7 +19,7 @@ void UNAP::lduAgglomeration::agglomerate
     {
     	label nCoarseCells = -1;
 
-        labelField* finalAgglomPtr = &agglomerate
+        labelVector* finalAgglomPtr = &agglomerate
         (
             nCoarseCells,
             matrixLevel(nCreatedLevels),
@@ -43,7 +43,7 @@ void UNAP::lduAgglomeration::agglomerate
     	{
     		label nCoarseFaces = coarseMatrixLevels_[nCreatedLevels].upperAddr().size();
 
-    		scalarField* aggFaceWeightsPtr = new scalarField(nCoarseFaces, 0.0);
+    		scalarVector* aggFaceWeightsPtr = new scalarVector(nCoarseFaces, 0.0);
 
     		restrictFaceField
             (
@@ -90,25 +90,25 @@ void UNAP::lduAgglomeration::agglomerate
 }
 
 
-UNAP::labelField& UNAP::lduAgglomeration::agglomerate
+UNAP::labelVector& UNAP::lduAgglomeration::agglomerate
 (
 	label&             nCoarseCells,
     const lduMatrix&   fineA,
-    const scalarField& faceWeights
+    const scalarVector& faceWeights
 )
 {
 	const label nFineCells = fineA.size();
 
-	const labelField& upperAddr = fineA.upperAddr();
-	const labelField& lowerAddr = fineA.lowerAddr();
+	const labelVector& upperAddr = fineA.upperAddr();
+	const labelVector& lowerAddr = fineA.lowerAddr();
 
 	//- for each cell calculate faces
-	labelField cellFaces(upperAddr.size() + lowerAddr.size());
-	labelField cellFaceOffsets(nFineCells + 1);
+	labelVector cellFaces(upperAddr.size() + lowerAddr.size());
+	labelVector cellFaceOffsets(nFineCells + 1);
 
 	//- memory management
 	{
-		labelField nNbrs(nFineCells, 0);
+		labelVector nNbrs(nFineCells, 0);
 
 		//- get number of faces in each row
         forAll(facei, upperAddr.size())
@@ -154,8 +154,8 @@ UNAP::labelField& UNAP::lduAgglomeration::agglomerate
 	}
 
 	//- go through the faces and create clusters
-    labelField* coarseCellMapPtr = new labelField(nFineCells, -1);
-    labelField& coarseCellMap =  *coarseCellMapPtr;
+    labelVector* coarseCellMapPtr = new labelVector(nFineCells, -1);
+    labelVector& coarseCellMap =  *coarseCellMapPtr;
 
 	nCoarseCells = 0;
 

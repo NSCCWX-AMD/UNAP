@@ -5,8 +5,8 @@ namespace UNAP
 
 scalar dot
 (
-	const scalarField &v1,
-	const scalarField &v2
+	const scalarVector &v1,
+	const scalarVector &v2
 )
 {
 #ifdef DEBUG

@@ -9,8 +9,8 @@
 
 void UNAP::MGSolver::solveCoarsestLevel
 (
-    scalarField& coarsestCorrField,
-    const scalarField& coarsestSource
+    scalarVector& coarsestCorrField,
+    const scalarVector& coarsestSource
 ) const
 {
 #ifdef DEBUG1

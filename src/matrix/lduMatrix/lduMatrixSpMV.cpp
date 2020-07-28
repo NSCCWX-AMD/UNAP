@@ -15,8 +15,8 @@
 
 void UNAP::lduMatrix::spMV
 (
-	scalarField& Apsi,
-	const scalarField& psi
+	scalarVector& Apsi,
+	const scalarVector& psi
 ) const
 {
 	this->initInterfaces(psi);

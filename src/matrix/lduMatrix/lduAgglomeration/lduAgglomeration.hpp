@@ -21,7 +21,7 @@ private:
     label nCellsInCoarsestLevel_;
 
     //- the number of cells in each level
-    labelField nCells_;
+    labelVector nCells_;
 
     //- number of levels created
     label nCreatedLevels_;
@@ -37,7 +37,7 @@ private:
 
     //- cell restriction addressing array.
     //- maps from the finer to the coarser level.
-    PtrList<labelField> restrictAddressing_;
+    PtrList<labelVector> restrictAddressing_;
 
     //- face restriction addressing array.
     //- maps from the finer to the coarser level.
@@ -45,11 +45,11 @@ private:
     //  of the coarser cells to the corresponding coarser cell face.
     //- negative indices map the finer faces which are internal to the
     //  coarser cells to minus the corresponding coarser cell index minus 1.
-    PtrList<labelField> faceRestrictAddressing_;
+    PtrList<labelVector> faceRestrictAddressing_;
 
     //- face restriction addressing in interface patch
     //- maps from the finer to the coarser level.
-    PtrList<labelField> patchFaceRestrictAddressing_;
+    PtrList<labelVector> patchFaceRestrictAddressing_;
 
     //- assemble coarse mesh addressing
     void agglomerateLduAddressing(const label fineLevelIndex);
@@ -64,11 +64,11 @@ private:
     void combineLevels(const label curLevel);
 
     //- calculate and return agglomeration of given level
-    labelField& agglomerate
+    labelVector& agglomerate
     (
         label             &nCoarseCells,
         const lduMatrix   &fineA,
-        const scalarField &weights
+        const scalarVector &weights
     );
 
     //- agglomerate coarse matrix
@@ -88,7 +88,7 @@ public:
 	virtual ~lduAgglomeration();
 
     //- agglomerate all levels starting from the given face weights
-    virtual void agglomerate(const scalarField &weights);
+    virtual void agglomerate(const scalarVector &weights);
 
     virtual label size() const
     {
@@ -108,14 +108,14 @@ public:
 
     //- access to restrictAddressing_
     //- return cell restrict addressing of given level
-    virtual const labelField& restrictAddressing(const label leveli) const
+    virtual const labelVector& restrictAddressing(const label leveli) const
     {
         return restrictAddressing_[leveli];
     }
 
     //- access to faceRestrictAddressing_
     //- return face restrict addressing of given level
-    virtual const labelField& faceRestrictAddressing(const label leveli) const
+    virtual const labelVector& faceRestrictAddressing(const label leveli) const
     {
         return faceRestrictAddressing_[leveli];
     }

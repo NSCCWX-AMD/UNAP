@@ -59,7 +59,7 @@ int main()
    	constructLDUMatrixFromHypre(lduA, fileName);
 
    	label nCells = lduA.size();
-   	scalarField b(nCells);
+   	scalarVector b(nCells);
 
    	LOCATEFILE(fileName, "b_u", dir);
    	constructVectorFromHypre(b, fileName);

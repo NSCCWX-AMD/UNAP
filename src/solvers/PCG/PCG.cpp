@@ -34,9 +34,9 @@ UNAP::PCG::PCG
 
 UNAP::matrix::solverPerformance UNAP::PCG::solve
 (
-	scalarField& x,
+	scalarVector& x,
 	const matrix& A,
-	const scalarField& b
+	const scalarVector& b
 ) const
 {
 	matrix::solverPerformance solverPerf;
@@ -45,13 +45,13 @@ UNAP::matrix::solverPerformance UNAP::PCG::solve
 	scalar* xPtr = x.values();
 	const scalar* bPtr = b.values();
 
-	scalarField pA(nCells);
+	scalarVector pA(nCells);
 	scalar* pAPtr = pA.values();
 
-	scalarField wA(nCells);
+	scalarVector wA(nCells);
 	scalar* wAPtr = wA.values();
 
-	scalarField rA(nCells);
+	scalarVector rA(nCells);
 	scalar* rAPtr = rA.values();
 
 	scalar wArA = GREAT;

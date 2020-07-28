@@ -18,31 +18,31 @@ UNAP::lduMatrix& UNAP::coo2ldu
 	//- number of no-zero in upper
 	const label nZeros = (size - nCells) / 2;
 
-	scalarField diag(nCells);
-	scalarField upper(nZeros);
+	scalarVector diag(nCells);
+	scalarVector upper(nZeros);
 
-	labelField upperAddr(nZeros);
-	labelField lowerAddr(nZeros);
+	labelVector upperAddr(nZeros);
+	labelVector lowerAddr(nZeros);
 
 	//- asymmetric case
-	scalarField* lowerPtr = NULL;
-	labelField*  lowerColPtr = NULL;
-	labelField*  upperNbrsPtr = NULL;
+	scalarVector* lowerPtr = NULL;
+	labelVector*  lowerColPtr = NULL;
+	labelVector*  upperNbrsPtr = NULL;
 
 	if(!symm)
 	{
-		lowerPtr = new scalarField(nZeros);
-		lowerColPtr = new labelField(nZeros);
-		upperNbrsPtr = new labelField(nCells, 0);
+		lowerPtr = new scalarVector(nZeros);
+		lowerColPtr = new labelVector(nZeros);
+		upperNbrsPtr = new labelVector(nCells, 0);
 	}
 	else
 	{
 		lowerPtr = &upper;
 	}
 
-	scalarField& lower = *lowerPtr;
-	labelField& lowerCol = *lowerColPtr;
-	labelField& upperNbrs = *upperNbrsPtr;
+	scalarVector& lower = *lowerPtr;
+	labelVector& lowerCol = *lowerColPtr;
+	labelVector& upperNbrs = *upperNbrsPtr;
 
 
 	label upperCount = 0;

@@ -12,9 +12,9 @@
 
 void UNAP::chebySmoother::smooth
 (
-	scalarField       &x,
+	scalarVector       &x,
     const lduMatrix   &A,
-    const scalarField &b,
+    const scalarVector &b,
     const label       nSweeps
 ) const
 {
@@ -49,10 +49,10 @@ void UNAP::chebySmoother::smooth
 		register const label nCells = x.size();
 	    scalar* xPtr = x.begin();
 
-	    scalarField p(nCells);
+	    scalarVector p(nCells);
 	    scalar* pPtr = p.begin();
 
-	    scalarField w(nCells);
+	    scalarVector w(nCells);
 	    scalar* wPtr = w.begin();
 
     	const scalar* rDPtr = precond.rD().begin();
@@ -151,9 +151,9 @@ void UNAP::chebySmoother::smooth
 
 void UNAP::chebySmoother::smooth
 (
-	scalarField       &x,
+	scalarVector       &x,
     const matrix 	  &A,
-    const scalarField &b,
+    const scalarVector &b,
     const label       nSweeps
 ) const
 {

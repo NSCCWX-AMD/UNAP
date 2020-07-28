@@ -44,13 +44,13 @@ public:
     //  for matrix operations
     virtual void initMatrixInterfaces
     (
-        const scalarField& psi
+        const scalarVector& psi
     ) const;
 
     //- update interfaced interfaces for matrix operations
     virtual void updateMatrixInterfaces
     (
-        scalarField& result
+        scalarVector& result
     ) const;
 
     virtual patch& patchList(const label i) const

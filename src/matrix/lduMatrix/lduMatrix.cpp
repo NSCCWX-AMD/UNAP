@@ -28,11 +28,11 @@ UNAP::lduMatrix::lduMatrix()
 UNAP::lduMatrix::lduMatrix
 (
 	const label&       nCells,
-    const labelField&  lowerAddr,
-    const labelField&  upperAddr,
-    const scalarField& lower,
-    const scalarField& diag,
-    const scalarField& upper
+    const labelVector&  lowerAddr,
+    const labelVector&  upperAddr,
+    const scalarVector& lower,
+    const scalarVector& diag,
+    const scalarVector& upper
 )
 :
 	nCells_(nCells),
@@ -46,10 +46,10 @@ UNAP::lduMatrix::lduMatrix
     ownerStartPtr_(NULL),
     losortStartPtr_(NULL)
 {
-    ALLOCATE_POINTER(lowerAddrPtr_, lowerAddr, labelField)
-    ALLOCATE_POINTER(upperAddrPtr_, upperAddr, labelField)
-    ALLOCATE_POINTER(diagPtr_,      diag,      scalarField)
-    ALLOCATE_POINTER(upperPtr_,     upper,     scalarField)
+    ALLOCATE_POINTER(lowerAddrPtr_, lowerAddr, labelVector)
+    ALLOCATE_POINTER(upperAddrPtr_, upperAddr, labelVector)
+    ALLOCATE_POINTER(diagPtr_,      diag,      scalarVector)
+    ALLOCATE_POINTER(upperPtr_,     upper,     scalarVector)
 
     if((&lower) == (&upper))
     {
@@ -57,7 +57,7 @@ UNAP::lduMatrix::lduMatrix
     }
     else
     {
-        ALLOCATE_POINTER(lowerPtr_, lower, scalarField)
+        ALLOCATE_POINTER(lowerPtr_, lower, scalarVector)
     }
 
 #ifdef SW_SLAVE
@@ -71,11 +71,11 @@ UNAP::lduMatrix::lduMatrix
 UNAP::lduMatrix::lduMatrix
 (
     const label&       nCells,
-    const labelField&  lowerAddr,
-    const labelField&  upperAddr,
-    const scalarField& lower,
-    const scalarField& diag,
-    const scalarField& upper,
+    const labelVector&  lowerAddr,
+    const labelVector&  upperAddr,
+    const scalarVector& lower,
+    const scalarVector& diag,
+    const scalarVector& upper,
     const bool         reUse
 )
 :
@@ -92,18 +92,18 @@ UNAP::lduMatrix::lduMatrix
 {
     if(reUse)
     {
-        lowerAddrPtr_ = const_cast<labelField*> (&lowerAddr);
-        upperAddrPtr_ = const_cast<labelField*> (&upperAddr);
-        diagPtr_      = const_cast<scalarField*> (&diag);
-        lowerPtr_     = const_cast<scalarField*> (&lower);
-        upperPtr_     = const_cast<scalarField*> (&upper);
+        lowerAddrPtr_ = const_cast<labelVector*> (&lowerAddr);
+        upperAddrPtr_ = const_cast<labelVector*> (&upperAddr);
+        diagPtr_      = const_cast<scalarVector*> (&diag);
+        lowerPtr_     = const_cast<scalarVector*> (&lower);
+        upperPtr_     = const_cast<scalarVector*> (&upper);
     }
     else
     {
-        ALLOCATE_POINTER(lowerAddrPtr_, lowerAddr, labelField)
-        ALLOCATE_POINTER(upperAddrPtr_, upperAddr, labelField)
-        ALLOCATE_POINTER(diagPtr_,      diag,      scalarField)
-        ALLOCATE_POINTER(upperPtr_,     upper,     scalarField)
+        ALLOCATE_POINTER(lowerAddrPtr_, lowerAddr, labelVector)
+        ALLOCATE_POINTER(upperAddrPtr_, upperAddr, labelVector)
+        ALLOCATE_POINTER(diagPtr_,      diag,      scalarVector)
+        ALLOCATE_POINTER(upperPtr_,     upper,     scalarVector)
 
         if((&lower) == (&upper))
         {
@@ -111,7 +111,7 @@ UNAP::lduMatrix::lduMatrix
         }
         else
         {
-            ALLOCATE_POINTER(lowerPtr_, lower, scalarField)
+            ALLOCATE_POINTER(lowerPtr_, lower, scalarVector)
         }
     }
 
@@ -126,8 +126,8 @@ UNAP::lduMatrix::lduMatrix
 UNAP::lduMatrix::lduMatrix
 (
     const label&       nCells,
-    const labelField&  lowerAddr,
-    const labelField&  upperAddr
+    const labelVector&  lowerAddr,
+    const labelVector&  upperAddr
 )
 :
     nCells_(nCells),
@@ -141,8 +141,8 @@ UNAP::lduMatrix::lduMatrix
     ownerStartPtr_(NULL),
     losortStartPtr_(NULL)
 {
-    ALLOCATE_POINTER(lowerAddrPtr_, lowerAddr, labelField)
-    ALLOCATE_POINTER(upperAddrPtr_, upperAddr, labelField)
+    ALLOCATE_POINTER(lowerAddrPtr_, lowerAddr, labelVector)
+    ALLOCATE_POINTER(upperAddrPtr_, upperAddr, labelVector)
 
 #ifdef SW_SLAVE
     mlbIter_ = NULL;
@@ -155,8 +155,8 @@ UNAP::lduMatrix::lduMatrix
 UNAP::lduMatrix::lduMatrix
 (
     const label&       nCells,
-    const labelField&  lowerAddr,
-    const labelField&  upperAddr,
+    const labelVector&  lowerAddr,
+    const labelVector&  upperAddr,
     const bool         reUse
 )
 :
@@ -173,13 +173,13 @@ UNAP::lduMatrix::lduMatrix
 {
     if(reUse)
     {
-        lowerAddrPtr_ = const_cast<labelField*> (&lowerAddr);
-        upperAddrPtr_ = const_cast<labelField*> (&upperAddr);
+        lowerAddrPtr_ = const_cast<labelVector*> (&lowerAddr);
+        upperAddrPtr_ = const_cast<labelVector*> (&upperAddr);
     }
     else
     {
-        ALLOCATE_POINTER(lowerAddrPtr_, lowerAddr, labelField)
-        ALLOCATE_POINTER(upperAddrPtr_, upperAddr, labelField)
+        ALLOCATE_POINTER(lowerAddrPtr_, lowerAddr, labelVector)
+        ALLOCATE_POINTER(upperAddrPtr_, upperAddr, labelVector)
     }
 
 #ifdef SW_SLAVE
@@ -218,7 +218,7 @@ UNAP::lduMatrix::~lduMatrix()
 #endif
 }
 
-UNAP::labelField& UNAP::lduMatrix::lowerAddr() const
+UNAP::labelVector& UNAP::lduMatrix::lowerAddr() const
 {
 #ifdef DEBUG
 	CHECK_POINTER(lowerAddrPtr_)
@@ -227,7 +227,7 @@ UNAP::labelField& UNAP::lduMatrix::lowerAddr() const
     return *lowerAddrPtr_;
 }
 
-UNAP::labelField& UNAP::lduMatrix::upperAddr() const
+UNAP::labelVector& UNAP::lduMatrix::upperAddr() const
 {
 #ifdef DEBUG
     CHECK_POINTER(upperAddrPtr_)
@@ -236,7 +236,7 @@ UNAP::labelField& UNAP::lduMatrix::upperAddr() const
     return *upperAddrPtr_;
 }
 
-UNAP::scalarField& UNAP::lduMatrix::lower() const
+UNAP::scalarVector& UNAP::lduMatrix::lower() const
 {
 #ifdef DEBUG
     CHECK_POINTER(lowerPtr_)
@@ -246,7 +246,7 @@ UNAP::scalarField& UNAP::lduMatrix::lower() const
 }
 
 
-UNAP::scalarField& UNAP::lduMatrix::diag() const
+UNAP::scalarVector& UNAP::lduMatrix::diag() const
 {
 #ifdef DEBUG
     CHECK_POINTER(diagPtr_)
@@ -256,7 +256,7 @@ UNAP::scalarField& UNAP::lduMatrix::diag() const
 }
 
 
-UNAP::scalarField& UNAP::lduMatrix::upper() const
+UNAP::scalarVector& UNAP::lduMatrix::upper() const
 {
 #ifdef DEBUG
     CHECK_POINTER(upperPtr_)
@@ -268,11 +268,11 @@ UNAP::scalarField& UNAP::lduMatrix::upper() const
 
 void UNAP::lduMatrix::calcOwnerStart() const
 {
-    const labelField& own = lowerAddr();
+    const labelVector& own = lowerAddr();
 
-    ownerStartPtr_ = new labelField(nCells() + 1, own.size());
+    ownerStartPtr_ = new labelVector(nCells() + 1, own.size());
 
-    labelField& ownStart = *ownerStartPtr_;
+    labelVector& ownStart = *ownerStartPtr_;
 
     //- set up first lookup by hand
     ownStart[0] = 0;
@@ -296,7 +296,7 @@ void UNAP::lduMatrix::calcOwnerStart() const
 }
 
 
-const UNAP::labelField& UNAP::lduMatrix::ownerStartAddr() const
+const UNAP::labelVector& UNAP::lduMatrix::ownerStartAddr() const
 {
     if (!ownerStartPtr_)
     {
@@ -312,9 +312,9 @@ void UNAP::lduMatrix::calcLosort() const
     //- scan the neighbor list to find out how many times the cell
     //  appears as a neighbor of the face. Done this way to avoid guessing
     //  and resizing list
-    labelField nNbrOfFace(nCells(), 0);
+    labelVector nNbrOfFace(nCells(), 0);
 
-    const labelField& nbr = upperAddr();
+    const labelVector& nbr = upperAddr();
 
     forAll(nbrI, nbr.size())
     {
@@ -340,9 +340,9 @@ void UNAP::lduMatrix::calcLosort() const
     }
 
     //- gather the neighbors into the losort array
-    losortPtr_ = new labelField(nbr.size(), -1);
+    losortPtr_ = new labelVector(nbr.size(), -1);
 
-    labelField& lst = *losortPtr_;
+    labelVector& lst = *losortPtr_;
 
     //- set counter for losort
     label lstI = 0;
@@ -367,7 +367,7 @@ void UNAP::lduMatrix::calcLosort() const
 }
 
 
-const UNAP::labelField& UNAP::lduMatrix::losortAddr() const
+const UNAP::labelVector& UNAP::lduMatrix::losortAddr() const
 {
     if (!losortPtr_)
     {
@@ -380,13 +380,13 @@ const UNAP::labelField& UNAP::lduMatrix::losortAddr() const
 
 void UNAP::lduMatrix::calcLosortStart() const
 {
-    losortStartPtr_ = new labelField(nCells() + 1, 0);
+    losortStartPtr_ = new labelVector(nCells() + 1, 0);
 
-    labelField& lsrtStart = *losortStartPtr_;
+    labelVector& lsrtStart = *losortStartPtr_;
 
-    const labelField& nbr = upperAddr();
+    const labelVector& nbr = upperAddr();
 
-    const labelField& lsrt = losortAddr();
+    const labelVector& lsrt = losortAddr();
 
     //- set up first lookup by hand
     lsrtStart[0] = 0;
@@ -414,7 +414,7 @@ void UNAP::lduMatrix::calcLosortStart() const
 }
 
 
-const UNAP::labelField& UNAP::lduMatrix::losortStartAddr() const
+const UNAP::labelVector& UNAP::lduMatrix::losortStartAddr() const
 {
     if (!losortStartPtr_)
     {
@@ -449,8 +449,8 @@ void UNAP::lduMatrix::createInterfacesTopology
             localFaceCells[faceI] = offDiagRows[start] - 1;
         }
 
-        labelField* locFaceCellsPtr = new labelField(localFaceCells, localSize, true);
-        scalarField* localDataPtr = new scalarField(localSize);
+        labelVector* locFaceCellsPtr = new labelVector(localFaceCells, localSize, true);
+        scalarVector* localDataPtr = new scalarVector(localSize);
 
         patchIPtr->faceCells(*locFaceCellsPtr);
         patchIPtr->patchCoeffs(*localDataPtr);
@@ -487,7 +487,7 @@ void UNAP::lduMatrix::fillInterfacesCofficients
 }
 
 
-void UNAP::lduMatrix::initInterfaces(const scalarField& psi) const
+void UNAP::lduMatrix::initInterfaces(const scalarVector& psi) const
 {
     if(PARRUN)
     {
@@ -496,7 +496,7 @@ void UNAP::lduMatrix::initInterfaces(const scalarField& psi) const
 }
 
 
-void UNAP::lduMatrix::updateInterfaces(scalarField& Apsi) const
+void UNAP::lduMatrix::updateInterfaces(scalarVector& Apsi) const
 {
     if(PARRUN)
     {
@@ -507,15 +507,15 @@ void UNAP::lduMatrix::updateInterfaces(scalarField& Apsi) const
 
 void UNAP::lduMatrix::setMatrixCoeffients
 (
-    const scalarField& diag,
-    const scalarField& upper,
-    const scalarField& lower
+    const scalarVector& diag,
+    const scalarVector& upper,
+    const scalarVector& lower
 )
 {
     nCells_ = diag.size();
-    ALLOCATE_POINTER(diagPtr_,  diag,  scalarField)
+    ALLOCATE_POINTER(diagPtr_,  diag,  scalarVector)
 
-    ALLOCATE_POINTER(upperPtr_, upper, scalarField)
+    ALLOCATE_POINTER(upperPtr_, upper, scalarVector)
 
     if((&lower) == (&upper))
     {
@@ -523,16 +523,16 @@ void UNAP::lduMatrix::setMatrixCoeffients
     }
     else
     {
-        ALLOCATE_POINTER(lowerPtr_, lower, scalarField)
+        ALLOCATE_POINTER(lowerPtr_, lower, scalarVector)
     }
 }
 
 
 void UNAP::lduMatrix::setMatrixCoeffients
 (
-    const scalarField& diag,
-    const scalarField& upper,
-    const scalarField& lower,
+    const scalarVector& diag,
+    const scalarVector& upper,
+    const scalarVector& lower,
     const bool reUse
 )
 {
@@ -540,10 +540,10 @@ void UNAP::lduMatrix::setMatrixCoeffients
     if(reUse)
     {
         DELETE_OBJECT_POINTER(diagPtr_)
-        this->diagPtr_  = const_cast<scalarField*>(&diag);
+        this->diagPtr_  = const_cast<scalarVector*>(&diag);
 
         DELETE_OBJECT_POINTER(upperPtr_)
-        this->upperPtr_ = const_cast<scalarField*>(&upper);
+        this->upperPtr_ = const_cast<scalarVector*>(&upper);
 
         if((&lower) == (&upper))
         {
@@ -552,7 +552,7 @@ void UNAP::lduMatrix::setMatrixCoeffients
         else
         {
             DELETE_OBJECT_POINTER(lowerPtr_)
-            this->lowerPtr_ = const_cast<scalarField*>(&lower);
+            this->lowerPtr_ = const_cast<scalarVector*>(&lower);
         }
     }
     else
@@ -565,30 +565,30 @@ void UNAP::lduMatrix::setMatrixCoeffients
 
 void UNAP::lduMatrix::setMatrixTopology
 (
-    const labelField& upperAddr,
-    const labelField& lowerAddr
+    const labelVector& upperAddr,
+    const labelVector& lowerAddr
 )
 {
-    ALLOCATE_POINTER(upperAddrPtr_,  upperAddr,  labelField)
+    ALLOCATE_POINTER(upperAddrPtr_,  upperAddr,  labelVector)
 
-    ALLOCATE_POINTER(lowerAddrPtr_, lowerAddr, labelField)
+    ALLOCATE_POINTER(lowerAddrPtr_, lowerAddr, labelVector)
 }
 
 
 void UNAP::lduMatrix::setMatrixTopology
 (
-    const labelField& upperAddr,
-    const labelField& lowerAddr,
+    const labelVector& upperAddr,
+    const labelVector& lowerAddr,
     const bool reUse
 )
 {
     if(reUse)
     {
         DELETE_OBJECT_POINTER(upperAddrPtr_)
-        this->upperAddrPtr_  = const_cast<labelField*>(&upperAddr);
+        this->upperAddrPtr_  = const_cast<labelVector*>(&upperAddr);
 
         DELETE_OBJECT_POINTER(lowerAddrPtr_)
-        this->lowerAddrPtr_  = const_cast<labelField*>(&lowerAddr);
+        this->lowerAddrPtr_  = const_cast<labelVector*>(&lowerAddr);
     }
     else
     {
@@ -654,7 +654,7 @@ void UNAP::lduMatrix::reorderLDUValues()
 }
 
 
-void UNAP::lduMatrix::restoreVector(scalarField& vv)
+void UNAP::lduMatrix::restoreVector(scalarVector& vv)
 {
     scalar* vvPtr = vv.begin();
     label nCells = vv.size();
@@ -669,7 +669,7 @@ void UNAP::lduMatrix::restoreVector(scalarField& vv)
 }
 
 
-void UNAP::lduMatrix::reorderVector(scalarField& vv)
+void UNAP::lduMatrix::reorderVector(scalarVector& vv)
 {
     scalar* vvPtr = vv.begin();
     label nCells = vv.size();

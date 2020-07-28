@@ -28,7 +28,7 @@ scalar Au(scalar *u, scalar rhx2, scalar rhy2, label i, label j)
 int main()
 {
 	label nCells = pow(N-1, 2);
-	scalarField x(nCells, 0.0);
+	scalarVector x(nCells, 0.0);
 
 	//- domain solved
 	const scalar x0 = 0.0;
@@ -64,7 +64,7 @@ int main()
 		}
 
 
-	scalarField b(nCells);
+	scalarVector b(nCells);
 
 	scalar rhx2 = 1.0/dx/dx;
 	scalar rhy2 = 1.0/dy/dy;
@@ -76,7 +76,7 @@ int main()
 		}
 
 	label nZeros = 0;
-	labelField nZerosCells(nCells+1);
+	labelVector nZerosCells(nCells+1);
 	for(int i=1; i<N; i++)
 		for(int j=1; j<N; j++)
 		{
@@ -88,8 +88,8 @@ int main()
 			nZerosCells[(i-1)*(N-1) + j - 1 + 1] = n1 - n0 + nZerosCells[(i-1)*(N-1) + j - 1];
 		}
 
-	labelField lowerAddr(nZeros);
-	labelField upperAddr(nZeros);
+	labelVector lowerAddr(nZeros);
+	labelVector upperAddr(nZeros);
 
 	label nStart = 0;
 	for(int i=1; i<N; i++)
@@ -110,9 +110,9 @@ int main()
 			}
 		}
 
-	scalarField upper(nZeros, rhx2);
-	scalarField &lower = upper;
-	scalarField diag (nCells,   -4*rhx2);
+	scalarVector upper(nZeros, rhx2);
+	scalarVector &lower = upper;
+	scalarVector diag (nCells,   -4*rhx2);
 
 	const lduMatrix lduA
 	(

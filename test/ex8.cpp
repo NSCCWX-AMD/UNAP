@@ -57,11 +57,11 @@ int main()
 	lduMatrix& lduA = coo2ldu(data, row, col, nCells, size, symm);
 
 
-	scalarField& diag = lduA.diag();
-	scalarField& upper = lduA.upper();
-	scalarField& lower = lduA.lower();
-	labelField& lowerAddr = lduA.lowerAddr();
-	labelField& upperAddr = lduA.upperAddr();
+	scalarVector& diag = lduA.diag();
+	scalarVector& upper = lduA.upper();
+	scalarVector& lower = lduA.lower();
+	labelVector& lowerAddr = lduA.lowerAddr();
+	labelVector& upperAddr = lduA.upperAddr();
 
 	UNAPCOUT << "upperAddr: " << ENDL;
 	forAll(i, nUpperFaces)

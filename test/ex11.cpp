@@ -90,7 +90,7 @@ int main()
 
    	label nCells = lduA.size();
    	label nFaces = lduA.upper().size();
-   	scalarField b(nCells);
+   	scalarVector b(nCells);
 
    	
 	UNAPCOUT << "Start reading b" << ENDL;
@@ -116,15 +116,15 @@ int main()
 
 
 	const bool useMG = false;
-	const bool usePBiCGStab = true;
-	scalarField x(nCells, 0.0);
+	const bool usePBiCGStab = false;
+	scalarVector x(nCells, 0.0);
 
 #ifdef SW_SLAVE
 	swlu_prof_init();
 #endif
 
-	labelField postV(nCells);
-   	labelField postE(nFaces);
+	labelVector postV(nCells);
+   	labelVector postE(nFaces);
    	rcmLDU_nowrite(nFaces, nCells, lduA.lowerAddr().begin(), lduA.upperAddr().begin(), postV.begin(), postE.begin());
 
 
@@ -135,7 +135,7 @@ int main()
 		UNAPCOUT <<"                        use  MG   solver                       \n\n ";
 		UNAPCOUT <<" ************************************************************* \n\n ";
 		
-		scalarField weights(nFaces);
+		scalarVector weights(nFaces);
 		forAll(i, nFaces)
 		{
 			weights[i] = mag(lduA.upper()[i]);
@@ -155,11 +155,11 @@ int main()
 
 		   	UNAPCOUT << "nCells = " << cnCells << ", nFaces = " << cnFaces << ENDL;
 
-		   	labelField cpostV(cnCells);
-		   	labelField cpostE(cnFaces);
+		   	labelVector cpostV(cnCells);
+		   	labelVector cpostE(cnFaces);
 
-		   	labelField clowerAddrOld(cm.lowerAddr());
-		   	labelField cupperAddrOld(cm.upperAddr());
+		   	labelVector clowerAddrOld(cm.lowerAddr());
+		   	labelVector cupperAddrOld(cm.upperAddr());
 
 		   	rcmLDU_nowrite(cnFaces, cnCells, cm.lowerAddr().begin(), cm.upperAddr().begin(), cpostV.begin(), cpostE.begin());
 		}

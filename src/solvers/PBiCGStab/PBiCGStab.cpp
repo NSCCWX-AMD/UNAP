@@ -44,9 +44,9 @@ UNAP::PBiCGStab::PBiCGStab
 
 UNAP::matrix::solverPerformance UNAP::PBiCGStab::solve
 (
-	scalarField& x,
+	scalarVector& x,
 	const matrix& A,
-	const scalarField& b
+	const scalarVector& b
 ) const
 {
 	matrix::solverPerformance solverPerf;
@@ -56,16 +56,16 @@ UNAP::matrix::solverPerformance UNAP::PBiCGStab::solve
     scalar* xPtr = x.values();
     const scalar* bPtr = b.values();
 
-	scalarField pA(nCells);
+	scalarVector pA(nCells);
     scalar* pAPtr = pA.values();
 
-	scalarField yA(nCells);
+	scalarVector yA(nCells);
     scalar* yAPtr = yA.values();
 
-	scalarField rA(nCells);
+	scalarVector rA(nCells);
     scalar* rAPtr = rA.values();
 
-	scalarField rA0(nCells);
+	scalarVector rA0(nCells);
     scalar* rA0Ptr = rA0.values();
 
 	//- calculate A.psi
@@ -135,16 +135,16 @@ IFPRINT
 }
 #endif
 
-	scalarField AyA(nCells);
+	scalarVector AyA(nCells);
     scalar* AyAPtr = AyA.values();
 
-    scalarField sA(nCells);
+    scalarVector sA(nCells);
     scalar* sAPtr = sA.values();
 
-    scalarField zA(nCells);
+    scalarVector zA(nCells);
     scalar* zAPtr = zA.values();
 
-    scalarField tA(nCells);
+    scalarVector tA(nCells);
     scalar* tAPtr = tA.values();
 
     //- initial values not used

@@ -42,18 +42,18 @@ void UNAP::ldumatrixcreat_
 {
 	label nCells = *nCellsPtr;
 	label upperSize = *upperSizePtr;
-	labelField lowerAddr(lowerAddrValue, upperSize);
-	labelField upperAddr(upperAddrValue, upperSize);
+	labelVector lowerAddr(lowerAddrValue, upperSize);
+	labelVector upperAddr(upperAddrValue, upperSize);
 
-	scalarField diag(diagValue, nCells);
-	scalarField upper(upperValue, upperSize);
+	scalarVector diag(diagValue, nCells);
+	scalarVector upper(upperValue, upperSize);
 
-	scalarField& lower = upper;
-	scalarField* lowerPtr = NULL;
+	scalarVector& lower = upper;
+	scalarVector* lowerPtr = NULL;
 
 	if(lowerValue != upperValue)
 	{
-		lowerPtr = new scalarField(lowerValue, upperSize);
+		lowerPtr = new scalarVector(lowerValue, upperSize);
 		lower = *lowerPtr;
 	}
 
@@ -180,8 +180,8 @@ void UNAP::matrixinterfacescreat_
 			localFaceCells[faceI] = faceCellsPtr[start] - 1;
 		}
 
-		scalarField* patchCoeffsPtr = new scalarField(localData, localSize);
-   		labelField* locFaceCellsPtr = new labelField(localFaceCells, localSize);
+		scalarVector* patchCoeffsPtr = new scalarVector(localData, localSize);
+   		labelVector* locFaceCellsPtr = new labelVector(localFaceCells, localSize);
 
    		delete [] localData;
    		delete [] localFaceCells;
@@ -213,8 +213,8 @@ void UNAP::pcgsolversolve_
 )
 {
 	label nCells = *nCellsPtr;
-	scalarField x(xValue, nCells);
-	scalarField b(bValue, nCells);
+	scalarVector x(xValue, nCells);
+	scalarVector b(bValue, nCells);
 
 	lduMatrix* APtr = (lduMatrix*)*APtrPtr;
 	CHECK_POINTER(APtr)
@@ -283,8 +283,8 @@ void UNAP::pbicgstabsolversolve_
 )
 {
 	label nCells = *nCellsPtr;
-	scalarField x(xValue, nCells);
-	scalarField b(bValue, nCells);
+	scalarVector x(xValue, nCells);
+	scalarVector b(bValue, nCells);
 
 	lduMatrix* APtr = (lduMatrix*)*APtrPtr;
 	CHECK_POINTER(APtr)
@@ -362,8 +362,8 @@ void UNAP::mgsolversolve_
 )
 {
 	label nCells = *nCellsPtr;
-	scalarField x(xValue, nCells);
-	scalarField b(bValue, nCells);
+	scalarVector x(xValue, nCells);
+	scalarVector b(bValue, nCells);
 
 	lduMatrix* APtr = (lduMatrix*)*APtrPtr;
 	CHECK_POINTER(APtr)
@@ -380,7 +380,7 @@ void UNAP::mgsolversolve_
 
 	if(agglType == 1)
 	{
-		scalarField weights(lduA.upper().size());
+		scalarVector weights(lduA.upper().size());
 
 		scalar average = lduA.upper().SumSqrt();
 
@@ -393,7 +393,7 @@ void UNAP::mgsolversolve_
 	}
 	else if(agglType == 2)
 	{
-		scalarField weights(faceAreaPtr, lduA.upper().size());
+		scalarVector weights(faceAreaPtr, lduA.upper().size());
 		agglPtr = new lduAgglomeration(lduA);
 
 		// printVector(weights, "old_facearea");
@@ -545,11 +545,11 @@ void UNAP::contruct_sw_matrix__
 	const label nCells = *nCellsPtr;
 	const label size = *sizePtr;
 
-	labelField* upperAddrPtr = new labelField(size);
-	labelField& upperAddr = *upperAddrPtr;
+	labelVector* upperAddrPtr = new labelVector(size);
+	labelVector& upperAddr = *upperAddrPtr;
 
-	labelField* lowerAddrPtr = new labelField(size);
-	labelField& lowerAddr = *lowerAddrPtr;
+	labelVector* lowerAddrPtr = new labelVector(size);
+	labelVector& lowerAddr = *lowerAddrPtr;
 
 	forAll(i, size)
 	{
@@ -557,11 +557,11 @@ void UNAP::contruct_sw_matrix__
 		lowerAddr[i] = rowsPtr[i];
 	}
 
-	scalarField* diagPtr = new scalarField(nCells);
-	scalarField& diag = *diagPtr;
+	scalarVector* diagPtr = new scalarVector(nCells);
+	scalarVector& diag = *diagPtr;
 
-	scalarField* upperPtr = new scalarField(size);
-	scalarField& upper = *upperPtr;
+	scalarVector* upperPtr = new scalarVector(size);
+	scalarVector& upper = *upperPtr;
 
 	lduMatrix* lduAPtr = new lduMatrix(nCells, lowerAddr, upperAddr, upper, diag, upper, true);
 	*(lduMatrix**)APtrPtr = lduAPtr;
@@ -597,8 +597,8 @@ void UNAP::contruct_sw_matrix_interfaces__
 			localFaceCells[faceI] = offDiagRowsPtr[start] - 1;
 		}
 
-   		labelField* locFaceCellsPtr = new labelField(localFaceCells, localSize, true);
-   		scalarField* localDataPtr = new scalarField(localSize);
+   		labelVector* locFaceCellsPtr = new labelVector(localFaceCells, localSize, true);
+   		scalarVector* localDataPtr = new scalarVector(localSize);
 
    		patchIPtr->faceCells(*locFaceCellsPtr);
    		patchIPtr->patchCoeffs(*localDataPtr);
@@ -659,7 +659,7 @@ void UNAP::fill_sw_matrix_coefficients__
 	if(!symm)
 	{
 		// UNAPCOUT << "symm = " << symm << ENDL;
-		scalarField lower(lowerPtr, nFaces);
+		scalarVector lower(lowerPtr, nFaces);
 		lduA.SET_lower(lower);
 	}
 	else if(!lduA.symm())
@@ -717,7 +717,7 @@ void UNAP::contruct_solver_mg__
 
 	const label nFaces = lduA.upper().size();
 
-	scalarField weights(weightsPtr, nFaces);
+	scalarVector weights(weightsPtr, nFaces);
 
 	// printVector(weights, "new_facearea");
 	// UNAPCOUT << "finish writing" << ENDL;
@@ -873,8 +873,8 @@ void UNAP::sw_solve_mg__
 
 	const label nCells = lduA.size();
 
-	scalarField x(xPtr, nCells);
-	scalarField b(bPtr, nCells);
+	scalarVector x(xPtr, nCells);
+	scalarVector b(bPtr, nCells);
 
 	MG.SET_ifPrint(true);
 
@@ -1022,8 +1022,8 @@ void UNAP::sw_solve_pbicgstab__
 
 	const label nCells = lduA.size();
 
-	scalarField x(xPtr, nCells);
-	scalarField b(bPtr, nCells);
+	scalarVector x(xPtr, nCells);
+	scalarVector b(bPtr, nCells);
 
 	solver.SET_ifPrint(true);
 

@@ -3,8 +3,8 @@
 //- no preconditioner
 void UNAP::matrix::preconditioner::precondition
 (
-	scalarField       &w,
-    const scalarField &r
+	scalarVector       &w,
+    const scalarVector &r
 ) const
 {
 	const label nCells  = w.size();

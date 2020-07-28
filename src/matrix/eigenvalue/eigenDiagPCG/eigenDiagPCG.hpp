@@ -27,8 +27,8 @@ private:
     //- algorithm see Ref.[3]
     void computeValueForMatrix
     (
-        const scalarField& alphas,  /// alphas from nPCGs times of PCG
-        const scalarField& betas,   /// betas from nPCGs times of PCG
+        const scalarVector& alphas,  /// alphas from nPCGs times of PCG
+        const scalarVector& betas,   /// betas from nPCGs times of PCG
         scalar** TriMatrix,         /// tridiagonal matrix
         const label nPCGs           /// nDiagPCGs_
     ) const;
@@ -45,8 +45,8 @@ private:
     //- compute eigenvalue
     void computeMaxEig
     (
-        const scalarField& alphas,   /// alphas from nPCGs times of PCG
-        const scalarField& betas,    /// betas from nPCGs times of PCG
+        const scalarVector& alphas,   /// alphas from nPCGs times of PCG
+        const scalarVector& betas,    /// betas from nPCGs times of PCG
         const label nPCGs,           /// nDiagPCGs_
         const label k               /// kth largest eigenvalue, default k=1 for the maximum eigenvalue
     ) const;
@@ -55,12 +55,12 @@ private:
     void diagPCGLoops
     (
     	const matrix& A,
-		scalarField& x,
-		const scalarField& b,
+		scalarVector& x,
+		const scalarVector& b,
 		const matrix::preconditioner& precond,
 		const label nDiagPCGs,
-		scalarField& alphas,
-		scalarField& betas
+		scalarVector& alphas,
+		scalarVector& betas
     ) const;
 
     template <typename T> T** allocateSym2D(label nPCGs) const;
@@ -70,8 +70,8 @@ public:
 	eigenDiagPCG
 	(
 		const matrix& A,
-		scalarField& x,
-		const scalarField& b,
+		scalarVector& x,
+		const scalarVector& b,
 		const matrix::preconditioner& precond,
 		const label nDiagPCGs
 	);

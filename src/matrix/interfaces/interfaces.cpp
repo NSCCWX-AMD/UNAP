@@ -24,7 +24,7 @@ UNAP::interfaces::~interfaces()
 
 void UNAP::interfaces::initMatrixInterfaces
 (
-    const scalarField& psi
+    const scalarVector& psi
 ) const
 {
 	label numInterfaces = patches_.size();
@@ -73,7 +73,7 @@ void UNAP::interfaces::initMatrixInterfaces
 
 void UNAP::interfaces::updateMatrixInterfaces
 (
-    scalarField& Apsi
+    scalarVector& Apsi
 ) const
 {
 	scalar* ApsiPtr = Apsi.begin();

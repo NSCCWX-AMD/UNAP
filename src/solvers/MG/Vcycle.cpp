@@ -10,15 +10,15 @@
 
 void UNAP::MGSolver::initVcycle
 (
-    PtrList<scalarField>& coarseCorrFields,
-    PtrList<scalarField>& coarseSources
+    PtrList<scalarVector>& coarseCorrFields,
+    PtrList<scalarVector>& coarseSources
 ) const
 {
     forAll(leveli, agglomeration_.size())
     {
         label nCells = agglomeration_.coarseMatrixLevels(leveli).size();
-        scalarField* coarseCorrFieldsLeveliPtr = new scalarField(nCells);
-        scalarField* coarseSourcesLeveliPtr = new scalarField(nCells);
+        scalarVector* coarseCorrFieldsLeveliPtr = new scalarVector(nCells);
+        scalarVector* coarseSourcesLeveliPtr = new scalarVector(nCells);
         coarseCorrFields.setLevel(leveli, *coarseCorrFieldsLeveliPtr);
         coarseSources.setLevel(leveli, *coarseSourcesLeveliPtr);
     }
@@ -26,13 +26,13 @@ void UNAP::MGSolver::initVcycle
 
 void UNAP::MGSolver::Vcycle
 (
-    scalarField& psi,
-    const scalarField& source,
-    scalarField& Apsi,
-    scalarField& finestCorrection,
-    scalarField& finestResidual,
-    PtrList<scalarField>& coarseCorrFields,
-    PtrList<scalarField>& coarseSources
+    scalarVector& psi,
+    const scalarVector& source,
+    scalarVector& Apsi,
+    scalarVector& finestCorrection,
+    scalarVector& finestResidual,
+    PtrList<scalarVector>& coarseCorrFields,
+    PtrList<scalarVector>& coarseSources
 ) const
 {
 #ifdef SW_SLAVE
@@ -65,7 +65,7 @@ void UNAP::MGSolver::Vcycle
                 nPreSweeps_ + leveli
             );
 
-            scalarField ACf(nCells);
+            scalarVector ACf(nCells);
 
             //- scale coarse-grid correction field
             //  but not on the coarsest level because it evaluates to 1
@@ -157,7 +157,7 @@ void UNAP::MGSolver::Vcycle
         label nCells = coarseCorrFields[leveli].size();
         scalar* coarseCorrFieldsPtr = coarseCorrFields[leveli].values();
 
-        scalarField preSmoothedCoarseCorrField(nCells);
+        scalarVector preSmoothedCoarseCorrField(nCells);
         scalar* preSmoothedCoarseCorrFieldPtr = preSmoothedCoarseCorrField.values();
 
         //- only store the preSmoothedCoarseCorrField if pre-smoothing is used
@@ -193,7 +193,7 @@ void UNAP::MGSolver::Vcycle
         if (scaleCorrection_ && leveli < coarsestLevel - 1)
         {
             //- create A.psi for this coarse level as a sub-field of Apsi
-            scalarField ACf(nCells);
+            scalarVector ACf(nCells);
 
             scalar sf = scalingFactor
             (

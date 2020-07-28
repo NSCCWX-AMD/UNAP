@@ -16,19 +16,19 @@ int main()
 	//- b = |2 -8|
 
 	label nCells = 2;
-	scalarField x(nCells);
+	scalarVector x(nCells);
 
 	scalar *bVal = new scalar[2];
 	bVal[0] =  2.0;
 	bVal[1] = -8.0;
-	scalarField b(bVal, nCells);
+	scalarVector b(bVal, nCells);
 
-	labelField lowerAddr(1, 0);
-	labelField upperAddr(1, 1);
+	labelVector lowerAddr(1, 0);
+	labelVector upperAddr(1, 1);
 
-	scalarField lower(1, 2);
-	scalarField upper(1, 2);
-	scalarField diag (nCells);
+	scalarVector lower(1, 2);
+	scalarVector upper(1, 2);
+	scalarVector diag (nCells);
 
 	diag[0] = 3.0;
 	diag[1] = 6.0;

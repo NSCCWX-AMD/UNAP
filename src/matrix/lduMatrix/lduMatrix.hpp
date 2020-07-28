@@ -24,22 +24,22 @@ private:
     label nCells_;
 
     //- addressing
-    labelField *lowerAddrPtr_, *upperAddrPtr_;
+    labelVector *lowerAddrPtr_, *upperAddrPtr_;
 
 	//- coefficients (not including interfaces)
-    scalarField *lowerPtr_, *diagPtr_, *upperPtr_;
+    scalarVector *lowerPtr_, *diagPtr_, *upperPtr_;
 
     //- interfaces
     interfaces* interfacesPtr_;
 
     //- losort addressing
-    mutable labelField* losortPtr_;
+    mutable labelVector* losortPtr_;
 
     //- owner start addressing
-    mutable labelField* ownerStartPtr_;
+    mutable labelVector* ownerStartPtr_;
 
     //- losort start addressing
-    mutable labelField* losortStartPtr_;
+    mutable labelVector* losortStartPtr_;
 
     //- calculate losort
     void calcLosort() const;
@@ -80,21 +80,21 @@ public:
     lduMatrix
     (
         const label& nCells,
-        const labelField& lowerAddr,
-        const labelField& upperAddr,
-        const scalarField& lower,
-        const scalarField& diag,
-        const scalarField& upper
+        const labelVector& lowerAddr,
+        const labelVector& upperAddr,
+        const scalarVector& lower,
+        const scalarVector& diag,
+        const scalarVector& upper
     );
 
     lduMatrix
     (
         const label& nCells,
-        const labelField& lowerAddr,
-        const labelField& upperAddr,
-        const scalarField& lower,
-        const scalarField& diag,
-        const scalarField& upper,
+        const labelVector& lowerAddr,
+        const labelVector& upperAddr,
+        const scalarVector& lower,
+        const scalarVector& diag,
+        const scalarVector& upper,
         const bool reUse
     );
 
@@ -103,15 +103,15 @@ public:
     lduMatrix
     (
         const label& nCells,
-        const labelField& lowerAddr,
-        const labelField& upperAddr
+        const labelVector& lowerAddr,
+        const labelVector& upperAddr
     );
 
     lduMatrix
     (
         const label& nCells,
-        const labelField& lowerAddr,
-        const labelField& upperAddr,
+        const labelVector& lowerAddr,
+        const labelVector& upperAddr,
         const bool reUse
     );
 
@@ -120,25 +120,25 @@ public:
 
 
     //- access to addressing
-    virtual labelField& lowerAddr() const;
-    virtual labelField& upperAddr() const;
+    virtual labelVector& lowerAddr() const;
+    virtual labelVector& upperAddr() const;
 
 	//- access to coefficients
-    virtual scalarField& lower() const;
-    virtual scalarField& diag () const;
-    virtual scalarField& upper() const;
+    virtual scalarVector& lower() const;
+    virtual scalarVector& diag () const;
+    virtual scalarVector& upper() const;
 
-    void SET_lowerAddr(labelField& newLowerAddr)
+    void SET_lowerAddr(labelVector& newLowerAddr)
     {
-        ALLOCATE_POINTER(lowerAddrPtr_, newLowerAddr, labelField)
+        ALLOCATE_POINTER(lowerAddrPtr_, newLowerAddr, labelVector)
     }
 
-    void SET_upperAddr(labelField& newUpperAddr)
+    void SET_upperAddr(labelVector& newUpperAddr)
     {
-        ALLOCATE_POINTER(upperAddrPtr_, newUpperAddr, labelField)
+        ALLOCATE_POINTER(upperAddrPtr_, newUpperAddr, labelVector)
     }
 
-    void SET_lower(scalarField& newLower)
+    void SET_lower(scalarVector& newLower)
     {
         if(this->symm())
         {
@@ -146,41 +146,41 @@ public:
             // COUT << "Here works" << ENDL;
         }
 
-        ALLOCATE_POINTER(lowerPtr_, newLower, scalarField)
+        ALLOCATE_POINTER(lowerPtr_, newLower, scalarVector)
     }
 
     void SET_lower(label newSize)
     {
         DELETE_OBJECT_POINTER(lowerPtr_)
 
-        lowerPtr_ =  new scalarField(newSize);
+        lowerPtr_ =  new scalarVector(newSize);
     }
 
-    void SET_upper(scalarField& newUpper)
+    void SET_upper(scalarVector& newUpper)
     {
-        ALLOCATE_POINTER(upperPtr_, newUpper, scalarField)
+        ALLOCATE_POINTER(upperPtr_, newUpper, scalarVector)
     }
 
     void SET_upper(label newSize)
     {
         DELETE_OBJECT_POINTER(upperPtr_)
 
-        upperPtr_ =  new scalarField(newSize);
+        upperPtr_ =  new scalarVector(newSize);
     }
 
-    void SET_diag(scalarField& newDiag)
+    void SET_diag(scalarVector& newDiag)
     {
-        ALLOCATE_POINTER(diagPtr_, newDiag, scalarField)
+        ALLOCATE_POINTER(diagPtr_, newDiag, scalarVector)
     }
 
     void SET_diag(label newSize)
     {
         DELETE_OBJECT_POINTER(diagPtr_)
 
-        diagPtr_ =  new scalarField(newSize);
+        diagPtr_ =  new scalarVector(newSize);
     }
 
-    scalarField& diag()
+    scalarVector& diag()
     {
         return *diagPtr_;
     }
@@ -238,18 +238,18 @@ public:
 
     virtual void spMV
     (
-    	scalarField& Apsi,
-		const scalarField& psi
+    	scalarVector& Apsi,
+		const scalarVector& psi
     ) const;
 
     //- return losort addressing
-    const labelField& losortAddr() const;
+    const labelVector& losortAddr() const;
 
     //- return owner start addressing
-    const labelField& ownerStartAddr() const;
+    const labelVector& ownerStartAddr() const;
 
     //- return losort start addressing
-    const labelField& losortStartAddr() const;
+    const labelVector& losortStartAddr() const;
 
     virtual interfaces& matrixInterfaces() const
     {
@@ -282,39 +282,39 @@ public:
     );
 
     //- initialize interfaces
-    virtual void initInterfaces(const scalarField& psi) const;
+    virtual void initInterfaces(const scalarVector& psi) const;
 
     //- update interfaces
-    virtual void updateInterfaces(scalarField& Apsi) const;
+    virtual void updateInterfaces(scalarVector& Apsi) const;
 
     //- fill coefficients
     void setMatrixCoeffients
     (
-        const scalarField& diag,
-        const scalarField& upper,
-        const scalarField& lower
+        const scalarVector& diag,
+        const scalarVector& upper,
+        const scalarVector& lower
     );
 
     void setMatrixCoeffients
     (
-        const scalarField& diag,
-        const scalarField& upper,
-        const scalarField& lower,
+        const scalarVector& diag,
+        const scalarVector& upper,
+        const scalarVector& lower,
         const bool reuse
     );
 
     //- fill topology
     void setMatrixTopology
     (
-        const labelField& upperAddr,
-        const labelField& lowerAddr,
+        const labelVector& upperAddr,
+        const labelVector& lowerAddr,
         const bool reUse
     );
 
     void setMatrixTopology
     (
-        const labelField& upperAddr,
-        const labelField& lowerAddr
+        const labelVector& upperAddr,
+        const labelVector& lowerAddr
     );
 
 #ifdef SW_SLAVE
@@ -327,9 +327,9 @@ public:
 
     void reorderLDUValues();
 
-    void restoreVector(scalarField& vv);
+    void restoreVector(scalarVector& vv);
 
-    void reorderVector(scalarField& vv);
+    void reorderVector(scalarVector& vv);
 
     const label* unatEdgeMap() const
     {

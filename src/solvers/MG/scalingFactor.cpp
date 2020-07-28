@@ -10,9 +10,9 @@
 
 scalar UNAP::MGSolver::scalingFactor
 (
-	scalarField& Acf,
-	scalarField& field,
-    const scalarField& source,
+	scalarVector& Acf,
+	scalarVector& field,
+    const scalarVector& source,
     const matrix& A
 ) const
 {
@@ -20,7 +20,7 @@ scalar UNAP::MGSolver::scalingFactor
 
     scalar sfVal[2] = {0.0, 0.0};
 
-    scalarField& D = A.diag();
+    scalarVector& D = A.diag();
     scalar* DPtr = D.values();
     scalar* fieldPtr = field.values();
     scalar* AcfPtr = Acf.values();

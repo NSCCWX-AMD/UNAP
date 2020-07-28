@@ -17,15 +17,15 @@ public:
 	//- matrix multiplication with updated interfaces
 	virtual void spMV
 	(
-		scalarField       &Apsi,
-		const scalarField &psi
+		scalarVector       &Apsi,
+		const scalarVector &psi
 	) const = 0;
 
     //- number of equations( = number of cells to be solved)
     virtual label size() const = 0;
 
     //- access to diagonal data
-    virtual scalarField& diag() const = 0;
+    virtual scalarVector& diag() const = 0;
 
     //- matrix is symmetric or asymmetric
     virtual bool symm() const = 0;
@@ -34,10 +34,10 @@ public:
     virtual interfaces& matrixInterfaces() const = 0;
 
     //- initialize interfaces
-    virtual void initInterfaces(const scalarField& psi) const = 0;
+    virtual void initInterfaces(const scalarVector& psi) const = 0;
 
     //- update interfaces
-    virtual void updateInterfaces(scalarField& Apsi) const = 0;
+    virtual void updateInterfaces(scalarVector& Apsi) const = 0;
 
 	//- Class returned by the solver, containing performance statistics
 	class solverPerformance
@@ -196,16 +196,16 @@ public:
 
         //- access to restrictAddressing_
         //- return cell restrict addressing of given level
-        virtual const labelField& restrictAddressing(const label leveli) const = 0;
+        virtual const labelVector& restrictAddressing(const label leveli) const = 0;
 
         //- access to faceRestrictAddressing_
         //- return face restrict addressing of given level
-        virtual const labelField& faceRestrictAddressing(const label leveli) const = 0;
+        virtual const labelVector& faceRestrictAddressing(const label leveli) const = 0;
 
         //- agglomerate coarse matrix
         virtual void agglomerateMatrix(const label fineLevelIndex) = 0;
 
-        virtual void agglomerate(const scalarField& weights) = 0;
+        virtual void agglomerate(const scalarVector& weights) = 0;
 
         virtual void SET_nCellsInCoarsestLevel(const label i) = 0;
 
@@ -274,16 +274,16 @@ public:
 
     	virtual solverPerformance solve
 		(
-			scalarField       &x,
+			scalarVector       &x,
 			const matrix 	  &A,
-			const scalarField &b
+			const scalarVector &b
 		) const = 0;
 
 		//- return the matrix norm used to normalize the residual for the
         //- stopping criterion
         scalar normFactor
         (
-            const scalarField  &source
+            const scalarVector  &source
         ) const;
 
         inline label maxIter() const
@@ -326,7 +326,7 @@ public:
     class preconditioner
     {
     private:
-        scalarField* rDTempPtr_;
+        scalarVector* rDTempPtr_;
 
     public:
     	//- destructor
@@ -336,11 +336,11 @@ public:
     	//- return wA the preconditioned form of residual rA
         virtual void precondition
         (
-            scalarField       &wA,
-            const scalarField &rA
+            scalarVector       &wA,
+            const scalarVector &rA
         ) const;
 
-        virtual const scalarField& rD() const
+        virtual const scalarVector& rD() const
         {
             return *rDTempPtr_;
         }
@@ -363,9 +363,9 @@ public:
 
         virtual void smooth
         (
-            scalarField       &x,
+            scalarVector       &x,
             const matrix      &A,
-            const scalarField &b,
+            const scalarVector &b,
             const label       nSweeps
         ) const = 0;
 
@@ -383,7 +383,7 @@ void matrix::agglomeration::restrictField
     const label     fineLevelIndex
 ) const
 {
-    const labelField &fineToCoarse = restrictAddressing(fineLevelIndex);
+    const labelVector &fineToCoarse = restrictAddressing(fineLevelIndex);
 
 #ifdef DEBUG
     if (ff.size() != fineToCoarse.size())
@@ -415,7 +415,7 @@ void matrix::agglomeration::prolongField
     const label     coarseLevelIndex
 ) const
 {
-    const labelField &fineToCoarse = restrictAddressing(coarseLevelIndex);
+    const labelVector &fineToCoarse = restrictAddressing(coarseLevelIndex);
 
 #ifdef DEBUG
     if (ff.size() != fineToCoarse.size())
@@ -446,7 +446,7 @@ void matrix::agglomeration::restrictFaceField
     const label     fineLevelIndex
 ) const
 {
-    const labelField &fineToCoarse = faceRestrictAddressing(fineLevelIndex);
+    const labelVector &fineToCoarse = faceRestrictAddressing(fineLevelIndex);
 
 #ifdef DEBUG
     if (ff.size() != fineToCoarse.size())

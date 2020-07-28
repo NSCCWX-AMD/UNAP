@@ -16,9 +16,9 @@ if(!MYID && ifPrint_)
 
 UNAP::matrix::solverPerformance UNAP::MGSolver::solve
 (
-	scalarField& x,
+	scalarVector& x,
     const matrix& A,
-    const scalarField& b
+    const scalarVector& b
 ) const
 {
 	//- setup class containing solver performance data
@@ -27,12 +27,12 @@ UNAP::matrix::solverPerformance UNAP::MGSolver::solve
 	const label nCells = x.size();
 
 	//- calculate A.psi used to calculate the initial residual
-	scalarField Apsi(nCells);
+	scalarVector Apsi(nCells);
 	A.spMV(Apsi, x);
 
 	//- create the storage for the finestCorrection which may be used as a
 	//  temporary in normFactor
-	scalarField finestCorrection(nCells);
+	scalarVector finestCorrection(nCells);
 
 #ifdef SW_SLAVE
 	MVM_Arrays arrays1;
@@ -40,7 +40,7 @@ UNAP::matrix::solverPerformance UNAP::MGSolver::solve
 
 	//- calculate initial finest-grid residual field
 	//- calculate normalised residual for convergence test
-	scalarField finestResidual(nCells);
+	scalarVector finestResidual(nCells);
 	IFNOT_SWACC
 	{
 		finestResidual = b - Apsi;
@@ -98,10 +98,10 @@ IFPRINT
 		label coarseLevels = agglomeration_.size();
 
 		//- create coarse grid correction fields
-        PtrList<scalarField> coarseCorrFields(coarseLevels);
+        PtrList<scalarVector> coarseCorrFields(coarseLevels);
 
         //- create coarse grid sources
-        PtrList<scalarField> coarseSources(coarseLevels);
+        PtrList<scalarVector> coarseSources(coarseLevels);
 
         initVcycle(coarseCorrFields, coarseSources);
 

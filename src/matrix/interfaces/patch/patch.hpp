@@ -19,13 +19,13 @@ private:
 	label neighbProcNo_;
 
 	//- face-cell addressing
-	mutable labelField* faceCellsPtr_;
+	mutable labelVector* faceCellsPtr_;
 
 	//- coefficients
-	mutable scalarField* patchCoeffsPtr_;
+	mutable scalarVector* patchCoeffsPtr_;
 
 	//- face restriction addressing if needed
-	mutable labelField* faceRestrictAddressingPtr_;
+	mutable labelVector* faceRestrictAddressingPtr_;
 
 public:
 
@@ -61,13 +61,13 @@ public:
 	}
 
 	//- return faceCells
-	inline labelField& faceCells() const
+	inline labelVector& faceCells() const
 	{
 		CHECK_POINTER(faceCellsPtr_)
 		return *faceCellsPtr_;
 	}
 
-	inline void faceCells(labelField& a) const
+	inline void faceCells(labelVector& a) const
 	{
 		DELETE_OBJECT_POINTER(faceCellsPtr_)
 		faceCellsPtr_ = &a;
@@ -79,13 +79,13 @@ public:
 		return (*patchCoeffsPtr_)[faceI];
 	}
 
-	inline scalarField& patchCoeffs() const
+	inline scalarVector& patchCoeffs() const
 	{
 		CHECK_POINTER(patchCoeffsPtr_)
 		return *patchCoeffsPtr_;
 	}
 
-	inline void patchCoeffs(scalarField& a)
+	inline void patchCoeffs(scalarVector& a)
 	{
 		DELETE_OBJECT_POINTER(patchCoeffsPtr_)
 		patchCoeffsPtr_ = &a;
@@ -101,13 +101,13 @@ public:
 		size_ = i;
 	}
 
-	inline void faceRestrictAddressing(labelField& a) const
+	inline void faceRestrictAddressing(labelVector& a) const
 	{
 		DELETE_OBJECT_POINTER(faceRestrictAddressingPtr_)
 		faceRestrictAddressingPtr_ = &a;
 	}
 
-	inline labelField& faceRestrictAddressing() const
+	inline labelVector& faceRestrictAddressing() const
 	{
 		CHECK_POINTER(faceRestrictAddressingPtr_)
 		return *faceRestrictAddressingPtr_;

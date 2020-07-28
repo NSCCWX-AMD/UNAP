@@ -66,7 +66,7 @@ int main()
    	}
 
    	label nCells = lduA.size();
-   	scalarField b(nCells);
+   	scalarVector b(nCells);
 
    	LOCATEFILE(fileName, "b_p", dir);
    	constructVectorFromOpenFOAM(b, fileName);
@@ -87,11 +87,11 @@ int main()
 
 	const bool useMG = true;
 	const bool usePBiCGStab = false;
-	scalarField x(nCells, 0.0);
+	scalarVector x(nCells, 0.0);
 
 	if(useMG)
 	{
-		scalarField weights(nFaces);
+		scalarVector weights(nFaces);
 		forAll(i, nFaces)
 		{
 			weights[i] = mag(lduA.upper()[i]);

@@ -32,17 +32,17 @@ public:
 	//- smooth the solution for a given number of sweeps
 	virtual void smooth
 	(
-		scalarField       &x,
+		scalarVector       &x,
         const matrix      &A,
-        const scalarField &b,
+        const scalarVector &b,
         const label       nSweeps
 	) const;
 
 	void smooth
 	(
-		scalarField       &x,
+		scalarVector       &x,
         const lduMatrix   &A,
-        const scalarField &b,
+        const scalarVector &b,
         const label       nSweeps
 	) const;
 
