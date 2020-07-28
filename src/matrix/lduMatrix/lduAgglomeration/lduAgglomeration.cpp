@@ -37,7 +37,7 @@ bool UNAP::lduAgglomeration::continueAgglomerating
     }
 
     bool contAggLocal = contAgg;
-    MPI_Allreduce(&contAggLocal, &contAgg, 1, MPI_CXX_BOOL, MPI_LOR, MPI_COMM_WORLD);
+    MPI_Allreduce(&contAggLocal, &contAgg, 1, MPIR_CXX_BOOL, MPI_LOR, MPI_COMM_WORLD);
 
     return contAgg;
 }

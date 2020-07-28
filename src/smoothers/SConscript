@@ -1,7 +1,7 @@
-import GLOVAR as gl
+from build import add_source_files, cxx_source_files
 
-cxxfile = ['lduSmoothers/lduGaussSeidelSmoother/lduGaussSeidelSmoother.cpp',
-		   'chebySmoother/chebySmoother.cpp'
-		  ]
+cxxfiles = ['lduSmoothers/lduGaussSeidelSmoother/lduGaussSeidelSmoother.cpp',
+		    'chebySmoother/chebySmoother.cpp'
+		   ]
 
-gl.add_files(cxxfile)
+add_source_files(cxxfiles, cxx_source_files)

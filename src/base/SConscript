@@ -1,7 +1,11 @@
-import GLOVAR as gl
+# -*- mode: python -*-
 
-cxxfile = ['unap.cpp',
-		   'vectors/unapVectorOperations.cpp',
-		   'mpi/unapMPI.cpp']
+from build import add_source_files, cxx_source_files
 
-gl.add_files(cxxfile)
+cxxfiles = Split("""
+unap.cpp
+vectors/unapVectorOperations.cpp
+mpi/unapMPI.cpp
+""")
+
+add_source_files(cxxfiles, cxx_source_files)

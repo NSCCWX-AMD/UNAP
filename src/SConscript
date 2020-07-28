@@ -1,22 +1,60 @@
+# -*- mode: python -*-
+
 import os
-import GLOVAR as gl
+import utils
+from build import build_lninclude, build_lib, cxx_source_files, chost_source_files, cslave_source_files, cxxhost_source_files, build_object
 
 Import('env')
 
-# copy parent environment so our alterations don't affect it
-env_local = env.Clone()
+target = 'unap'
 
-# make all header files linked in the same dir: 'build/Include'
-gl.build_Include(env_local)
+subdirs = Split("""
+    base
+    matrix
+    preconditioners
+    smoothers
+    solvers
+    tools
+""")
 
-env_local.SConscript('base/SConscript', duplicate = 0, exports = 'env')
-env_local.SConscript('matrix/SConscript', duplicate = 0, exports = 'env')
-env_local.SConscript('preconditioners/SConscript', duplicate = 0, exports = 'env')
-env_local.SConscript('smoothers/SConscript', duplicate = 0, exports = 'env')
-env_local.SConscript('solvers/SConscript', duplicate = 0, exports = 'env')
-env_local.SConscript('tools/SConscript', duplicate = 0, exports = 'env')
+src_include = list(build_lninclude(env))
 
+for d in subdirs:
+    SConscript(os.path.join(d, 'SConscript'), exports=['env', 'src_include'])
 
-env_local.StaticLibrary(gl.build_path + '/lib/libunap', source = gl.get_files() )
+program_inc = []
+program_libs = []
+objs_all = []
 
-# env_local.Install('$PREFIX/lib', gl.build_path + '/lib/libunap.a')
+source_files = cxx_source_files
+
+if env['PLATFORM'] == 'sw':
+    if env['ATHREAD']:
+        program_inc += []
+        objs_all = objs_all + build_object(env,
+                                           sources=chost_source_files,
+                                           program_inc=program_inc,
+                                           program_libs=program_libs,
+                                           sources_type='host')
+
+        objs_all = objs_all + build_object(env,
+                                           sources=cslave_source_files,
+                                           program_inc=program_inc,
+                                           program_libs=program_libs,
+                                           sources_type='slave')
+
+        objs_all = objs_all + build_object(env,
+                                           sources=cxxhost_source_files,
+                                           program_inc=program_inc,
+                                           program_libs=program_libs)
+
+objs_all = objs_all + build_object(env,
+                                   sources=cxx_source_files,
+                                   program_inc=program_inc,
+                                   program_libs=program_libs)
+
+build_lib(env,
+          target=target,
+          sources=objs_all,
+          program_inc=program_inc,
+          program_libs=program_libs)

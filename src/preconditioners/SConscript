@@ -1,8 +1,8 @@
-import GLOVAR as gl
+from build import add_source_files, cxx_source_files
 
-cxxfile = ['lduPreconditioners/lduDiagonal/lduDiagPrecond.cpp',
-		   'lduPreconditioners/lduDIC/lduDICPrecond.cpp',
-		   'lduPreconditioners/lduDILU/lduDILUPrecond.cpp'
-		  ]
+cxxfiles = ['lduPreconditioners/lduDiagonal/lduDiagPrecond.cpp',
+		    'lduPreconditioners/lduDIC/lduDICPrecond.cpp',
+		    'lduPreconditioners/lduDILU/lduDILUPrecond.cpp'
+		   ]
 
-gl.add_files(cxxfile)
+add_source_files(cxxfiles, cxx_source_files)

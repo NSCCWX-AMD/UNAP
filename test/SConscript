@@ -1,27 +1,30 @@
-import GLOVAR as gl
-
+from build import build_app
 Import('env')
-
-env_local = env.Clone()
-
-env_local.Prepend(LIBS = ['unap'])
-env_local.Append(LIBPATH = [gl.build_path + '/lib'])
-env_local.Append(LIBS = ['stdc++'])
-
-if gl.platform == 'sw':
-    cpplinker = 'mpiCC'
-    f90linker = 'mpif90'
-else:
-    # linker_bin_path = '/home/export/online1/amd_dev1/software/MPICH/bin'
-    # cpplinker = linker_bin_path + '/mpicxx'
-    # f90linker = linker_bin_path + '/mpifort'
-    cpplinker = 'mpiicpc'
-    f90linker = 'mpiifort'
 
 cxxfile = ['ex11.cpp']
 
 fortranfile = ['ex12f.f90']
 
-env_local.Program(gl.build_path + '/bin/ex11', source = cxxfile, LINK=cpplinker)
+program_inc = []
+program_libs = ['unap', 'stdc++']
 
-env_local.Program(gl.build_path + '/bin/ex12f', source = fortranfile, LINK=f90linker)
+if env['PLATFORM'] == 'windows':
+    program_libs.append(['mpi', 'fmpich2g'])
+
+build_app(env,
+          target='ex11',
+          sources=cxxfile,
+          program_inc=program_inc,
+          program_libs=program_libs,
+          linker=env['CXX_LINKER'])
+
+# if env['PLATFORM'] == 'windows':
+#     program_libs.append('fmpich2g')
+# program_libs.append('msmpifec')
+# program_libs.append('msmpifmc')
+build_app(env,
+          target='ex12f',
+          sources=fortranfile,
+          program_inc=program_inc,
+          program_libs=program_libs,
+          linker=env['F_LINKER'])
