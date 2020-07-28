@@ -55,7 +55,7 @@ int main()
 
 
 
-   	const char* dir = "./exData/openfoam/cavity/2.5w/p";
+   	const char* dir = "./../../../exData/openfoam/cavity/2.5w/p";
    	char fileName[200];
 
    	if(PARRUN)
@@ -238,7 +238,11 @@ int main()
 #endif
 
 		if(!MYID)
+		{
 			COUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
+			COUT << "finalResidual " << solverPerf.finalResidual()  << ENDL;
+		}
+
 	}
 	else if(usePBiCGStab)
 	{
@@ -287,7 +291,10 @@ int main()
 #endif
 
 		if(!MYID)
+		{
 			COUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
+			COUT << "finalResidual " << solverPerf.finalResidual()  << ENDL;
+		}
 	}
 	else
 	{
@@ -306,7 +313,10 @@ int main()
 		matrix::solverPerformance solverPerf = PCGSolver.solve(x, lduA, b);
 
 		if(!MYID)
+		{
 			COUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
+			COUT << "finalResidual " << solverPerf.finalResidual()  << ENDL;
+		}
 	}
 
 #ifdef SW_SLAVE
