@@ -100,7 +100,7 @@ UNAP::matrix::solverPerformance UNAP::PBiCGStab::solve
         arrays1.A4Ptr = rA0Ptr;
         arrays1.k1Ptr = &rASqr;
         residualNormFactor_host(&arrays1);
-        reduceSum(rASqr);
+        reduceSum(&rASqr);
         solverPerf.initialResidual() = sqrt(rASqr);
     }
 #endif
@@ -174,7 +174,7 @@ IFPRINT
             arrays1.k1Ptr = &rA0rA;
             // rA0rA += rA0 * rA
             gSum_host(&arrays1, &slave_userFunc_sumProd);
-            reduceSum(rA0rA);
+            reduceSum(&rA0rA);
         }
 #endif
 #ifdef SWTIMER
@@ -262,7 +262,7 @@ IFPRINT
             arrays1.k1Ptr = &rA0AyA;
             // rA0AyA += rA0 * AyA
             gSum_host(&arrays1, &slave_userFunc_sumProd);
-            reduceSum(rA0AyA);
+            reduceSum(&rA0AyA);
         }
 #endif
 
@@ -290,7 +290,7 @@ IFPRINT
             arrays1.k1Ptr = &sATemp;
             arrays1.k1    = alpha;
             gSum_host(&arrays1, &slave_userFunc_residualSumKSqr);
-            reduceSum(sATemp);
+            reduceSum(&sATemp);
             solverPerf.finalResidual() = sqrt(sATemp);
         }
 #endif
@@ -416,7 +416,7 @@ IFPRINT
             arrays1.k1    = omega;
             // rA = sA - k1 * tA
             gSum_host(&arrays1, &slave_userFunc_residualSumKSqr);
-			reduceSum(rATemp);
+			reduceSum(&rATemp);
 			solverPerf.finalResidual() = sqrt(rATemp);
         }
 #endif

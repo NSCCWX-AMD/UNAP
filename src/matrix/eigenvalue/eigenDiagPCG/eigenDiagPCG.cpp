@@ -125,7 +125,7 @@ void UNAP::eigenDiagPCG::diagPCGLoops
             gSum_host(&arrays1, &slave_userFunc_digPrecondSum);
         };
 #endif
-        reduceSum(wArA);
+        reduceSum(&wArA);
 
         if((mag(wArA)) <  VSMALL)
         {
@@ -206,7 +206,7 @@ void UNAP::eigenDiagPCG::diagPCGLoops
             gSum_host(&arrays1, &slave_userFunc_sumProd);
         }
 #endif
-        reduceSum(wApA);
+        reduceSum(&wApA);
 
         //- update solution and residual
         scalar alpha = wArA/wApA;

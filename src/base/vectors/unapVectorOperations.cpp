@@ -29,7 +29,7 @@ scalar dot
 		res += val1[i] * val2[i];
 	}
 
-	reduceSum(res);
+	reduceSum(&res);
 	return res;
 }
 

@@ -56,7 +56,7 @@ UNAP::matrix::solverPerformance UNAP::MGSolver::solve
         arrays1.A3Ptr = Apsi.values();
         arrays1.k1Ptr = &temp;
         residualNormFactor_host(&arrays1);
-        reduceSum(temp);
+        reduceSum(&temp);
         solverPerf.initialResidual() = sqrt(temp);
     }
 #endif
@@ -141,7 +141,7 @@ IFPRINT
 		        arrays1.A3Ptr = Apsi.values();
 		        arrays1.k1Ptr = &temp;
 		        residualNormFactor_host(&arrays1);
-		        reduceSum(temp);
+		        reduceSum(&temp);
 		        solverPerf.finalResidual() = sqrt(temp);
 		    }
 #endif

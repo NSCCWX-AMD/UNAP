@@ -77,29 +77,9 @@ public:
 
 #define UNAPCOUT  if(!MYID) std::cout 
 
-template<typename T>
-void reduceSum(T& v)
-{
-	if(PARRUN)
-	{
-		T vLocal = v;
-		CommData myType;
-		if(typeid(T) == typeid(label))
-		{
-			myType = UNAPMPI_LABEL;
-		}
-		else if(typeid(T) == typeid(scalar))
-		{
-			myType = UNAPMPI_SCALAR;
-		}
-        UNAP::unapMPI::unapCommunicator().allReduce("sum",&vLocal,&v,1,myType,COMM_SUM);
-        UNAP::unapMPI::unapCommunicator().finishTask("sum");
-	}
-}
-
 
 template<typename T>
-void reduceSum(T* v, label n)
+void reduceSum(T* v, label n = 1)
 {
     if(PARRUN)
     {

@@ -437,7 +437,7 @@ T Vector<T>::Sum() const
 	{
 		sum += val[i];
 	}
-	reduceSum(sum);
+	reduceSum(&sum);
 	return sum;
 }
 
@@ -468,7 +468,7 @@ T Vector<T>::SumMag() const
 		ERROR_EXIT;
 	}
 
-	reduceSum(sum);
+	reduceSum(&sum);
 
 	return sum;
 }
@@ -486,7 +486,7 @@ T Vector<T>::SumSqr() const
 		sum += val[i]*val[i];
 	}
 
-	reduceSum(sum);
+	reduceSum(&sum);
 	return sum;
 }
 
