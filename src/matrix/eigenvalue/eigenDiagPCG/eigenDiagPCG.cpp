@@ -130,12 +130,11 @@ void UNAP::eigenDiagPCG::diagPCGLoops
         if((mag(wArA)) <  VSMALL)
         {
 #ifdef DEBUG
-            if(MYID == 0)
-            {
-                COUT << "In " << __FILE__ << " " << __LINE__ << ENDL;
-                COUT << "Warning: singularity in calculating eigenvalue! " << ENDL;
-                COUT << "The value of search directions is too small:  wArA = " << wArA << ENDL;
-            }
+
+            UNAPCOUT << "In " << __FILE__ << " " << __LINE__ << ENDL;
+            UNAPCOUT << "Warning: singularity in calculating eigenvalue! " << ENDL;
+            UNAPCOUT << "The value of search directions is too small:  wArA = " << wArA << ENDL;
+   
 #endif
             break;
         }

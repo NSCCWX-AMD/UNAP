@@ -77,19 +77,19 @@ UNAP::matrix::solverPerformance UNAP::PCG::solve
 #ifdef DEBUG
 IFPRINT
 {
-	COUT << "At nIter = ";
+	UNAPCOUT << "At nIter = ";
 	std::cout.width(5);
-	COUT << solverPerf.nIterations();
-	COUT << ",   ini res = ";
+	UNAPCOUT << solverPerf.nIterations();
+	UNAPCOUT << ",   ini res = ";
 	std::cout.width(11);
-	COUT << solverPerf.initialResidual();
-	COUT << ",   rel res = ";
+	UNAPCOUT << solverPerf.initialResidual();
+	UNAPCOUT << ",   rel res = ";
 	std::cout.width(11);
-	COUT << solverPerf.initialResidual()/solverPerf.initialResidual();
-	COUT << ",   b norm = ";
+	UNAPCOUT << solverPerf.initialResidual()/solverPerf.initialResidual();
+	UNAPCOUT << ",   b norm = ";
 	std::cout.width(11);
 	std::cout.setf(std::ios::scientific);
-	COUT << normFactor << ENDL;
+	UNAPCOUT << normFactor << ENDL;
 }
 #endif
 
@@ -110,7 +110,7 @@ IFPRINT
 #ifdef DEBUG
             IFPRINT
             {
-            	COUT << "singularity! wArA = " << wArA << ENDL;
+            	UNAPCOUT << "singularity! wArA = " << wArA << ENDL;
             }
 #endif
             break;
@@ -153,15 +153,15 @@ IFPRINT
 #ifdef DEBUG
 IFPRINT
 {
-		COUT << "At nIter = ";
+		UNAPCOUT << "At nIter = ";
 		std::cout.width(5);
-		COUT << solverPerf.nIterations()+1;
-		COUT << ",   fin res = ";
+		UNAPCOUT << solverPerf.nIterations()+1;
+		UNAPCOUT << ",   fin res = ";
 		std::cout.width(11);
-		COUT << solverPerf.finalResidual();
-		COUT << ",   rel res = ";
+		UNAPCOUT << solverPerf.finalResidual();
+		UNAPCOUT << ",   rel res = ";
 		std::cout.width(11);
-		COUT << solverPerf.finalResidual()/normFactor << ENDL;
+		UNAPCOUT << solverPerf.finalResidual()/normFactor << ENDL;
 }
 #endif
 	} while

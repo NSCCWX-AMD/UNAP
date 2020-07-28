@@ -46,10 +46,10 @@ int main()
 			bAll[i*(N+1)+j] = -8.0*pi*pi*sin(2*pi*i*dx)*sin(2*pi*j*dy);
 		}
 
-	// COUT << "bAll: " << ENDL;
+	// UNAPCOUT << "bAll: " << ENDL;
 	// forAll(i, (N+1)*(N+1))
 	// {
-	// 	COUT << bAll[i] << ENDL;
+	// 	UNAPCOUT << bAll[i] << ENDL;
 	// }
 
 	scalar *xAll = new scalar[(N+1)*(N+1)];
@@ -69,10 +69,10 @@ int main()
 			}
 		}
 
-	// COUT << "xAll: " << ENDL;
+	// UNAPCOUT << "xAll: " << ENDL;
 	// forAll(i, (N+1)*(N+1))
 	// {
-	// 	COUT << xAll[i] << ENDL;
+	// 	UNAPCOUT << xAll[i] << ENDL;
 	// }
 
 	scalarField b(nCells);
@@ -102,7 +102,7 @@ int main()
 	labelField lowerAddr(nZeros);
 	labelField upperAddr(nZeros);
 
-	COUT << "Number of non zeros in upper coefficients is " << nZeros << ENDL;
+	UNAPCOUT << "Number of non zeros in upper coefficients is " << nZeros << ENDL;
 
 	label nStart = 0;
 	for(int i=1; i<N; i++)
@@ -173,8 +173,8 @@ int main()
 
 	matrix::solverPerformance solverPerf = MG.solve(x, lduA, b);
 
-	COUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
-	COUT << "Let me check now: " << ENDL;
+	UNAPCOUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
+	UNAPCOUT << "Let me check now: " << ENDL;
 
 	label okNums = 0;
 	scalar relErr = 0.001;
@@ -189,7 +189,7 @@ int main()
 			scalar err = fabs((x[pos] - uExact) / (uExact + SMALL));
 
 			if(err > relErr && fabs(uExact) > max(relTol, tol))
-				COUT << "err = " << err
+				UNAPCOUT << "err = " << err
 					 << ", uExact = " << uExact
 					 << ", uComput = " << x[pos] << ENDL;
 			else
@@ -198,11 +198,11 @@ int main()
 
 	if(okNums == nCells)
 	{
-		COUT << "No cell's error is larger than " << relErr*100 << "%." << ENDL;
+		UNAPCOUT << "No cell's error is larger than " << relErr*100 << "%." << ENDL;
 	}
 	else
 	{
-		COUT << "The number of cells is " << nCells
+		UNAPCOUT << "The number of cells is " << nCells
 			 << ", while only " << okNums
 			 << " cells have correct solutions." << ENDL;
 	}

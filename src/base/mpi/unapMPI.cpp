@@ -39,7 +39,7 @@ void UNAP::unapMPI::initMPI()
     }
     else
     {
-    	COUT << "Error: label is not neither a int nor a long int type!" << ENDL;
+    	UNAPCOUT << "Error: label is not neither a int nor a long int type!" << ENDL;
     	ERROR_EXIT;
     }
 
@@ -53,7 +53,7 @@ void UNAP::unapMPI::initMPI()
     }
     else
     {
-    	COUT << "Error: scalar is not neither a float nor a double type!" << ENDL;
+    	UNAPCOUT << "Error: scalar is not neither a float nor a double type!" << ENDL;
     	ERROR_EXIT;
     }
 }
@@ -86,7 +86,7 @@ void UNAP::unapMPI::initMPI(Communicator &otherCommunicator)
     }
     else
     {
-    	COUT << "Error: label is not neither a int nor a long int type!" << ENDL;
+    	UNAPCOUT << "Error: label is not neither a int nor a long int type!" << ENDL;
     	ERROR_EXIT;
     }
 
@@ -100,7 +100,7 @@ void UNAP::unapMPI::initMPI(Communicator &otherCommunicator)
     }
     else
     {
-    	COUT << "Error: scalar is not neither a float nor a double type!" << ENDL;
+    	UNAPCOUT << "Error: scalar is not neither a float nor a double type!" << ENDL;
     	ERROR_EXIT;
     }
 }

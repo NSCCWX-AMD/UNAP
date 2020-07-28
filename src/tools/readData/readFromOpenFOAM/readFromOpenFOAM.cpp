@@ -60,7 +60,7 @@ void UNAP::constructLDUMatrixFromOpenFOAM(lduMatrix& lduA, const char* fileName)
 
     if(vec.size() != (nCells + nFaces + 1))
     {
-    	COUT << "Error in reading " << fileName <<": reading " << vec.size() - 1
+    	UNAPCOUT << "Error in reading " << fileName <<": reading " << vec.size() - 1
     		 << " lines, while nCells = " << nCells
     		 << ", nFaces = " << nFaces << ENDL;
 
@@ -173,14 +173,14 @@ void UNAP::constructVectorFromOpenFOAM(scalarField& b, const char* fileName)
 
     if((nCells + 1) != vec.size())
     {
-    	COUT << "Error in reading " << fileName <<": reading " << vec.size() - 1
+    	UNAPCOUT << "Error in reading " << fileName <<": reading " << vec.size() - 1
     		 << " lines, while nCells = " << nCells << ENDL;
     	ERROR_EXIT;
     }
 
     if(nCells != b.size())
     {
-    	COUT << "Error in " << fileName << ": fill size = " << nCells
+    	UNAPCOUT << "Error in " << fileName << ": fill size = " << nCells
     		 << ", while allocated size = " << b.size() << ENDL;
     	ERROR_EXIT;
     }
@@ -243,7 +243,7 @@ void UNAP::constructLDUInterfacesFromOpenFOAM(lduMatrix& lduA, const char* fileN
 
     if(vec.size() != (nFaces + nNeiProcs + 1))
     {
-    	COUT << "Error in reading " << fileName
+    	UNAPCOUT << "Error in reading " << fileName
     		 << ":, reading " << vec.size() - 1
     		 << " lines, while nNeiProcs = " << nNeiProcs
     		 << ", nFaces = " << nFaces << ENDL;

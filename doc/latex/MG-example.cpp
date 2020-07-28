@@ -61,5 +61,5 @@ swTimer::endTimer("MG Solve");
 #endif
 
 //- print iteration numbers
-if(!MYID)
-	COUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
+
+UNAPCOUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;

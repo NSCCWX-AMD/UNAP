@@ -12,7 +12,7 @@ scalar dot
 #ifdef DEBUG
 	if(v1.size() != v2.size())
 	{
-		COUT << "ERROR in " << __FILE__ << " " << __LINE__
+		UNAPCOUT << "ERROR in " << __FILE__ << " " << __LINE__
 			 << ": The length of two vectors is not same!" << ENDL;
 		ERROR_EXIT;
 	}

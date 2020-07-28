@@ -47,7 +47,7 @@ namespace UNAP
 	//- check if pointer exists
 	#define CHECK_POINTER(ptr) if(!ptr) \
     { \
-    	COUT << "ERROR in " << __FILE__ << " " << __LINE__ \
+    	UNAPCOUT << "ERROR in " << __FILE__ << " " << __LINE__ \
 			 << ": " << #ptr << " is NULL!" << ENDL; \
 		ERROR_EXIT; \
     }
@@ -92,10 +92,8 @@ namespace UNAP
 
 #define printMessage(ss) \
 MPI_Barrier(MPI_COMM_WORLD); \
-if(!MYID) \
-{ \
-    COUT << ss << ENDL; \
-}
+UNAPCOUT << ss << ENDL; 
+
 
 }
 

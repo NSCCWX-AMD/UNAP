@@ -11,7 +11,7 @@ template<typename T>
 void reduce(T& v)
 {
 	T vLocal = v;
-	MPI_Datatype mytype;
+	CommData mytype;
 	if(typeid(T) == typeid(int))
 	{
 		cout << "COMM_INT" << endl;

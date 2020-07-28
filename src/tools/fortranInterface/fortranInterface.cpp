@@ -246,17 +246,16 @@ void UNAP::pcgsolversolve_
 	matrix::solverPerformance solverPerf = PCGSolver.solve(x, lduA, b);
 
 #ifdef DEBUG
-	if(MYID == 0)
+
+	if(solverPerf.converged())
 	{
-		if(solverPerf.converged())
-		{
-			COUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
-		}
-		else
-		{
-			COUT << "The PCG solver reaches the maximum iterations." << ENDL;
-		}
+		UNAPCOUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
 	}
+	else
+	{
+		UNAPCOUT << "The PCG solver reaches the maximum iterations." << ENDL;
+	}
+
 #endif
 
 	RETURN_VALUE(xValue, x, nCells)
@@ -324,17 +323,16 @@ void UNAP::pbicgstabsolversolve_
 	matrix::solverPerformance solverPerf = PBiCGStabSolver.solve(x, lduA, b);
 
 #ifdef DEBUG
-	if(MYID == 0)
+
+	if(solverPerf.converged())
 	{
-		if(solverPerf.converged())
-		{
-			COUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
-		}
-		else
-		{
-			COUT << "The PBiCGStab solver reaches the maximum iterations." << ENDL;
-		}
+		UNAPCOUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
 	}
+	else
+	{
+		UNAPCOUT << "The PBiCGStab solver reaches the maximum iterations." << ENDL;
+	}
+
 #endif
 
 	RETURN_VALUE(xValue, x, nCells)
@@ -442,17 +440,16 @@ void UNAP::mgsolversolve_
 	matrix::solverPerformance solverPerf = MG.solve(x, lduA, b);
 
 #ifdef DEBUG
-	if(MYID == 0)
+
+	if(solverPerf.converged())
 	{
-		if(solverPerf.converged())
-		{
-			COUT << "After " << solverPerf.nIterations() << " cycles, the solution is converged!" << ENDL;
-		}
-		else
-		{
-			COUT << "The Multigrid solver reaches the maximum cycles." << ENDL;
-		}
+		UNAPCOUT << "After " << solverPerf.nIterations() << " cycles, the solution is converged!" << ENDL;
 	}
+	else
+	{
+		UNAPCOUT << "The Multigrid solver reaches the maximum cycles." << ENDL;
+	}
+
 #endif
 
 	RETURN_VALUE(xValue, x, nCells)
@@ -640,7 +637,7 @@ void UNAP::fill_sw_matrix_coefficients__
 	const label nCells = lduA.size();
 	const label nFaces = lduA.upperAddr().size();
 
-	// COUT << "In unap, nCells = " << nCells << ", nFaces = " << nFaces << ENDL;
+	// UNAPCOUT << "In unap, nCells = " << nCells << ", nFaces = " << nFaces << ENDL;
 
 	scalar* upperData = lduA.upper().begin();
 	scalar* diagData = lduA.diag().begin();
@@ -661,7 +658,7 @@ void UNAP::fill_sw_matrix_coefficients__
 
 	if(!symm)
 	{
-		// COUT << "symm = " << symm << ENDL;
+		// UNAPCOUT << "symm = " << symm << ENDL;
 		scalarField lower(lowerPtr, nFaces);
 		lduA.SET_lower(lower);
 	}
@@ -723,7 +720,7 @@ void UNAP::contruct_solver_mg__
 	scalarField weights(weightsPtr, nFaces);
 
 	// printVector(weights, "new_facearea");
-	// COUT << "finish writing" << ENDL;
+	// UNAPCOUT << "finish writing" << ENDL;
 	// return;
 
 	lduAgglomeration* agglPtr = new lduAgglomeration(lduA);
@@ -741,10 +738,9 @@ void UNAP::contruct_solver_mg__
 
 	if(smootherType == 1)
 	{
-		if(!MYID)
-		{
-			COUT << "Gauss-Seidel smoother used in AMG." << ENDL;
-		}
+		
+		UNAPCOUT << "Gauss-Seidel smoother used in AMG." << ENDL;
+
 		forAll(i, coarseLevels)
 		{
 			lduGaussSeidelSmoother* smLocPtr = new lduGaussSeidelSmoother;
@@ -753,10 +749,9 @@ void UNAP::contruct_solver_mg__
 	}
 	else if(smootherType == 2)
 	{
-		if(!MYID)
-		{
-			COUT << "Chebyshev smoother used in AMG." << ENDL;
-		}
+		
+		UNAPCOUT << "Chebyshev smoother used in AMG." << ENDL;
+		
 		forAll(i, coarseLevels)
 		{
 			chebySmoother* smLocPtr = new chebySmoother;
@@ -765,8 +760,8 @@ void UNAP::contruct_solver_mg__
 	}
 	else
 	{
-		COUT << "ERROR: smoother type is not recognized!" << ENDL;
-		COUT << "Valid option is: 1--GaussSeidel, 2--Chebyshev" << ENDL;
+		UNAPCOUT << "ERROR: smoother type is not recognized!" << ENDL;
+		UNAPCOUT << "Valid option is: 1--GaussSeidel, 2--Chebyshev" << ENDL;
 	}
 
 	MGSolver* MGPtr = new MGSolver(lduA, *agglPtr, sm);
@@ -886,7 +881,7 @@ void UNAP::sw_solve_mg__
 	// printLDUMatrix(lduA, "new_A_p");
 	// printInterfaces(lduA, "new_interfaces_p");
 	// printVector(b, "new_b");
-	// COUT << "finish writing" << ENDL;
+	// UNAPCOUT << "finish writing" << ENDL;
 	// return;
 
 #ifdef SW_SLAVE
@@ -904,17 +899,17 @@ void UNAP::sw_solve_mg__
 	RETURN_VALUE(xPtr, x, nCells);
 
 #ifdef DEBUG
-	if(MYID == 0)
+	
+	
+	if(solverPerf.converged())
 	{
-		if(solverPerf.converged())
-		{
-			COUT << "After " << solverPerf.nIterations() << " cycles, the solution is converged!" << ENDL;
-		}
-		else
-		{
-			COUT << "The Multigrid solver reaches the maximum cycles." << ENDL;
-		}
+		UNAPCOUT << "After " << solverPerf.nIterations() << " cycles, the solution is converged!" << ENDL;
 	}
+	else
+	{
+		UNAPCOUT << "The Multigrid solver reaches the maximum cycles." << ENDL;
+	}
+	
 #endif
 
 	*res_normPtr = solverPerf.finalResidual();
@@ -1007,8 +1002,8 @@ void UNAP::sw_solver_pbicgstab_set_precond__
 	}
 	else
 	{
-		COUT << "ERROR: preconditioner type is not recognized!" << ENDL;
-		COUT << "Valid option is: 1--diagonal, 2--DIC, 3--DILU" << ENDL;
+		UNAPCOUT << "ERROR: preconditioner type is not recognized!" << ENDL;
+		UNAPCOUT << "Valid option is: 1--diagonal, 2--DIC, 3--DILU" << ENDL;
 	}
 }
 
@@ -1049,17 +1044,16 @@ void UNAP::sw_solve_pbicgstab__
 	RETURN_VALUE(xPtr, x, nCells);
 
 #ifdef DEBUG
-	if(MYID == 0)
+	
+	if(solverPerf.converged())
 	{
-		if(solverPerf.converged())
-		{
-			COUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
-		}
-		else
-		{
-			COUT << "The PBiCGStab solver reaches the maximum iterations." << ENDL;
-		}
+		UNAPCOUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
 	}
+	else
+	{
+		UNAPCOUT << "The PBiCGStab solver reaches the maximum iterations." << ENDL;
+	}
+	
 #endif
 
 	*res_normPtr = solverPerf.finalResidual();

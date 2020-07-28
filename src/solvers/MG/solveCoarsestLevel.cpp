@@ -14,10 +14,9 @@ void UNAP::MGSolver::solveCoarsestLevel
 ) const
 {
 #ifdef DEBUG1
-if(!MYID)
-{
-	COUT << "Solving in the coarsest level" << ENDL;
-}
+
+	UNAPCOUT << "Solving in the coarsest level" << ENDL;
+
 #endif
 	const label coarsestLevel = agglomeration_.size() - 1;
 

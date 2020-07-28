@@ -63,34 +63,34 @@ int main()
 	labelField& lowerAddr = lduA.lowerAddr();
 	labelField& upperAddr = lduA.upperAddr();
 
-	COUT << "upperAddr: " << ENDL;
+	UNAPCOUT << "upperAddr: " << ENDL;
 	forAll(i, nUpperFaces)
 	{
-		COUT << "At i = " << i << ", upperAddr = " << upperAddr[i] << ENDL;
+		UNAPCOUT << "At i = " << i << ", upperAddr = " << upperAddr[i] << ENDL;
 	}
 
-	COUT << "lowerAddr: " << ENDL;
+	UNAPCOUT << "lowerAddr: " << ENDL;
 	forAll(i, nUpperFaces)
 	{
-		COUT << "At i = " << i << ", lowerAddr = " << lowerAddr[i] << ENDL;
+		UNAPCOUT << "At i = " << i << ", lowerAddr = " << lowerAddr[i] << ENDL;
 	}
 
-	COUT << "diag: " << ENDL;
+	UNAPCOUT << "diag: " << ENDL;
 	forAll(i, nCells)
 	{
-		COUT << "At i = " << i << ", diag = " << diag[i] << ENDL;
+		UNAPCOUT << "At i = " << i << ", diag = " << diag[i] << ENDL;
 	}
 
-	COUT << "upper: " << ENDL;
+	UNAPCOUT << "upper: " << ENDL;
 	forAll(i, nUpperFaces)
 	{
-		COUT << "At i = " << i << ", upper = " << upper[i] << ENDL;
+		UNAPCOUT << "At i = " << i << ", upper = " << upper[i] << ENDL;
 	}
 
-	COUT << "lower: " << ENDL;
+	UNAPCOUT << "lower: " << ENDL;
 	forAll(i, nUpperFaces)
 	{
-		COUT << "At i = " << i << ", lower = " << lower[i] << ENDL;
+		UNAPCOUT << "At i = " << i << ", lower = " << lower[i] << ENDL;
 	}
 
 	return 0;

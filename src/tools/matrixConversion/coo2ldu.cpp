@@ -86,7 +86,7 @@ UNAP::lduMatrix& UNAP::coo2ldu
 #ifdef DEBUG
 	if(upperCount != nZeros)
 	{
-		COUT << "ERROR in " << __FILE__ << " " << __LINE__
+		UNAPCOUT << "ERROR in " << __FILE__ << " " << __LINE__
 			 << ": the input COO matrix is not a structural symmetric matrix!" << ENDL;
 		ERROR_EXIT;
 	}

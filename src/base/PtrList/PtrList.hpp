@@ -174,7 +174,7 @@ inline void PtrList<T>::SET_size(const label newSize)
 #ifdef DEBUG
     if (newSize < 0)
     {
-        COUT << "Error in PtrList SET_size: "
+        UNAPCOUT << "Error in PtrList SET_size: "
             << "bad new set size " << newSize
             << ENDL;
 
@@ -243,8 +243,8 @@ void PtrList<T>::removeLevel(const label leveli)
     }
     else
     {
-        COUT << "Error: removeLevel failed!" << ENDL;
-        COUT << "Number of levels is " << oldSize
+        UNAPCOUT << "Error: removeLevel failed!" << ENDL;
+        UNAPCOUT << "Number of levels is " << oldSize
              << ", while the level tended to delete is " << leveli << ENDL;
         ERROR_EXIT;
     }
@@ -260,8 +260,8 @@ void PtrList<T>::setLevel(const label leveli, T& obj)
     }
     else
     {
-        COUT << "Error: setLevel failed!" << ENDL;
-        COUT << "Number of levels is " << size_
+        UNAPCOUT << "Error: setLevel failed!" << ENDL;
+        UNAPCOUT << "Number of levels is " << size_
              << ", while the level tended to set is " << leveli << ENDL;
         ERROR_EXIT;
     }

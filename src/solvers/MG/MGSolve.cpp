@@ -69,17 +69,17 @@ UNAP::matrix::solverPerformance UNAP::MGSolver::solve
 	scalar normFactor = this->normFactor(b);
 IFPRINT
 {
-	COUT << "At cycle = ";
+	UNAPCOUT << "At cycle = ";
 	std::cout.width(5);
-	COUT << solverPerf.nIterations();
-	COUT << ",   ini res = ";
+	UNAPCOUT << solverPerf.nIterations();
+	UNAPCOUT << ",   ini res = ";
 	std::cout.width(11);
 	std::cout.setf(std::ios::scientific);
-	COUT << solverPerf.initialResidual();
-	COUT << ",   rel res = ";
-	COUT << solverPerf.initialResidual()/solverPerf.initialResidual();
-	COUT << ",   rhs  norm = ";
-	COUT << normFactor << ENDL;
+	UNAPCOUT << solverPerf.initialResidual();
+	UNAPCOUT << ",   rel res = ";
+	UNAPCOUT << solverPerf.initialResidual()/solverPerf.initialResidual();
+	UNAPCOUT << ",   rhs  norm = ";
+	UNAPCOUT << normFactor << ENDL;
 }
 // swTimer::startTimer("MG Vcycle");
 #endif
@@ -152,17 +152,17 @@ IFPRINT
 // swTimer::endTimer("MG Vcycle");
 IFPRINT
 {
-        	COUT << "At cycle = ";
+        	UNAPCOUT << "At cycle = ";
 			std::cout.width(5);
-			COUT << solverPerf.nIterations()+1;
-			COUT << ",   fin res = ";
+			UNAPCOUT << solverPerf.nIterations()+1;
+			UNAPCOUT << ",   fin res = ";
 			std::cout.width(11);
 			std::cout.setf(std::ios::scientific);
-			COUT << solverPerf.finalResidual();
-			COUT << ",   rel res = ";
-			COUT << solverPerf.finalResidual()/normFactor;
-			COUT << ",   conv rate = ";
-			COUT << convergenceRate << ENDL;
+			UNAPCOUT << solverPerf.finalResidual();
+			UNAPCOUT << ",   rel res = ";
+			UNAPCOUT << solverPerf.finalResidual()/normFactor;
+			UNAPCOUT << ",   conv rate = ";
+			UNAPCOUT << convergenceRate << ENDL;
 }
 #endif
         } while

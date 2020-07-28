@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
 			}
 		}
 
-	COUT << "global nnz = " << size << ENDL;
+	UNAPCOUT << "global nnz = " << size << ENDL;
 
    	label local_size, extra;
    	label ilower, iupper;
@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
    		}
    	}
 
-   	COUT << "local_nnz = " << local_nnz << ENDL;
+   	UNAPCOUT << "local_nnz = " << local_nnz << ENDL;
 
    	scalar* local_data = new scalar[local_nnz];
    	label* local_row = new label[local_nnz];
@@ -367,10 +367,9 @@ int main(int argc, char *argv[])
 	// PBiCGStabSolver.SET_minIter(5);
 	// matrix::solverPerformance solverPerf = PBiCGStabSolver.solve(local_x, lduA, local_b);
 
-	if(!MYID)
-	{
-		COUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
-	}
+	
+	UNAPCOUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
+	
 	delete []data;
 	delete []col;
 	delete []row;

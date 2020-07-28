@@ -63,7 +63,7 @@ void UNAP::lduAgglomeration::agglomerateMatrix
                 }
                 else
                 {
-                    COUT << "Error in agglomerateMatrix: Inconsistent addressing between "
+                    UNAPCOUT << "Error in agglomerateMatrix: Inconsistent addressing between "
                     	 << "fine and coarse grids." << ENDL;
                     ERROR_EXIT;
                 }

@@ -139,8 +139,8 @@ int main()
 	PCGSolver.SET_maxIter(50);
 
 	matrix::solverPerformance solverPerf = PCGSolver.solve(x, lduA, b);
-	COUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
-	COUT << "Let me check now: " << ENDL;
+	UNAPCOUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
+	UNAPCOUT << "Let me check now: " << ENDL;
 
 	label okNums = 0;
 	scalar relErr = 0.001;
@@ -155,7 +155,7 @@ int main()
 			scalar err = fabs((x[pos] - uExact) / (uExact + SMALL));
 
 			if(err > relErr)
-				COUT << "err = " << err
+				UNAPCOUT << "err = " << err
 					 << ", uExact = " << uExact
 					 << ", uComput = " << x[pos] << ENDL;
 			else
@@ -164,11 +164,11 @@ int main()
 
 	if(okNums == nCells)
 	{
-		COUT << "No cell's error is larger than " << relErr*100 << "%." << ENDL;
+		UNAPCOUT << "No cell's error is larger than " << relErr*100 << "%." << ENDL;
 	}
 	else
 	{
-		COUT << "The number of cells is " << nCells
+		UNAPCOUT << "The number of cells is " << nCells
 			 << ", while only " << okNums
 			 << " cells have correct solutions." << ENDL;
 	}

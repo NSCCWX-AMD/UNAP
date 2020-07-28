@@ -83,10 +83,9 @@ void UNAP::lduAgglomeration::agglomerate
     }
 
 #ifdef DEBUG
-    if(MYID == 0)
-    {
-        COUT << nCreatedLevels << " coarse levels created!" << ENDL;
-    }
+    
+        UNAPCOUT << nCreatedLevels << " coarse levels created!" << ENDL;
+    
 #endif
 }
 

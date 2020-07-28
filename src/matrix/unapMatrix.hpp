@@ -389,7 +389,7 @@ void matrix::agglomeration::restrictField
     if (ff.size() != fineToCoarse.size())
     {
 
-        COUT << "Error in restrictField: field does not correspond to level " << fineLevelIndex
+        UNAPCOUT << "Error in restrictField: field does not correspond to level " << fineLevelIndex
              << " sizes: field = " << ff.size()
              << " level = " << fineToCoarse.size()
              << ENDL;
@@ -421,7 +421,7 @@ void matrix::agglomeration::prolongField
     if (ff.size() != fineToCoarse.size())
     {
 
-        COUT << "Error in prolongField: field does not correspond to level " << coarseLevelIndex
+        UNAPCOUT << "Error in prolongField: field does not correspond to level " << coarseLevelIndex
              << " sizes: field = " << ff.size()
              << " level = " << fineToCoarse.size()
              << ENDL;
@@ -452,7 +452,7 @@ void matrix::agglomeration::restrictFaceField
     if (ff.size() != fineToCoarse.size())
     {
 
-        COUT << "Error in restrictFaceField: field does not correspond to level " << fineLevelIndex
+        UNAPCOUT << "Error in restrictFaceField: field does not correspond to level " << fineLevelIndex
              << " sizes: field = " << ff.size()
              << " level = " << fineToCoarse.size()
              << ENDL;

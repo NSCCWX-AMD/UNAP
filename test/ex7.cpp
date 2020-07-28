@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
 
 	// forAll(i, size)
 	// {
-	// 	COUT << "At i = " << i << ", data is " << data[i] << ENDL;
+	// 	UNAPCOUT << "At i = " << i << ", data is " << data[i] << ENDL;
 	// }
 
 	bool symm = true;
@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
 
 	matrix::solverPerformance solverPerf = PBiCGStabSolver.solve(x, lduA, b);
 
-	COUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
+	UNAPCOUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
 
 	delete []data;
 	delete []col;

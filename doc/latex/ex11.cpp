@@ -51,11 +51,9 @@ int main()
    		UNAP::unapMPI::unapCommunicator().barrier() ;
    	}
 
-   	if(!MYID)
+   
+	UNAPCOUT << "Start reading data" << ENDL;
 
-	{
-		COUT << "Start reading data" << ENDL;
-	}
 
    	lduMatrix lduA;
    	LOCATEFILE(fileName, "A_p", dir);
@@ -78,10 +76,9 @@ int main()
    		UNAP::unapMPI::unapCommunicator().barrier() ;
    	}
 
-   	if(!MYID)
-	{
-		COUT << "Finish reading data" << ENDL;
-	}
+ 
+	UNAPCOUT << "Finish reading data" << ENDL;
+	
 
    	scalar tol = 0.0;
 	scalar relTol = 1e-6;
@@ -165,8 +162,8 @@ int main()
     	swTimer::endTimer("MG Solve");
 #endif
 
-		if(!MYID)
-			COUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
+		
+		UNAPCOUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
 	}
 	else if(usePBiCGStab)
 	{
@@ -185,8 +182,8 @@ int main()
 
 		matrix::solverPerformance solverPerf = PBiCGStabSolver.solve(x, lduA, b);
 
-		if(!MYID)
-			COUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
+
+		UNAPCOUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
 	}
 	else
 	{
@@ -204,8 +201,7 @@ int main()
 
 		matrix::solverPerformance solverPerf = PCGSolver.solve(x, lduA, b);
 
-		if(!MYID)
-			COUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
+		UNAPCOUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
 	}
 
 	// printVector(x, "xEnd");

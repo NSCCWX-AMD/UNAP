@@ -55,8 +55,8 @@ int main()
 
 	matrix::solverPerformance solverPerf = PCGSolver.solve(x, *A, b);
 
-	COUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged to: " << ENDL;
-	COUT << "x0 = " << x[0] << ", x1 = " << x[1] << ENDL;
+	UNAPCOUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged to: " << ENDL;
+	UNAPCOUT << "x0 = " << x[0] << ", x1 = " << x[1] << ENDL;
 
 	return 0;
 }

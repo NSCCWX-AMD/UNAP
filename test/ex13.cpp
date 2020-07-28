@@ -50,11 +50,9 @@ int main()
    		UNAP::unapMPI::unapCommunicator().barrier() ;
    	}
 
-   	if(!MYID)
 
-	{
-		COUT << "Start reading data" << ENDL;
-	}
+	UNAPCOUT << "Start reading data" << ENDL;
+	
 
    	lduMatrix lduA;
    	LOCATEFILE(fileName, "A_u", dir);
@@ -71,10 +69,9 @@ int main()
    		UNAP::unapMPI::unapCommunicator().barrier() ;
    	}
 
-   	if(!MYID)
-	{
-		COUT << "Finish reading data" << ENDL;
-	}
+  
+	COUT << "Finish reading data" << ENDL;
+	
 
 
 

@@ -12,7 +12,7 @@ int main()
 	forAll(i, nCells)
 	{
 		x[i] = ((scalar)i + 0.2)/0.4;
-		COUT << "x = " << x[i] << ENDL;
+		UNAPCOUT << "x = " << x[i] << ENDL;
 	}
 
 	labelField lowerAddr(nCells);
@@ -42,7 +42,7 @@ int main()
 
     forAll(i, nCells)
     {
-    	COUT << "i = " << i << ", Apsi = " << Apsi[i] << ENDL;
+    	UNAPCOUT << "i = " << i << ", Apsi = " << Apsi[i] << ENDL;
     }
 
     //- for checking the correct

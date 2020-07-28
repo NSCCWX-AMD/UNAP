@@ -246,10 +246,9 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix& lduA, const char* fileName)
     {
     	constructLDUInterfacesFromHypre(lduA, nNeiProcs, neiProcNo, faceStart, faceCells, valOffDiag);
     	UNAP::unapMPI::unapCommunicator().barrier() ;
-    	if(!MYID)
-    	{
-    		COUT << "start print interfaces" << ENDL;
-    	}
+    	
+    	UNAPCOUT << "start print interfaces" << ENDL;
+    	
     	printInterfaces(lduA, "interfaces");
     }
 }
@@ -494,14 +493,14 @@ void UNAP::constructVectorFromHypre(scalarField& b, const char* fileName)
 
     if((nCells + 1) != vec.size())
     {
-    	COUT << "Error in reading " << fileName <<": reading " << vec.size() - 1
+    	UNAPCOUT << "Error in reading " << fileName <<": reading " << vec.size() - 1
     		 << " lines, while nCells = " << nCells << ENDL;
     	ERROR_EXIT;
     }
 
     if(nCells != b.size())
     {
-    	COUT << "Error in " << fileName << ": fill size = " << nCells
+    	UNAPCOUT << "Error in " << fileName << ": fill size = " << nCells
     		 << ", while allocated size = " << b.size() << ENDL;
     	ERROR_EXIT;
     }
