@@ -3,9 +3,6 @@
 
 #include "unap.hpp"
 
-using UNAP::label;
-using UNAP::scalar;
-
 #ifdef __cplusplus
 extern "C" {
 #endif

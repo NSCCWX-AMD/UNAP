@@ -92,8 +92,8 @@ int main()
 		}
    	}
 
-   	UNAP::label nCells = lduA.size();
-   	UNAP::label nFaces = lduA.upper().size();
+   	label nCells = lduA.size();
+   	label nFaces = lduA.upper().size();
    	scalarField b(nCells);
 
    	if(!MYID)
@@ -117,8 +117,8 @@ int main()
 		COUT << "Finish reading data" << ENDL;
 	}
 
-   	UNAP::scalar tol = 0.0;
-	UNAP::scalar relTol = 1e-6;
+   	scalar tol = 0.0;
+	scalar relTol = 1e-6;
 
 
 
@@ -137,6 +137,11 @@ int main()
 
 	if(useMG)
 	{
+		if(!MYID){
+			COUT <<" ************************************************************* \n\n ";
+			COUT <<"                        use  MG   solver                       \n\n ";
+			COUT <<" ************************************************************* \n\n ";
+		}
 		scalarField weights(nFaces);
 		forAll(i, nFaces)
 		{
@@ -152,8 +157,8 @@ int main()
 		{
 			COUT << "At coarse level " << i << ":" << ENDL;
 			lduMatrix& cm = aggl.coarseMatrix(i);
-			UNAP::label cnCells = cm.size();
-		   	UNAP::label cnFaces = cm.upperAddr().size();
+			label cnCells = cm.size();
+		   	label cnFaces = cm.upperAddr().size();
 
 		   	COUT << "nCells = " << cnCells << ", nFaces = " << cnFaces << ENDL;
 
@@ -246,6 +251,11 @@ int main()
 	}
 	else if(usePBiCGStab)
 	{
+		if(!MYID){
+			COUT <<" ************************************************************* \n\n ";
+			COUT <<"                        use  PBiCGStab  solver                 \n\n ";
+			COUT <<" ************************************************************* \n\n ";
+		}
 #ifdef UNAT_MLB
 		lduA.constructMLBIterator();
 		lduA.reorderVector(b);
@@ -298,6 +308,11 @@ int main()
 	}
 	else
 	{
+		if(!MYID){
+			COUT <<" ************************************************************* \n\n ";
+			COUT <<"                          use  PCG  solver                     \n\n ";
+			COUT <<" ************************************************************* \n\n ";
+		}
 		// lduDiagPrecond precond(lduA);
 
 		lduDICPrecond precond(lduA);
@@ -317,6 +332,12 @@ int main()
 			COUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
 			COUT << "finalResidual " << solverPerf.finalResidual()  << ENDL;
 		}
+	}
+
+	// test scalar byte and label byte
+	if(!MYID){
+		std::cout<<"test byte: \n";
+		std::cout<<"label "<<sizeof(label)<<" ,scalar "<<sizeof(scalar)<<std::endl;
 	}
 
 #ifdef SW_SLAVE

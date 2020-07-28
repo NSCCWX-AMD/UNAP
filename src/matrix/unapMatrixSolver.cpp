@@ -9,7 +9,7 @@ UNAP::matrix::solver::solver()
 	ifPrint_(false)
 {}
 
-UNAP::scalar UNAP::matrix::solver::normFactor(const scalarField &source) const
+scalar UNAP::matrix::solver::normFactor(const scalarField &source) const
 {
 	// return source.SumMag() + SMALL;
 	return source.SumSqrt() + SMALL;

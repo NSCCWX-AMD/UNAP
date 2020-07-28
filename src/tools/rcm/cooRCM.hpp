@@ -6,7 +6,6 @@
 #include <vector>
 #include "unap.hpp"
 
-using UNAP::label;
 
 namespace COORCM
 {

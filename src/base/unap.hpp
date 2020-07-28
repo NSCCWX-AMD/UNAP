@@ -16,6 +16,7 @@
 #include <typeinfo>
 #include <math.h>
 
+#include "utilities.h"
 // #include "swMacro.h"
 
 namespace UNAP
@@ -26,48 +27,7 @@ namespace UNAP
 	#define ERROR_EXIT exit(1)
 }
 
-
-//- label
-#if defined(LABEL_INT32)
-//- define label as a 32-bit int
-namespace UNAP
-{
-	typedef int label;
-}
-#elif defined(LABEL_INT64)
-//- define label as a 64-bit int
-namespace UNAP
-{
-	typedef long int label;
-}
-#else
-{
-	COUT << "Error: label size is not defined." << ENDL;
-	ERROR_EXIT;
-}
-#endif
-
-
-//- scalar
-#if defined(SCALAR_FLOAT32)
-// define scalar as a float
-namespace UNAP
-{
-	typedef float scalar;
-}
-#elif defined(SCALAR_FLOAT64)
-//- define scalar as a double
-namespace UNAP
-{
-	typedef double scalar;
-}
-#else
-{
-	COUT << "Error: scalar size is not defined." << ENDL;
-	ERROR_EXIT;
-}
-#endif
-
+// define sw data type 
 typedef int    swInt;
 typedef int    swInt32;
 typedef long   swInt64;
@@ -81,8 +41,6 @@ namespace UNAP
 	//- sleep for the specified number of seconds
 	unsigned int sleep(const unsigned int);
 
-	//- simplify loop
-	#define forAll(i, length) for(int i=0; i<length; i++)
 
 	//- small scalar for the use in solvers
 	#define SMALL (1.0e-37)
@@ -98,18 +56,6 @@ namespace UNAP
     	COUT << "ERROR in " << __FILE__ << " " << __LINE__ \
 			 << ": " << #ptr << " is NULL!" << ENDL; \
 		ERROR_EXIT; \
-    }
-
-    #define DELETE_POINTER(ptr) if(ptr) \
-    { \
-        delete [] ptr; \
-        ptr = NULL; \
-    }
-
-    #define DELETE_OBJECT_POINTER(ptr) if(ptr) \
-    { \
-        delete ptr; \
-        ptr = NULL; \
     }
 
     #define ALLOCATE_POINTER(ptr, oldObj, T) \

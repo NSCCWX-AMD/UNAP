@@ -8,7 +8,7 @@
 #include "swTimer.hpp"
 #endif
 
-UNAP::scalar UNAP::MGSolver::scalingFactor
+scalar UNAP::MGSolver::scalingFactor
 (
 	scalarField& Acf,
 	scalarField& field,
