@@ -65,8 +65,8 @@ public:
 
 #define MYID       unapMPI::myProcNo()
 #define PARRUN     unapMPI::parRun()
-#define MPI_LABEL  unapMPI::unapLabel()
-#define MPI_SCALAR unapMPI::unapScalar()
+#define UNAPMPI_LABEL  unapMPI::unapLabel()
+#define UNAPMPI_SCALAR unapMPI::unapScalar()
 #define NPROCS     unapMPI::nProcs()
 
 
@@ -79,11 +79,11 @@ void reduceSum(T& v)
 		MPI_Datatype myType;
 		if(typeid(T) == typeid(label))
 		{
-			myType = MPI_LABEL;
+			myType = UNAPMPI_LABEL;
 		}
 		else if(typeid(T) == typeid(scalar))
 		{
-			myType = MPI_SCALAR;
+			myType = UNAPMPI_SCALAR;
 		}
 
         // MPI_Barrier(MPI_COMM_WORLD);
@@ -106,11 +106,11 @@ void reduceSum(T* v, label n)
         MPI_Datatype myType;
         if(typeid(T) == typeid(label))
         {
-            myType = MPI_LABEL;
+            myType = UNAPMPI_LABEL;
         }
         else if(typeid(T) == typeid(scalar))
         {
-            myType = MPI_SCALAR;
+            myType = UNAPMPI_SCALAR;
         }
 
         // MPI_Barrier(MPI_COMM_WORLD);

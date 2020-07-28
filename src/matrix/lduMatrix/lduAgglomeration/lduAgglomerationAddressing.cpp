@@ -219,7 +219,7 @@ void UNAP::lduAgglomeration::agglomerateLduAddressing
             (
                 localAddressing.begin(),
                 finePatchIFaceSize,
-                MPI_LABEL,
+                UNAPMPI_LABEL,
                 neighbProcNo,
                 1,
                 MPI_COMM_WORLD,
@@ -230,7 +230,7 @@ void UNAP::lduAgglomeration::agglomerateLduAddressing
             (
                 neighbourAddressing.begin(),
                 finePatchIFaceSize,
-                MPI_LABEL,
+                UNAPMPI_LABEL,
                 neighbProcNo,
                 1,
                 MPI_COMM_WORLD,

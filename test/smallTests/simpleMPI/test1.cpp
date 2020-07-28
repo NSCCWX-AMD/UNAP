@@ -13,23 +13,23 @@ void reduce(T& v)
 	MPI_Datatype mytype;
 	if(typeid(T) == typeid(int))
 	{
-		cout << "MPI_INT" << endl;
-		mytype = MPI_INT;
+		cout << "COMM_INT" << endl;
+		mytype = COMM_INT;
 	}
 	else if(typeid(T) == typeid(double))
 	{
-		cout << "MPI_DOUBLE" << endl;
-		mytype = MPI_DOUBLE;
+		cout << "COMM_DOUBLE" << endl;
+		mytype = COMM_DOUBLE;
 	}
 	else if(typeid(T) == typeid(long int))
 	{
-		cout << "MPI_LONG" << endl;
-		mytype = MPI_LONG;
+		cout << "COMM_LONG" << endl;
+		mytype = COMM_LONG;
 	}
 	else if(typeid(T) == typeid(float))
 	{
-		cout << "MPI_FLOAT" << endl;
-		mytype = MPI_FLOAT;
+		cout << "COMM_FLOAT" << endl;
+		mytype = COMM_FLOAT;
 	}
 	MPI_Allreduce(&vLocal, &v, 1, mytype, MPI_SUM, MPI_COMM_WORLD);
 }
@@ -73,10 +73,10 @@ int main(int argc, char *argv[])
    	if(myid == 0)
    	{
    		cout << "mpi: " << endl;
-   		cout << "MPI_INT size = " << sizeof(MPI_INT) << endl;
-   		cout << "MPI_LONG size = " << sizeof(MPI_LONG) << endl;
-   		cout << "MPI_FLOAT size = " << sizeof(MPI_FLOAT) << endl;
-   		cout << "MPI_DOUBLE size = " << sizeof(MPI_DOUBLE) << endl;
+   		cout << "COMM_INT size = " << sizeof(COMM_INT) << endl;
+   		cout << "COMM_LONG size = " << sizeof(COMM_LONG) << endl;
+   		cout << "COMM_FLOAT size = " << sizeof(COMM_FLOAT) << endl;
+   		cout << "COMM_DOUBLE size = " << sizeof(COMM_DOUBLE) << endl;
 
    		cout << "compiler: " << endl;
    		cout << "INT size = " << sizeof(int) << endl;

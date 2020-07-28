@@ -64,7 +64,7 @@ void UNAP::interfaces::initMatrixInterfaces
 		(
 			&(sendBuffer_[locPosition_[i]]),
 			locSize,
-			MPI_SCALAR,
+			UNAPMPI_SCALAR,
 			destRank_[i],
 			1,
 			MPI_COMM_WORLD,
@@ -75,7 +75,7 @@ void UNAP::interfaces::initMatrixInterfaces
 		(
 			&(recvBuffer_[locPosition_[i]]),
 			locSize,
-			MPI_SCALAR,
+			UNAPMPI_SCALAR,
 			destRank_[i],
 			1,
 			MPI_COMM_WORLD,

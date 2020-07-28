@@ -61,8 +61,8 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix& lduA, const char* fileName)
     if(PARRUN)
     {
     	MPI_Barrier(MPI_COMM_WORLD);
-    	MPI_Allgather(&rStart, 1, MPI_LABEL, procStart.values(), 1, MPI_LABEL, MPI_COMM_WORLD);
-    	MPI_Allgather(&rEnd, 1, MPI_LABEL, procEnd.values(), 1, MPI_LABEL, MPI_COMM_WORLD);
+    	MPI_Allgather(&rStart, 1, UNAPMPI_LABEL, procStart.values(), 1, UNAPMPI_LABEL, MPI_COMM_WORLD);
+    	MPI_Allgather(&rEnd, 1, UNAPMPI_LABEL, procEnd.values(), 1, UNAPMPI_LABEL, MPI_COMM_WORLD);
     }
 
     const label nCells = rEnd - rStart + 1;

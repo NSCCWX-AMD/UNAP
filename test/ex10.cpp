@@ -280,7 +280,7 @@ int main(int argc, char *argv[])
 	    (
 	        &local_offdiag_col[0],
 	        local_offdiag_size,
-	        MPI_LABEL,
+	        UNAPMPI_LABEL,
 	        neighborid,
 	        1,
 	        MPI_COMM_WORLD
@@ -293,7 +293,7 @@ int main(int argc, char *argv[])
 	    (
 	        &local_offdiag_row[0],
 	        local_offdiag_size,
-	        MPI_LABEL,
+	        COMM_LABEL,
 	        neighborid,
 	        1,
 	        MPI_COMM_WORLD,

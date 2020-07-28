@@ -3,8 +3,8 @@
 int UNAP::unapMPI::myProcNo_ = 0;
 int UNAP::unapMPI::nProcs_ = 1;
 bool  UNAP::unapMPI::parRun_ = false;
-MPI_Datatype UNAP::unapMPI::unapLabel_ = MPI_INT;
-MPI_Datatype UNAP::unapMPI::unapScalar_ = MPI_DOUBLE;
+MPI_Datatype UNAP::unapMPI::unapLabel_ = COMM_INT;
+MPI_Datatype UNAP::unapMPI::unapScalar_ = COMM_DOUBLE;
 
 void UNAP::unapMPI::initMPI()
 {
@@ -29,11 +29,11 @@ void UNAP::unapMPI::initMPI()
 
     if(typeid(label) == typeid(int))
     {
-    	unapLabel_ = MPI_INT;
+    	unapLabel_ = COMM_INT;
     }
     else if(typeid(label) == typeid(long int))
     {
-    	unapLabel_ = MPI_LONG;
+    	unapLabel_ = COMM_LONG;
     }
     else
     {
@@ -43,11 +43,11 @@ void UNAP::unapMPI::initMPI()
 
     if(typeid(scalar) == typeid(double))
     {
-    	unapScalar_ = MPI_DOUBLE;
+    	unapScalar_ = COMM_DOUBLE;
     }
     else if(typeid(scalar) == typeid(float))
     {
-    	unapScalar_ = MPI_FLOAT;
+    	unapScalar_ = COMM_FLOAT;
     }
     else
     {
