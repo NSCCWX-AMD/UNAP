@@ -55,7 +55,7 @@ int main()
 
 
 
-   	const char* dir = "./../../../exData/openfoam/cavity/2.5w/p";
+   	const char* dir = "/home/export/online3/amd_dev1/guhf/UNAP_test_data/exData/openfoam/cavity/2.5w/p";
    	char fileName[200];
 
    	if(PARRUN)
@@ -63,52 +63,52 @@ int main()
    		UNAP::unapMPI::unapCommunicator().barrier();
    	}
 
-   	
+
 	UNAPCOUT << "Start reading diagonal of A" << ENDL;
-	
+
 
    	lduMatrix lduA;
    	LOCATEFILE(fileName, "A_p", dir);
    	constructLDUMatrixFromOpenFOAM(lduA, fileName);
 
-   	
+
 	UNAPCOUT << "End reading diagonal of A" << ENDL;
-	
+
 
 
    	if(PARRUN)
    	{
-   		
+
 		UNAPCOUT << "Start reading interfaces" << ENDL;
-		
+
    		LOCATEFILE(fileName, "interfaces_p", dir);
    		constructLDUInterfacesFromOpenFOAM(lduA, fileName);
-   		
+
 		UNAPCOUT << "End reading interfaces" << ENDL;
-		
+
    	}
 
    	label nCells = lduA.size();
    	label nFaces = lduA.upper().size();
    	scalarVector b(nCells);
 
-   	
+
 	UNAPCOUT << "Start reading b" << ENDL;
-	
+
    	LOCATEFILE(fileName, "b_p", dir);
    	constructVectorFromOpenFOAM(b, fileName);
-   	
+
 	UNAPCOUT << "End reading b" << ENDL;
-	
+
 
    	if(PARRUN)
    	{
    		UNAP::unapMPI::unapCommunicator().barrier() ;
    	}
 
-   	
+
 	UNAPCOUT << "Finish reading data" << ENDL;
-	
+
 
    	scalar tol = 0.0;
 	scalar relTol = 1e-6;
@@ -130,11 +130,11 @@ int main()
 
 	if(useMG)
 	{
-		
+
 		UNAPCOUT <<" ************************************************************* \n\n ";
 		UNAPCOUT <<"                        use  MG   solver                       \n\n ";
 		UNAPCOUT <<" ************************************************************* \n\n ";
-		
+
 		scalarVector weights(nFaces);
 		forAll(i, nFaces)
 		{
@@ -235,19 +235,19 @@ int main()
     	swTimer::endTimer("MG Solve");
 #endif
 
-		
+
 		UNAPCOUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
 		UNAPCOUT << "finalResidual " << solverPerf.finalResidual()  << ENDL;
-		
+
 
 	}
 	else if(usePBiCGStab)
 	{
-		
+
 		UNAPCOUT <<" ************************************************************* \n\n ";
 		UNAPCOUT <<"                        use  PBiCGStab  solver                 \n\n ";
 		UNAPCOUT <<" ************************************************************* \n\n ";
-		
+
 #ifdef UNAT_MLB
 		lduA.constructMLBIterator();
 		lduA.reorderVector(b);
@@ -292,18 +292,18 @@ int main()
 #endif
 #endif
 
-		
+
 		UNAPCOUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
 		UNAPCOUT << "finalResidual " << solverPerf.finalResidual()  << ENDL;
-		
+
 	}
 	else
 	{
-		
+
 		UNAPCOUT <<" ************************************************************* \n\n ";
 		UNAPCOUT <<"                          use  PCG  solver                     \n\n ";
 		UNAPCOUT <<" ************************************************************* \n\n ";
-		
+
 		// lduDiagPrecond precond(lduA);
 
 		lduDICPrecond precond(lduA);
@@ -318,16 +318,16 @@ int main()
 
 		matrix::solverPerformance solverPerf = PCGSolver.solve(x, lduA, b);
 
-		
+
 		UNAPCOUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
 		UNAPCOUT << "finalResidual " << solverPerf.finalResidual()  << ENDL;
 	}
 
 	// test scalar byte and label byte
-	
+
 	UNAPCOUT<<"test byte: \n";
 	UNAPCOUT<<"label "<<sizeof(label)<<" ,scalar "<<sizeof(scalar)<<std::endl;
-	
+
 
 #ifdef SW_SLAVE
 	swlu_prof_print();
