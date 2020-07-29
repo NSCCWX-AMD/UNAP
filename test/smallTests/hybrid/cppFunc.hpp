@@ -2,15 +2,16 @@
 #define CPPFUNC_HPP
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-void cppFunc();
+  void cppFunc();
 
-void cppfunc_();
+  void cppfunc_();
 
-void show1_(long int* ptr, int* i, double* v, bool* symm);
-void show2_(long int* ptr);
+  void show1_(long int *ptr, int *i, double *v, bool *symm);
+  void show2_(long int *ptr);
 
 #ifdef __cplusplus
 }

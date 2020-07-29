@@ -12,6 +12,7 @@ chost_source_files = []
 cslave_source_files = []
 cxxhost_source_files = []
 
+
 def build_object(baseenv,
                  sources,
                  program_inc,
@@ -32,6 +33,7 @@ def build_object(baseenv,
 
     objs = libenv.Object(source=sources)
     return objs
+
 
 def build_lib(baseenv,
               target,
