@@ -10,7 +10,7 @@
 #ifndef PTRLIST_HPP
 #define PTRLIST_HPP
 
-#include "unap.hpp"
+#include "unapMPI.hpp"
 
 namespace UNAP
 {

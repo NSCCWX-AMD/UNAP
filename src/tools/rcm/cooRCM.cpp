@@ -13,20 +13,6 @@
 
 using namespace COORCM;
 
-#define DELETE_POINTER(ptr) \
-  if (ptr)                  \
-  {                         \
-    delete[] ptr;           \
-    ptr = NULL;             \
-  }
-
-#define DELETE_OBJECT_POINTER(ptr) \
-  if (ptr)                         \
-  {                                \
-    delete ptr;                    \
-    ptr = NULL;                    \
-  }
-
 label findIndex(std::vector<std::pair<label, label> > a, label x)
 {
   label nRet = -1;
