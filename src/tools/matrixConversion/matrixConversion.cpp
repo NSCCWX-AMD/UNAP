@@ -3,14 +3,14 @@
 
 void UNAP::sortData
 (
-	scalarField& data,
-	const labelField&  order,
-	const labelField&  cellFaces
+	scalarVector& data,
+	const labelVector&  order,
+	const labelVector&  cellFaces
 )
 {
 	const label nCells = cellFaces.size();
 
-	labelField cellFaceOffsets(nCells + 1);
+	labelVector cellFaceOffsets(nCells + 1);
 
 	cellFaceOffsets[0] = 0;
 	forAll(celli, nCells)
@@ -21,10 +21,10 @@ void UNAP::sortData
 	//- size of faces in upper
 	const label nFaces = data.size();
 
-	scalarField dataOld(data);
+	scalarVector dataOld(data);
 
 	//- count the data input
-	labelField count(nCells, 0);
+	labelVector count(nCells, 0);
 
 	forAll(facei, nFaces)
 	{
@@ -44,21 +44,21 @@ void UNAP::reorderCOO
 	const label size
 )
 {
-	labelField countsInRow(nCells);
+	labelVector countsInRow(nCells);
 
 	forAll(i, size)
 	{
 		countsInRow[rowsPtr[i]]++;
 	}
 
-	labelField countsInRowOffsets(nCells+1);
+	labelVector countsInRowOffsets(nCells+1);
 
 	forAll(i, nCells)
 	{
 		countsInRowOffsets[i+1] = countsInRowOffsets[i] + countsInRow[i];
 	}
 
-	labelField posInRow(size);
+	labelVector posInRow(size);
 	forAll(i, size)
 	{
 		label rowLocal = rowsPtr[i];
@@ -74,9 +74,9 @@ void UNAP::reorderCOO
 		}
 	}
 
-	labelField rowTemp(size);
-	labelField colTemp(size);
-	scalarField valTemp(size);
+	labelVector rowTemp(size);
+	labelVector colTemp(size);
+	scalarVector valTemp(size);
 
 	forAll(i, size)
 	{
@@ -105,7 +105,7 @@ void UNAP::reorderValue
 	const label  size
 )
 {
-	scalarField valTemp(val, size, false);
+	scalarVector valTemp(val, size, false);
 
 	forAll(i, size)
 	{
@@ -123,21 +123,21 @@ void UNAP::reorderUFace
 	label*  newOrder
 )
 {
-	labelField countsInRow(nCells);
+	labelVector countsInRow(nCells);
 
 	forAll(i, size)
 	{
 		countsInRow[rowsPtr[i]]++;
 	}
 
-	labelField countsInRowOffsets(nCells+1);
+	labelVector countsInRowOffsets(nCells+1);
 
 	forAll(i, nCells)
 	{
 		countsInRowOffsets[i+1] = countsInRowOffsets[i] + countsInRow[i];
 	}
 
-	labelField posInRow(size);
+	labelVector posInRow(size);
 	forAll(i, size)
 	{
 		label rowLocal = rowsPtr[i];
@@ -153,8 +153,8 @@ void UNAP::reorderUFace
 		}
 	}
 
-	labelField rowTemp(size);
-	labelField colTemp(size);
+	labelVector rowTemp(size);
+	labelVector colTemp(size);
 
 	forAll(i, size)
 	{
@@ -184,14 +184,14 @@ void UNAP::reorderLFace
 	label*  newOrder
 )
 {
-	labelField countsInCol(nCells);
+	labelVector countsInCol(nCells);
 
 	forAll(i, size)
 	{
 		countsInCol[colsPtr[i]]++;
 	}
 
-	labelField countsInColOffsets(nCells+1);
+	labelVector countsInColOffsets(nCells+1);
 
 	forAll(i, nCells)
 	{
@@ -199,8 +199,8 @@ void UNAP::reorderLFace
 		countsInCol[i] = 0;
 	}
 
-	labelField rowTemp(size);
-	labelField colTemp(size);
+	labelVector rowTemp(size);
+	labelVector colTemp(size);
 
 	forAll(i, size)
 	{

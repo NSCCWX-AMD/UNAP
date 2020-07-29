@@ -370,7 +370,7 @@ void matrix::agglomeration::restrictField
     }
     else
     {
-    	const labelField& fineToCoarse = restrictAddressing(fineLevelIndex);
+    	const labelVector& fineToCoarse = restrictAddressing(fineLevelIndex);
     	forAll(i, len)
 	    {
 	        cf[fineToCoarse[i]] += ff[i];
@@ -391,7 +391,7 @@ void matrix::agglomeration::prolongField
 ) const
 {
     label len = ff.size();
-    const labelField &fineToCoarse = restrictAddressing(coarseLevelIndex);
+    const labelVector &fineToCoarse = restrictAddressing(coarseLevelIndex);
 
 #ifdef SWTIMER
 	swTimer::startTimer("prolongField");

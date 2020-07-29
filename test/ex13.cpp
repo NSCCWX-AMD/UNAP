@@ -47,34 +47,31 @@ int main()
 
    	if(PARRUN)
    	{
-   		MPI_Barrier(MPI_COMM_WORLD);
+   		UNAP::unapMPI::unapCommunicator().barrier() ;
    	}
 
-   	if(!MYID)
 
-	{
-		COUT << "Start reading data" << ENDL;
-	}
+	UNAPCOUT << "Start reading data" << ENDL;
+	
 
    	lduMatrix lduA;
    	LOCATEFILE(fileName, "A_u", dir);
    	constructLDUMatrixFromHypre(lduA, fileName);
 
    	label nCells = lduA.size();
-   	scalarField b(nCells);
+   	scalarVector b(nCells);
 
    	LOCATEFILE(fileName, "b_u", dir);
    	constructVectorFromHypre(b, fileName);
 
    	if(PARRUN)
    	{
-   		MPI_Barrier(MPI_COMM_WORLD);
+   		UNAP::unapMPI::unapCommunicator().barrier() ;
    	}
 
-   	if(!MYID)
-	{
-		COUT << "Finish reading data" << ENDL;
-	}
+  
+	COUT << "Finish reading data" << ENDL;
+	
 
 
 

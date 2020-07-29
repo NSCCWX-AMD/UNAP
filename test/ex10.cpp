@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 			}
 		}
 
-	scalarField b(nCells);
+	scalarVector b(nCells);
 	for(int i=1; i<N; i++)
 		for(int j=1; j<N; j++)
 		{
@@ -87,10 +87,10 @@ int main(int argc, char *argv[])
 	delete []bAll;
 	delete []xAll;
 
-	scalarField x(nCells, 0.0);
+	scalarVector x(nCells, 0.0);
 
 	label nZeros = 0;
-	labelField nZerosCells(nCells+1);
+	labelVector nZerosCells(nCells+1);
 	for(int i=1; i<N; i++)
 		for(int j=1; j<N; j++)
 		{
@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
 			}
 		}
 
-	COUT << "global nnz = " << size << ENDL;
+	UNAPCOUT << "global nnz = " << size << ENDL;
 
    	label local_size, extra;
    	label ilower, iupper;
@@ -180,8 +180,8 @@ int main(int argc, char *argv[])
    	/* How many rows do I have? */
    	local_size = iupper - ilower + 1;
 
-   	scalarField local_b(local_size);
-   	scalarField local_x(local_size);
+   	scalarVector local_b(local_size);
+   	scalarVector local_x(local_size);
 
    	forAll(i, local_size)
    	{
@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
    		}
    	}
 
-   	COUT << "local_nnz = " << local_nnz << ENDL;
+   	UNAPCOUT << "local_nnz = " << local_nnz << ENDL;
 
    	scalar* local_data = new scalar[local_nnz];
    	label* local_row = new label[local_nnz];
@@ -280,7 +280,7 @@ int main(int argc, char *argv[])
 	    (
 	        &local_offdiag_col[0],
 	        local_offdiag_size,
-	        MPI_LABEL,
+	        UNAPMPI_LABEL,
 	        neighborid,
 	        1,
 	        MPI_COMM_WORLD
@@ -293,7 +293,7 @@ int main(int argc, char *argv[])
 	    (
 	        &local_offdiag_row[0],
 	        local_offdiag_size,
-	        MPI_LABEL,
+	        COMM_LABEL,
 	        neighborid,
 	        1,
 	        MPI_COMM_WORLD,
@@ -308,8 +308,8 @@ int main(int argc, char *argv[])
    		local_offdiag_row[i] -= ilower;
    	}
 
-   	scalarField* patchCoeffsPtr = new scalarField(local_offdiag_data, local_offdiag_size);
-   	labelField* faceCellsPtr = new labelField(local_offdiag_row, local_offdiag_size);
+   	scalarVector* patchCoeffsPtr = new scalarVector(local_offdiag_data, local_offdiag_size);
+   	labelVector* faceCellsPtr = new labelVector(local_offdiag_row, local_offdiag_size);
 
    	patchIPtr->patchCoeffs(*patchCoeffsPtr);
    	patchIPtr->faceCells(*faceCellsPtr);
@@ -367,10 +367,9 @@ int main(int argc, char *argv[])
 	// PBiCGStabSolver.SET_minIter(5);
 	// matrix::solverPerformance solverPerf = PBiCGStabSolver.solve(local_x, lduA, local_b);
 
-	if(!MYID)
-	{
-		COUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
-	}
+	
+	UNAPCOUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
+	
 	delete []data;
 	delete []col;
 	delete []row;

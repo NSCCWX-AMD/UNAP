@@ -14,7 +14,7 @@ class lduDiagPrecond
 private:
 
 	//- the reciprocal diagonal
-	scalarField rD_;
+	scalarVector rD_;
 
 public:
 
@@ -30,11 +30,11 @@ public:
 
     virtual void precondition
     (
-        scalarField& w,
-        const scalarField& r
+        scalarVector& w,
+        const scalarVector& r
     ) const;
 
-    virtual const scalarField& rD() const
+    virtual const scalarVector& rD() const
     {
     	return rD_;
     }

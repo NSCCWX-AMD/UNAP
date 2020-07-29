@@ -45,29 +45,29 @@ protected:
     //  scaling factor.
     scalar scalingFactor
     (
-        scalarField& Acf,
-        scalarField& field,
-        const scalarField& source,
+        scalarVector& Acf,
+        scalarVector& field,
+        const scalarVector& source,
         const matrix& A
     ) const;
 
     //- initialize the data structures for the V-cycle
     void initVcycle
     (
-        PtrList<scalarField>& coarseCorrFields,
-        PtrList<scalarField>& coarseSources
+        PtrList<scalarVector>& coarseCorrFields,
+        PtrList<scalarVector>& coarseSources
     ) const;
 
     //- perform a single GAMG V-cycle with pre, post and finest smoothing.
     void Vcycle
     (
-        scalarField& psi,
-        const scalarField& source,
-        scalarField& Apsi,
-        scalarField& finestCorrection,
-        scalarField& finestResidual,
-        PtrList<scalarField>& coarseCorrFields,
-        PtrList<scalarField>& coarseSources
+        scalarVector& psi,
+        const scalarVector& source,
+        scalarVector& Apsi,
+        scalarVector& finestCorrection,
+        scalarVector& finestResidual,
+        PtrList<scalarVector>& coarseCorrFields,
+        PtrList<scalarVector>& coarseSources
     ) const;
 
     //- relTol on coarsest level
@@ -75,8 +75,8 @@ protected:
     //- solve the coarsest level with an iterative solver
     void solveCoarsestLevel
     (
-        scalarField& coarsestCorrField,
-        const scalarField& coarsestSource
+        scalarVector& coarsestCorrField,
+        const scalarVector& coarsestSource
     ) const;
 
 public:
@@ -95,9 +95,9 @@ public:
     //- solve
     virtual matrix::solverPerformance solve
     (
-        scalarField& x,
+        scalarVector& x,
         const matrix& A,
-        const scalarField& b
+        const scalarVector& b
     ) const;
 
     //- access to parameters

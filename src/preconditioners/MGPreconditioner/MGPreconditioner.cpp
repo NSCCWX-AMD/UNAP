@@ -11,8 +11,8 @@ UNAP::MGPrecond::MGPrecond
 	nVcycles_(2),
 	APtr_(&A)
 {
-	const scalarField& upper = A.upper();
-	scalarField weights(upper.size());
+	const scalarVector& upper = A.upper();
+	scalarVector weights(upper.size());
 	forAll(i, weights.size())
 	{
 		weights[i] = mag(upper[i]);
@@ -34,8 +34,8 @@ UNAP::MGPrecond::MGPrecond
 
 void UNAP::MGPrecond::precondition
 (
-	scalarField& w,
-	const scalarField& r
+	scalarVector& w,
+	const scalarVector& r
 ) const
 {
 

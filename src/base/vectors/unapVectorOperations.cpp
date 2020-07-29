@@ -5,14 +5,14 @@ namespace UNAP
 
 scalar dot
 (
-	const scalarField &v1,
-	const scalarField &v2
+	const scalarVector &v1,
+	const scalarVector &v2
 )
 {
 #ifdef DEBUG
 	if(v1.size() != v2.size())
 	{
-		COUT << "ERROR in " << __FILE__ << " " << __LINE__
+		UNAPCOUT << "ERROR in " << __FILE__ << " " << __LINE__
 			 << ": The length of two vectors is not same!" << ENDL;
 		ERROR_EXIT;
 	}
@@ -29,7 +29,7 @@ scalar dot
 		res += val1[i] * val2[i];
 	}
 
-	reduceSum(res);
+	reduceSum(&res);
 	return res;
 }
 

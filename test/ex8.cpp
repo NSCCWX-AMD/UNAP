@@ -57,40 +57,40 @@ int main()
 	lduMatrix& lduA = coo2ldu(data, row, col, nCells, size, symm);
 
 
-	scalarField& diag = lduA.diag();
-	scalarField& upper = lduA.upper();
-	scalarField& lower = lduA.lower();
-	labelField& lowerAddr = lduA.lowerAddr();
-	labelField& upperAddr = lduA.upperAddr();
+	scalarVector& diag = lduA.diag();
+	scalarVector& upper = lduA.upper();
+	scalarVector& lower = lduA.lower();
+	labelVector& lowerAddr = lduA.lowerAddr();
+	labelVector& upperAddr = lduA.upperAddr();
 
-	COUT << "upperAddr: " << ENDL;
+	UNAPCOUT << "upperAddr: " << ENDL;
 	forAll(i, nUpperFaces)
 	{
-		COUT << "At i = " << i << ", upperAddr = " << upperAddr[i] << ENDL;
+		UNAPCOUT << "At i = " << i << ", upperAddr = " << upperAddr[i] << ENDL;
 	}
 
-	COUT << "lowerAddr: " << ENDL;
+	UNAPCOUT << "lowerAddr: " << ENDL;
 	forAll(i, nUpperFaces)
 	{
-		COUT << "At i = " << i << ", lowerAddr = " << lowerAddr[i] << ENDL;
+		UNAPCOUT << "At i = " << i << ", lowerAddr = " << lowerAddr[i] << ENDL;
 	}
 
-	COUT << "diag: " << ENDL;
+	UNAPCOUT << "diag: " << ENDL;
 	forAll(i, nCells)
 	{
-		COUT << "At i = " << i << ", diag = " << diag[i] << ENDL;
+		UNAPCOUT << "At i = " << i << ", diag = " << diag[i] << ENDL;
 	}
 
-	COUT << "upper: " << ENDL;
+	UNAPCOUT << "upper: " << ENDL;
 	forAll(i, nUpperFaces)
 	{
-		COUT << "At i = " << i << ", upper = " << upper[i] << ENDL;
+		UNAPCOUT << "At i = " << i << ", upper = " << upper[i] << ENDL;
 	}
 
-	COUT << "lower: " << ENDL;
+	UNAPCOUT << "lower: " << ENDL;
 	forAll(i, nUpperFaces)
 	{
-		COUT << "At i = " << i << ", lower = " << lower[i] << ENDL;
+		UNAPCOUT << "At i = " << i << ", lower = " << lower[i] << ENDL;
 	}
 
 	return 0;

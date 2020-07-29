@@ -37,8 +37,8 @@ public:
 	//- return wA the preconditioned form of residual rA
 	virtual void precondition
 	(
-		scalarField& wA,
-		const scalarField& rA
+		scalarVector& wA,
+		const scalarVector& rA
 	)const;
 
 	void set_nVcycles(const label n)

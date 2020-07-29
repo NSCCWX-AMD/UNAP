@@ -28,7 +28,7 @@ scalar Au(scalar *u, scalar rhx2, scalar rhy2, label i, label j)
 int main()
 {
 	label nCells = pow(N-1, 2);
-	scalarField x(nCells, 0.0);
+	scalarVector x(nCells, 0.0);
 
 	//- domain solved
 	const scalar x0 = 0.0;
@@ -46,10 +46,10 @@ int main()
 			bAll[i*(N+1)+j] = -8.0*pi*pi*sin(2*pi*i*dx)*sin(2*pi*j*dy);
 		}
 
-	// COUT << "bAll: " << ENDL;
+	// UNAPCOUT << "bAll: " << ENDL;
 	// forAll(i, (N+1)*(N+1))
 	// {
-	// 	COUT << bAll[i] << ENDL;
+	// 	UNAPCOUT << bAll[i] << ENDL;
 	// }
 
 	scalar *xAll = new scalar[(N+1)*(N+1)];
@@ -69,13 +69,13 @@ int main()
 			}
 		}
 
-	// COUT << "xAll: " << ENDL;
+	// UNAPCOUT << "xAll: " << ENDL;
 	// forAll(i, (N+1)*(N+1))
 	// {
-	// 	COUT << xAll[i] << ENDL;
+	// 	UNAPCOUT << xAll[i] << ENDL;
 	// }
 
-	scalarField b(nCells);
+	scalarVector b(nCells);
 
 	scalar rhx2 = 1.0/dx/dx;
 	scalar rhy2 = 1.0/dy/dy;
@@ -87,7 +87,7 @@ int main()
 		}
 
 	label nZeros = 0;
-	labelField nZerosCells(nCells+1);
+	labelVector nZerosCells(nCells+1);
 	for(int i=1; i<N; i++)
 		for(int j=1; j<N; j++)
 		{
@@ -99,10 +99,10 @@ int main()
 			nZerosCells[(i-1)*(N-1) + j - 1 + 1] = n1 - n0 + nZerosCells[(i-1)*(N-1) + j - 1];
 		}
 
-	labelField lowerAddr(nZeros);
-	labelField upperAddr(nZeros);
+	labelVector lowerAddr(nZeros);
+	labelVector upperAddr(nZeros);
 
-	COUT << "Number of non zeros in upper coefficients is " << nZeros << ENDL;
+	UNAPCOUT << "Number of non zeros in upper coefficients is " << nZeros << ENDL;
 
 	label nStart = 0;
 	for(int i=1; i<N; i++)
@@ -123,9 +123,9 @@ int main()
 			}
 		}
 
-	scalarField upper(nZeros, rhx2);
-	scalarField &lower = upper;
-	scalarField diag (nCells,   -4*rhx2);
+	scalarVector upper(nZeros, rhx2);
+	scalarVector &lower = upper;
+	scalarVector diag (nCells,   -4*rhx2);
 
 	// exit(0);
 
@@ -142,7 +142,7 @@ int main()
 	scalar tol = 1e-10;
 	scalar relTol = 1e-6;
 
-	scalarField weights(upper.size());
+	scalarVector weights(upper.size());
 	forAll(i, weights.size())
 	{
 		weights[i] = mag(upper[i]);
@@ -173,8 +173,8 @@ int main()
 
 	matrix::solverPerformance solverPerf = MG.solve(x, lduA, b);
 
-	COUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
-	COUT << "Let me check now: " << ENDL;
+	UNAPCOUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
+	UNAPCOUT << "Let me check now: " << ENDL;
 
 	label okNums = 0;
 	scalar relErr = 0.001;
@@ -189,7 +189,7 @@ int main()
 			scalar err = fabs((x[pos] - uExact) / (uExact + SMALL));
 
 			if(err > relErr && fabs(uExact) > max(relTol, tol))
-				COUT << "err = " << err
+				UNAPCOUT << "err = " << err
 					 << ", uExact = " << uExact
 					 << ", uComput = " << x[pos] << ENDL;
 			else
@@ -198,11 +198,11 @@ int main()
 
 	if(okNums == nCells)
 	{
-		COUT << "No cell's error is larger than " << relErr*100 << "%." << ENDL;
+		UNAPCOUT << "No cell's error is larger than " << relErr*100 << "%." << ENDL;
 	}
 	else
 	{
-		COUT << "The number of cells is " << nCells
+		UNAPCOUT << "The number of cells is " << nCells
 			 << ", while only " << okNums
 			 << " cells have correct solutions." << ENDL;
 	}

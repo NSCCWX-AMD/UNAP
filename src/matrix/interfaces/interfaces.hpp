@@ -24,6 +24,8 @@ private:
     //- mpi requests of sends and receives for updating interfaces
     mutable MPI_Request* sendRecvRequests_;
 
+    mutable string* sendRecvTaskName_;
+
     //- locPosition
     mutable label* locPosition_;
 
@@ -42,13 +44,13 @@ public:
     //  for matrix operations
     virtual void initMatrixInterfaces
     (
-        const scalarField& psi
+        const scalarVector& psi
     ) const;
 
     //- update interfaced interfaces for matrix operations
     virtual void updateMatrixInterfaces
     (
-        scalarField& result
+        scalarVector& result
     ) const;
 
     virtual patch& patchList(const label i) const

@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
 			}
 		}
 
-	scalarField b(nCells);
+	scalarVector b(nCells);
 	for(int i=1; i<N; i++)
 		for(int j=1; j<N; j++)
 		{
@@ -82,10 +82,10 @@ int main(int argc, char *argv[])
 	delete []bAll;
 	delete []xAll;
 
-	scalarField x(nCells, 0.0);
+	scalarVector x(nCells, 0.0);
 
 	label nZeros = 0;
-	labelField nZerosCells(nCells+1);
+	labelVector nZerosCells(nCells+1);
 	for(int i=1; i<N; i++)
 		for(int j=1; j<N; j++)
 		{
@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
 
 	// forAll(i, size)
 	// {
-	// 	COUT << "At i = " << i << ", data is " << data[i] << ENDL;
+	// 	UNAPCOUT << "At i = " << i << ", data is " << data[i] << ENDL;
 	// }
 
 	bool symm = true;
@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
 
 	matrix::solverPerformance solverPerf = PBiCGStabSolver.solve(x, lduA, b);
 
-	COUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
+	UNAPCOUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
 
 	delete []data;
 	delete []col;

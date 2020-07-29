@@ -43,8 +43,8 @@ UNAP::lduDiagPrecond::lduDiagPrecond
 
 void UNAP::lduDiagPrecond::precondition
 (
-	scalarField& w,
-	const scalarField& r
+	scalarVector& w,
+	const scalarVector& r
 ) const
 {
 	const label nCells  = w.size();

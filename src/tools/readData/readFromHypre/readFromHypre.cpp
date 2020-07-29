@@ -55,23 +55,25 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix& lduA, const char* fileName)
     }
 
     //- in fact, there is no need to know end in every processor, except for the last processor
-    labelField procStart(NPROCS);
-    labelField procEnd(NPROCS);
+    labelVector procStart(NPROCS);
+    labelVector procEnd(NPROCS);
 
     if(PARRUN)
     {
-    	MPI_Barrier(MPI_COMM_WORLD);
-    	MPI_Allgather(&rStart, 1, MPI_LABEL, procStart.values(), 1, MPI_LABEL, MPI_COMM_WORLD);
-    	MPI_Allgather(&rEnd, 1, MPI_LABEL, procEnd.values(), 1, MPI_LABEL, MPI_COMM_WORLD);
+    	UNAP::unapMPI::unapCommunicator().barrier() ;
+		UNAP::unapMPI::unapCommunicator().allGather("allgather1",&rStart,1*sizeof(label),procStart.values(),1*sizeof(label));
+		UNAP::unapMPI::unapCommunicator().allGather("allgather2",&rEnd,1*sizeof(label),procEnd.values(),1*sizeof(label));
+		UNAP::unapMPI::unapCommunicator().finishTask("allgather1");
+		UNAP::unapMPI::unapCommunicator().finishTask("allgather2");
     }
 
     const label nCells = rEnd - rStart + 1;
 
     const label nnzAll = vec.size() - 1;
 
-    labelField  row(nnzAll);
-    labelField  col(nnzAll);
-    scalarField val(nnzAll);
+    labelVector  row(nnzAll);
+    labelVector  col(nnzAll);
+    scalarVector val(nnzAll);
 
     {
     	std::vector<std::string>::iterator it;
@@ -108,7 +110,7 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix& lduA, const char* fileName)
     label nnzOffDiagPart = 0;
     label upperSize = 0;
 
-    labelField procCounts(NPROCS);
+    labelVector procCounts(NPROCS);
 
     vector<label> faceToProcNOVec;
 
@@ -145,8 +147,8 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix& lduA, const char* fileName)
     	}
     }
 
-    labelField nFacesInProc(nNeiProcs);
-    labelField neiProcNo(nNeiProcs);
+    labelVector nFacesInProc(nNeiProcs);
+    labelVector neiProcNo(nNeiProcs);
     nNeiProcs = 0;
     map<int, int> mapProcID;
     forAll(i, NPROCS)
@@ -161,14 +163,14 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix& lduA, const char* fileName)
     }
 
 
-    labelField  rowLoc(nnzDiagPart);
-    labelField  colLoc(nnzDiagPart);
-    scalarField valLoc(nnzDiagPart);
+    labelVector  rowLoc(nnzDiagPart);
+    labelVector  colLoc(nnzDiagPart);
+    scalarVector valLoc(nnzDiagPart);
 
-    labelField  rowOffDiag(nnzOffDiagPart);
-    labelField  colOffDiag (nnzOffDiagPart);
-   	labelField  faceToProcNO(nnzOffDiagPart);
-   	scalarField valOffDiag(nnzOffDiagPart);
+    labelVector  rowOffDiag(nnzOffDiagPart);
+    labelVector  colOffDiag (nnzOffDiagPart);
+   	labelVector  faceToProcNO(nnzOffDiagPart);
+   	scalarVector valOffDiag(nnzOffDiagPart);
 
    	forAll(i, nnzOffDiagPart)
     {
@@ -208,7 +210,7 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix& lduA, const char* fileName)
 
     printLDUMatrix(diagA, "A_diag");
 
-    labelField faceStart(nNeiProcs+1);
+    labelVector faceStart(nNeiProcs+1);
 	forAll(i, nNeiProcs)
 	{
 		faceStart[i+1] = faceStart[i] + nFacesInProc[i];
@@ -234,7 +236,7 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix& lduA, const char* fileName)
     lduA.setMatrixTopology(diagA.upperAddr(), diagA.lowerAddr(), reUse);
     lduA.setMatrixCoeffients(diagA.diag(), diagA.upper(), diagA.lower(), reUse);
 
-    labelField faceCells(nnzOffDiagPart);
+    labelVector faceCells(nnzOffDiagPart);
     forAll(i, nnzOffDiagPart)
     {
     	faceCells[i] = rowOffDiag[i] - rStart;
@@ -243,11 +245,10 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix& lduA, const char* fileName)
     if(PARRUN)
     {
     	constructLDUInterfacesFromHypre(lduA, nNeiProcs, neiProcNo, faceStart, faceCells, valOffDiag);
-    	MPI_Barrier(MPI_COMM_WORLD);
-    	if(!MYID)
-    	{
-    		COUT << "start print interfaces" << ENDL;
-    	}
+    	UNAP::unapMPI::unapCommunicator().barrier() ;
+    	
+    	UNAPCOUT << "start print interfaces" << ENDL;
+    	
     	printInterfaces(lduA, "interfaces");
     }
 }
@@ -255,24 +256,24 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix& lduA, const char* fileName)
 
 void UNAP::sortInterFaces
 (
-	scalarField& val,
-	labelField&  row,
-	labelField&  col,
-	const labelField& faceToProcNO,
+	scalarVector& val,
+	labelVector&  row,
+	labelVector&  col,
+	const labelVector& faceToProcNO,
 	const label  faceSize,
-	const labelField& faceStart,
+	const labelVector& faceStart,
 	map<int, int>& mapProcNO,
-	const labelField& neiProcNo,
+	const labelVector& neiProcNo,
 	const label  procSize,
-	const labelField& globalRowStart,
-	const labelField& globalRowEnd
+	const labelVector& globalRowStart,
+	const labelVector& globalRowEnd
 )
 {
-	labelField procCounts(procSize);
+	labelVector procCounts(procSize);
 
-	scalarField valTemp(faceSize);
-	labelField  rowTemp(faceSize);
-	labelField  colTemp(faceSize);
+	scalarVector valTemp(faceSize);
+	labelVector  rowTemp(faceSize);
+	labelVector  colTemp(faceSize);
 
 	//- sort as processor
 	forAll(i, faceSize)
@@ -291,16 +292,16 @@ void UNAP::sortInterFaces
 		label procNO = neiProcNo[i];
 		label localSize = faceStart[i+1] - faceStart[i];
 
-		scalarField valTemp2(localSize);
-		labelField  rowTemp2(localSize);
-		labelField  colTemp2(localSize);
+		scalarVector valTemp2(localSize);
+		labelVector  rowTemp2(localSize);
+		labelVector  colTemp2(localSize);
 
 		//- sort lower part
 		if(procNO < MYID)
 		{
 			label nCols = globalRowEnd[procNO] - globalRowStart[procNO] + 1;
 
-			labelField  countsInCol(nCols);
+			labelVector  countsInCol(nCols);
 			forAll(j, localSize)
 			{
 				label globalPosition = faceStart[i] + j;
@@ -308,7 +309,7 @@ void UNAP::sortInterFaces
 				countsInCol[colLocal]++;
 			}
 
-			labelField countsInColOffsets(nCols+1);
+			labelVector countsInColOffsets(nCols+1);
 
 			forAll(j, nCols)
 			{
@@ -341,7 +342,7 @@ void UNAP::sortInterFaces
 		{
 			label nRows = globalRowEnd[MYID] - globalRowStart[MYID] + 1;
 
-			labelField  countsInRow(nRows);
+			labelVector  countsInRow(nRows);
 
 			forAll(j, localSize)
 			{
@@ -351,7 +352,7 @@ void UNAP::sortInterFaces
 			}
 
 
-			labelField countsInRowOffsets(nRows+1);
+			labelVector countsInRowOffsets(nRows+1);
 
 			forAll(j, nRows)
 			{
@@ -360,7 +361,7 @@ void UNAP::sortInterFaces
 			}
 
 
-			labelField posInRow(localSize);
+			labelVector posInRow(localSize);
 			forAll(j, localSize)
 			{
 				label globalPosition = faceStart[i] + j;
@@ -410,10 +411,10 @@ void UNAP::constructLDUInterfacesFromHypre
 (
 	lduMatrix&  lduA,
 	const label nNeiProcs,
-	const labelField&  destRank,
-	const labelField&  locPosition,
-	const labelField&  faceCells,
-	const scalarField& data
+	const labelVector&  destRank,
+	const labelVector&  locPosition,
+	const labelVector&  faceCells,
+	const scalarVector& data
 )
 {
 	PtrList<patch>* patchesPtr = new PtrList<patch>(nNeiProcs);
@@ -434,8 +435,8 @@ void UNAP::constructLDUInterfacesFromHypre
 			localFaceCells[faceI] = faceCells[start];
 		}
 
-		scalarField* patchCoeffsPtr = new scalarField(localData, localSize);
-   		labelField* locFaceCellsPtr = new labelField(localFaceCells, localSize);
+		scalarVector* patchCoeffsPtr = new scalarVector(localData, localSize);
+   		labelVector* locFaceCellsPtr = new labelVector(localFaceCells, localSize);
 
    		delete [] localData;
    		delete [] localFaceCells;
@@ -451,7 +452,7 @@ void UNAP::constructLDUInterfacesFromHypre
 }
 
 
-void UNAP::constructVectorFromHypre(scalarField& b, const char* fileName)
+void UNAP::constructVectorFromHypre(scalarVector& b, const char* fileName)
 {
 	ifstream dataFile;
     dataFile.open(fileName);
@@ -492,14 +493,14 @@ void UNAP::constructVectorFromHypre(scalarField& b, const char* fileName)
 
     if((nCells + 1) != vec.size())
     {
-    	COUT << "Error in reading " << fileName <<": reading " << vec.size() - 1
+    	UNAPCOUT << "Error in reading " << fileName <<": reading " << vec.size() - 1
     		 << " lines, while nCells = " << nCells << ENDL;
     	ERROR_EXIT;
     }
 
     if(nCells != b.size())
     {
-    	COUT << "Error in " << fileName << ": fill size = " << nCells
+    	UNAPCOUT << "Error in " << fileName << ": fill size = " << nCells
     		 << ", while allocated size = " << b.size() << ENDL;
     	ERROR_EXIT;
     }

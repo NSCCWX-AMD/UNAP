@@ -14,12 +14,12 @@ void UNAP::lduAgglomeration::agglomerateMatrix
 	lduMatrix& coarseMatrix = coarseMatrixLevels_[fineLevelIndex];
 
 	//- get face restriction map for current level
-	const labelField& faceRestrictAddr = faceRestrictAddressing(fineLevelIndex);
+	const labelVector& faceRestrictAddr = faceRestrictAddressing(fineLevelIndex);
 
 	//- coarse matrix diagonal initialized by restricting the finer mesh diagonal
     coarseMatrix.SET_diag(nCells_[fineLevelIndex]);
 
-	scalarField& coarseDiag = coarseMatrix.diag();
+	scalarVector& coarseDiag = coarseMatrix.diag();
 
     restrictField(coarseDiag, fineMatrix.diag(), fineLevelIndex);
 
@@ -28,20 +28,20 @@ void UNAP::lduAgglomeration::agglomerateMatrix
     if(!fineMatrix.symm())
     {
         //- get off-diagonal matrix coefficients
-        const scalarField& fineUpper = fineMatrix.upper();
-        const scalarField& fineLower = fineMatrix.lower();
+        const scalarVector& fineUpper = fineMatrix.upper();
+        const scalarVector& fineLower = fineMatrix.lower();
 
         //- coarse matrix upper coefficients
         coarseMatrix.SET_upper(coarseMatrix.upperAddr().size());
         coarseMatrix.SET_lower(coarseMatrix.lowerAddr().size());
-        scalarField& coarseUpper = coarseMatrix.upper();
-        scalarField& coarseLower = coarseMatrix.lower();
+        scalarVector& coarseUpper = coarseMatrix.upper();
+        scalarVector& coarseLower = coarseMatrix.lower();
 
-        const labelField& restrictAddr = restrictAddressing(fineLevelIndex);
+        const labelVector& restrictAddr = restrictAddressing(fineLevelIndex);
 
-        const labelField& l  = fineMatrix.lowerAddr();
-        const labelField& cl = coarseMatrix.lowerAddr();
-        const labelField& cu = coarseMatrix.upperAddr();
+        const labelVector& l  = fineMatrix.lowerAddr();
+        const labelVector& cl = coarseMatrix.lowerAddr();
+        const labelVector& cu = coarseMatrix.upperAddr();
 
         forAll(fineFacei, faceRestrictAddr.size())
         {
@@ -63,7 +63,7 @@ void UNAP::lduAgglomeration::agglomerateMatrix
                 }
                 else
                 {
-                    COUT << "Error in agglomerateMatrix: Inconsistent addressing between "
+                    UNAPCOUT << "Error in agglomerateMatrix: Inconsistent addressing between "
                     	 << "fine and coarse grids." << ENDL;
                     ERROR_EXIT;
                 }
@@ -79,11 +79,11 @@ void UNAP::lduAgglomeration::agglomerateMatrix
     else //- ... Otherwise it is symmetric so agglomerate just the upper
     {
         //- get off-diagonal matrix coefficients
-        const scalarField& fineUpper = fineMatrix.upper();
+        const scalarVector& fineUpper = fineMatrix.upper();
 
         //- coarse matrix upper coefficients
         coarseMatrix.SET_upper(coarseMatrix.upperAddr().size());
-        scalarField& coarseUpper = coarseMatrix.upper();
+        scalarVector& coarseUpper = coarseMatrix.upper();
 
         coarseMatrix.setSymm();
 
@@ -111,14 +111,14 @@ void UNAP::lduAgglomeration::agglomerateMatrix
         const label interfacesSize = fineInterfaces.size();
         forAll(inti, interfacesSize)
         {
-            const scalarField& finePatchCoeffs = fineInterfaces.patchList(inti).patchCoeffs();
+            const scalarVector& finePatchCoeffs = fineInterfaces.patchList(inti).patchCoeffs();
             const label coarsePatchFacesSize = coarseInterfaces.patchList(inti).size();
             const label finePatchFacesSize = fineInterfaces.patchList(inti).size();
 
-            scalarField* coarsePatchCoeffsPtr = new scalarField(coarsePatchFacesSize);
-            scalarField& coarsePatchCoeffs = *coarsePatchCoeffsPtr;
+            scalarVector* coarsePatchCoeffsPtr = new scalarVector(coarsePatchFacesSize);
+            scalarVector& coarsePatchCoeffs = *coarsePatchCoeffsPtr;
 
-            labelField& faceRestrictAddressing = coarseInterfaces.patchList(inti).faceRestrictAddressing();
+            labelVector& faceRestrictAddressing = coarseInterfaces.patchList(inti).faceRestrictAddressing();
 
             forAll(ffi, finePatchFacesSize)
             {

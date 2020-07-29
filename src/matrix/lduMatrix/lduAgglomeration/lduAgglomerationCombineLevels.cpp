@@ -10,11 +10,11 @@ void UNAP::lduAgglomeration::combineLevels(const label curLevel)
     //- map the restrictAddressing from the coarser level into the previous
     //  finer level
 
-    const labelField& curResAddr = restrictAddressing_[curLevel];
-    labelField& prevResAddr = restrictAddressing_[prevLevel];
+    const labelVector& curResAddr = restrictAddressing_[curLevel];
+    labelVector& prevResAddr = restrictAddressing_[prevLevel];
 
-    const labelField& curFaceResAddr = faceRestrictAddressing_[curLevel];
-    labelField& prevFaceResAddr = faceRestrictAddressing_[prevLevel];
+    const labelVector& curFaceResAddr = faceRestrictAddressing_[curLevel];
+    labelVector& prevFaceResAddr = faceRestrictAddressing_[prevLevel];
 
     forAll(i, prevFaceResAddr.size())
     {

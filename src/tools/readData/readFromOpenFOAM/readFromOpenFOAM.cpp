@@ -60,7 +60,7 @@ void UNAP::constructLDUMatrixFromOpenFOAM(lduMatrix& lduA, const char* fileName)
 
     if(vec.size() != (nCells + nFaces + 1))
     {
-    	COUT << "Error in reading " << fileName <<": reading " << vec.size() - 1
+    	UNAPCOUT << "Error in reading " << fileName <<": reading " << vec.size() - 1
     		 << " lines, while nCells = " << nCells
     		 << ", nFaces = " << nFaces << ENDL;
 
@@ -68,11 +68,11 @@ void UNAP::constructLDUMatrixFromOpenFOAM(lduMatrix& lduA, const char* fileName)
     }
 
 
-    labelField upperAddr(nFaces);
-    labelField lowerAddr(nFaces);
-    scalarField upper(nFaces);
-    scalarField lower(nFaces);
-    scalarField diag(nCells);
+    labelVector upperAddr(nFaces);
+    labelVector lowerAddr(nFaces);
+    scalarVector upper(nFaces);
+    scalarVector lower(nFaces);
+    scalarVector diag(nCells);
 
     std::vector<std::string>::iterator it;
 
@@ -139,7 +139,7 @@ void UNAP::constructLDUMatrixFromOpenFOAM(lduMatrix& lduA, const char* fileName)
 }
 
 
-void UNAP::constructVectorFromOpenFOAM(scalarField& b, const char* fileName)
+void UNAP::constructVectorFromOpenFOAM(scalarVector& b, const char* fileName)
 {
 	ifstream dataFile;
     dataFile.open(fileName);
@@ -173,14 +173,14 @@ void UNAP::constructVectorFromOpenFOAM(scalarField& b, const char* fileName)
 
     if((nCells + 1) != vec.size())
     {
-    	COUT << "Error in reading " << fileName <<": reading " << vec.size() - 1
+    	UNAPCOUT << "Error in reading " << fileName <<": reading " << vec.size() - 1
     		 << " lines, while nCells = " << nCells << ENDL;
     	ERROR_EXIT;
     }
 
     if(nCells != b.size())
     {
-    	COUT << "Error in " << fileName << ": fill size = " << nCells
+    	UNAPCOUT << "Error in " << fileName << ": fill size = " << nCells
     		 << ", while allocated size = " << b.size() << ENDL;
     	ERROR_EXIT;
     }
@@ -243,7 +243,7 @@ void UNAP::constructLDUInterfacesFromOpenFOAM(lduMatrix& lduA, const char* fileN
 
     if(vec.size() != (nFaces + nNeiProcs + 1))
     {
-    	COUT << "Error in reading " << fileName
+    	UNAPCOUT << "Error in reading " << fileName
     		 << ":, reading " << vec.size() - 1
     		 << " lines, while nNeiProcs = " << nNeiProcs
     		 << ", nFaces = " << nFaces << ENDL;
@@ -303,8 +303,8 @@ void UNAP::constructLDUInterfacesFromOpenFOAM(lduMatrix& lduA, const char* fileN
 		    }
 	    }
 
-	    scalarField* patchCoeffsPtr = new scalarField(localData, localSize);
-   		labelField* locFaceCellsPtr = new labelField(localFaceCells, localSize);
+	    scalarVector* patchCoeffsPtr = new scalarVector(localData, localSize);
+   		labelVector* locFaceCellsPtr = new labelVector(localFaceCells, localSize);
 
    		delete [] localData;
    		delete [] localFaceCells;

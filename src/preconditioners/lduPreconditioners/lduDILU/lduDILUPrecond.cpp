@@ -14,7 +14,7 @@ UNAP::lduDILUPrecond::lduDILUPrecond
 
 void UNAP::lduDILUPrecond::calcReciprocalD
 (
-	scalarField     &rD,
+	scalarVector     &rD,
 	const lduMatrix &A
 )
 {
@@ -45,8 +45,8 @@ void UNAP::lduDILUPrecond::calcReciprocalD
 
 void UNAP::lduDILUPrecond::precondition
 (
-	scalarField       &w,
-	const scalarField &r
+	scalarVector       &w,
+	const scalarVector &r
 ) const
 {
     scalar       *wPtr  = w.begin();

@@ -8,9 +8,9 @@ namespace UNAP
 
 void sortData
 (
-	scalarField& data,
-	const labelField& order,
-	const labelField& cellFaces
+	scalarVector& data,
+	const labelVector& order,
+	const labelVector& cellFaces
 );
 
 

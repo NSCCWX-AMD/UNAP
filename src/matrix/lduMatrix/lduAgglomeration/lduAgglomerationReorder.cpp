@@ -39,12 +39,12 @@ void UNAP::lduAgglomeration::agglomerationReorderTopo()
 		    const label* unatFaceMap_f = fineM.unatEdgeMap();
 
 		    //- cell
-		    labelField resMapOld(restrictAddressing_[i]);
+		    labelVector resMapOld(restrictAddressing_[i]);
 	        label* resMapPtr_new = restrictAddressing_[i].begin();
 	        label* resMapPtr_old = resMapOld.begin();
 
 	        //- face
-	        labelField faceResMapOld(faceRestrictAddressing_[i]);
+	        labelVector faceResMapOld(faceRestrictAddressing_[i]);
 	        label* faceResMapPtr_new = faceRestrictAddressing_[i].begin();
 	        label* faceResMapPtr_old = faceResMapOld.begin();
 

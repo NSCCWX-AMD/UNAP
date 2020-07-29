@@ -58,7 +58,7 @@ ReorderingSSM::ReorderingSSM(const label nnz, const label nRows, const label* ro
 			Max = temp;
 		}
 	}
-	std::cout << "Bandwidth before reordering: " << Max << std::endl;
+	POUT << "Bandwidth before reordering: " << Max << std::endl;
 
 	ReverseCuthillMckee();
 }
@@ -78,7 +78,7 @@ bool ReorderingSSM::compareDegree(label i, label j)
 
 void ReorderingSSM::degreeGenerator()
 {
-	std::cout << "in degreeGenerator" << std::endl;
+	POUT << "in degreeGenerator" << std::endl;
 	_globalDegree.clear();
 	label* nColsInRow = new label[_nRows];
 	for(label i=0; i<_nRows; i++)
@@ -95,12 +95,12 @@ void ReorderingSSM::degreeGenerator()
 	}
 	DELETE_POINTER(nColsInRow);
 
-	std::cout << "end degreeGenerator" << std::endl;
+	POUT << "end degreeGenerator" << std::endl;
 }
 
 void ReorderingSSM::CuthillMckee()
 {
-	std::cout << "in CuthillMckee" << std::endl;
+	POUT << "in CuthillMckee" << std::endl;
 	degreeGenerator();
 	std::queue<label>* Qptr = new std::queue<label>();
 	std::queue<label>& Q = *Qptr;
@@ -162,13 +162,13 @@ void ReorderingSSM::CuthillMckee()
 
 	DELETE_OBJECT_POINTER(Qptr);
 	DELETE_OBJECT_POINTER(notVisitedPtr);
-	std::cout << "end CuthillMckee" << std::endl;
+	POUT << "end CuthillMckee" << std::endl;
 }
 
 
 void ReorderingSSM::ReverseCuthillMckee()
 {
-	std::cout << "in ReverseCuthillMckee" << std::endl;
+	POUT << "in ReverseCuthillMckee" << std::endl;
 	CuthillMckee();
 	std::vector<label>& cuthill = *_vetexOrderPtr;
 
@@ -229,9 +229,9 @@ void ReorderingSSM::ReverseCuthillMckee()
             Max = otto;
         }
    	}
-   	std::cout << "Bandwidth after  reordering: " << Max << std::endl;
+   	POUT << "Bandwidth after  reordering: " << Max << std::endl;
 	DELETE_POINTER(ord);
-	std::cout << "end ReverseCuthillMckee" << std::endl;
+	POUT << "end ReverseCuthillMckee" << std::endl;
 }
 
 std::vector<label>* ReorderingSSM::getVetexOrder()

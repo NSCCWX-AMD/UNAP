@@ -1,6 +1,6 @@
 //- using upper coefficients in matrix as the weights of coarsening in AMG
 //- alternative using face areas
-scalarField weights(nFaces);
+scalarVector weights(nFaces);
 forAll(i, nFaces)
 {
 	weights[i] = mag(lduA.upper()[i]);
@@ -61,5 +61,5 @@ swTimer::endTimer("MG Solve");
 #endif
 
 //- print iteration numbers
-if(!MYID)
-	COUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
+
+UNAPCOUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;

@@ -2,9 +2,9 @@
 
 void UNAP::lduGaussSeidelSmoother::smooth
 (
-	scalarField       &x,
+	scalarVector       &x,
     const lduMatrix   &A,
-    const scalarField &b,
+    const scalarVector &b,
     const label       nSweeps
 ) const
 {
@@ -12,7 +12,7 @@ void UNAP::lduGaussSeidelSmoother::smooth
 
 	const label nCells = x.size();
 
-	scalarField bPrime(nCells, 0);
+	scalarVector bPrime(nCells, 0);
 
 	scalar* bPrimePtr = bPrime.begin();
 
@@ -82,9 +82,9 @@ void UNAP::lduGaussSeidelSmoother::smooth
 
 void UNAP::lduGaussSeidelSmoother::smooth
 (
-	scalarField       &x,
+	scalarVector       &x,
     const matrix 	  &A,
-    const scalarField &b,
+    const scalarVector &b,
     const label       nSweeps
 ) const
 {

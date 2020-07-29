@@ -14,7 +14,7 @@ class lduDILUPrecond
 private:
 
 	//- the reciprocal diagonal
-	scalarField rD_;
+	scalarVector rD_;
 
 	//- lduMatrix
 	const lduMatrix* APtr_;
@@ -34,17 +34,17 @@ public:
     //- calculate the reciprocal of the preconditioned diagonal
     static void calcReciprocalD
     (
-    	scalarField& rD,
+    	scalarVector& rD,
     	const lduMatrix& A
     );
 
     virtual void precondition
     (
-        scalarField& w,
-        const scalarField& r
+        scalarVector& w,
+        const scalarVector& r
     ) const;
 
-    virtual const scalarField& rD() const
+    virtual const scalarVector& rD() const
     {
     	return rD_;
     }

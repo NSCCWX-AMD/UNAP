@@ -44,9 +44,9 @@ UNAP::PBiCGStab::PBiCGStab
 
 UNAP::matrix::solverPerformance UNAP::PBiCGStab::solve
 (
-	scalarField& x,
+	scalarVector& x,
 	const matrix& A,
-	const scalarField& b
+	const scalarVector& b
 ) const
 {
 	matrix::solverPerformance solverPerf;
@@ -56,16 +56,16 @@ UNAP::matrix::solverPerformance UNAP::PBiCGStab::solve
     scalar* xPtr = x.values();
     const scalar* bPtr = b.values();
 
-	scalarField pA(nCells);
+	scalarVector pA(nCells);
     scalar* pAPtr = pA.values();
 
-	scalarField yA(nCells);
+	scalarVector yA(nCells);
     scalar* yAPtr = yA.values();
 
-	scalarField rA(nCells);
+	scalarVector rA(nCells);
     scalar* rAPtr = rA.values();
 
-	scalarField rA0(nCells);
+	scalarVector rA0(nCells);
     scalar* rA0Ptr = rA0.values();
 
 	//- calculate A.psi
@@ -100,7 +100,7 @@ UNAP::matrix::solverPerformance UNAP::PBiCGStab::solve
         arrays1.A4Ptr = rA0Ptr;
         arrays1.k1Ptr = &rASqr;
         residualNormFactor_host(&arrays1);
-        reduceSum(rASqr);
+        reduceSum(&rASqr);
         solverPerf.initialResidual() = sqrt(rASqr);
     }
 #endif
@@ -121,30 +121,30 @@ UNAP::matrix::solverPerformance UNAP::PBiCGStab::solve
 	scalar normFactor = this->normFactor(b);
 IFPRINT
 {
-    COUT << "At nIter = ";
+    UNAPCOUT << "At nIter = ";
 	std::cout.width(5);
-	COUT << solverPerf.nIterations();
-	COUT << ",   ini res = ";
+	UNAPCOUT << solverPerf.nIterations();
+	UNAPCOUT << ",   ini res = ";
 	std::cout.width(11);
 	std::cout.setf(std::ios::scientific);
-	COUT << solverPerf.initialResidual();
-	COUT << ",   rel res = ";
-	COUT << solverPerf.initialResidual()/solverPerf.initialResidual();
-	COUT << ",   rhs  norm = ";
-	COUT << normFactor << ENDL;
+	UNAPCOUT << solverPerf.initialResidual();
+	UNAPCOUT << ",   rel res = ";
+	UNAPCOUT << solverPerf.initialResidual()/solverPerf.initialResidual();
+	UNAPCOUT << ",   rhs  norm = ";
+	UNAPCOUT << normFactor << ENDL;
 }
 #endif
 
-	scalarField AyA(nCells);
+	scalarVector AyA(nCells);
     scalar* AyAPtr = AyA.values();
 
-    scalarField sA(nCells);
+    scalarVector sA(nCells);
     scalar* sAPtr = sA.values();
 
-    scalarField zA(nCells);
+    scalarVector zA(nCells);
     scalar* zAPtr = zA.values();
 
-    scalarField tA(nCells);
+    scalarVector tA(nCells);
     scalar* tAPtr = tA.values();
 
     //- initial values not used
@@ -174,7 +174,7 @@ IFPRINT
             arrays1.k1Ptr = &rA0rA;
             // rA0rA += rA0 * rA
             gSum_host(&arrays1, &slave_userFunc_sumProd);
-            reduceSum(rA0rA);
+            reduceSum(&rA0rA);
         }
 #endif
 #ifdef SWTIMER
@@ -189,7 +189,7 @@ IFPRINT
 #ifdef DEBUG
             IFPRINT
             {
-            	COUT << "singularity! rA0rA = " << rA0rA << ENDL;
+            	UNAPCOUT << "singularity! rA0rA = " << rA0rA << ENDL;
             }
 #endif
             break;
@@ -262,7 +262,7 @@ IFPRINT
             arrays1.k1Ptr = &rA0AyA;
             // rA0AyA += rA0 * AyA
             gSum_host(&arrays1, &slave_userFunc_sumProd);
-            reduceSum(rA0AyA);
+            reduceSum(&rA0AyA);
         }
 #endif
 
@@ -290,7 +290,7 @@ IFPRINT
             arrays1.k1Ptr = &sATemp;
             arrays1.k1    = alpha;
             gSum_host(&arrays1, &slave_userFunc_residualSumKSqr);
-            reduceSum(sATemp);
+            reduceSum(&sATemp);
             solverPerf.finalResidual() = sqrt(sATemp);
         }
 #endif
@@ -332,17 +332,17 @@ IFPRINT
         	solverPerf.previousResidual() = solverPerf.finalResidual();
 IFPRINT
 {
-            COUT << "At nIter = ";
+            UNAPCOUT << "At nIter = ";
 			std::cout.width(5);
-			COUT << solverPerf.nIterations();
-			COUT << ",   fin res = ";
+			UNAPCOUT << solverPerf.nIterations();
+			UNAPCOUT << ",   fin res = ";
 			std::cout.width(11);
 			std::cout.setf(std::ios::scientific);
-			COUT << solverPerf.finalResidual();
-			COUT << ",   rel res = ";
-			COUT << solverPerf.finalResidual()/normFactor;
-			COUT << ",   conv rate = ";
-			COUT << convergenceRate << ENDL;
+			UNAPCOUT << solverPerf.finalResidual();
+			UNAPCOUT << ",   rel res = ";
+			UNAPCOUT << solverPerf.finalResidual()/normFactor;
+			UNAPCOUT << ",   conv rate = ";
+			UNAPCOUT << convergenceRate << ENDL;
 }
 #endif
             return solverPerf;
@@ -416,7 +416,7 @@ IFPRINT
             arrays1.k1    = omega;
             // rA = sA - k1 * tA
             gSum_host(&arrays1, &slave_userFunc_residualSumKSqr);
-			reduceSum(rATemp);
+			reduceSum(&rATemp);
 			solverPerf.finalResidual() = sqrt(rATemp);
         }
 #endif
@@ -426,17 +426,17 @@ IFPRINT
         solverPerf.previousResidual() = solverPerf.finalResidual();
 IFPRINT
 {
-        COUT << "At nIter = ";
+        UNAPCOUT << "At nIter = ";
 		std::cout.width(5);
-		COUT << solverPerf.nIterations()+1;
-		COUT << ",   fin res = ";
+		UNAPCOUT << solverPerf.nIterations()+1;
+		UNAPCOUT << ",   fin res = ";
 		std::cout.width(11);
 		std::cout.setf(std::ios::scientific);
-		COUT << solverPerf.finalResidual();
-		COUT << ",   rel res = ";
-		COUT << solverPerf.finalResidual()/normFactor;
-		COUT << ",   conv rate = ";
-		COUT << convergenceRate << ENDL;
+		UNAPCOUT << solverPerf.finalResidual();
+		UNAPCOUT << ",   rel res = ";
+		UNAPCOUT << solverPerf.finalResidual()/normFactor;
+		UNAPCOUT << ",   conv rate = ";
+		UNAPCOUT << convergenceRate << ENDL;
 }
 #endif
 

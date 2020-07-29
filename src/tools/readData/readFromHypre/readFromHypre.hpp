@@ -11,29 +11,29 @@ void constructLDUMatrixFromHypre(lduMatrix& lduA, const char* fileName);
 
 void sortInterFaces
 (
-	scalarField& val,
-	labelField&  row,
-	labelField&  col,
-	const labelField& faceToProcNO,
+	scalarVector& val,
+	labelVector&  row,
+	labelVector&  col,
+	const labelVector& faceToProcNO,
 	const label  faceSize,
-	const labelField& faceStart,
+	const labelVector& faceStart,
 	std::map<int, int>& mapProcNO,
-	const labelField& neiProcNo,
+	const labelVector& neiProcNo,
 	const label  procSize,
-	const labelField& globalRowStart,
-	const labelField& globalRowEnd
+	const labelVector& globalRowStart,
+	const labelVector& globalRowEnd
 );
 
 void constructLDUInterfacesFromHypre
 (
 	lduMatrix&  lduA,
 	const label nNeiProcs,
-	const labelField&  destRank,
-	const labelField&  locPosition,
-	const labelField&  faceCells,
-	const scalarField& data
+	const labelVector&  destRank,
+	const labelVector&  locPosition,
+	const labelVector&  faceCells,
+	const scalarVector& data
 );
 
-void constructVectorFromHypre(scalarField& b, const char* fileName);
+void constructVectorFromHypre(scalarVector& b, const char* fileName);
 }
 #endif

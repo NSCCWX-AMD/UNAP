@@ -8,7 +8,7 @@ namespace UNAP
 
 void constructLDUMatrixFromOpenFOAM(lduMatrix& lduA, const char* fileName);
 
-void constructVectorFromOpenFOAM(scalarField& b, const char* fileName);
+void constructVectorFromOpenFOAM(scalarVector& b, const char* fileName);
 
 void constructLDUInterfacesFromOpenFOAM(lduMatrix& lduA, const char* fileName);
 

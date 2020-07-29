@@ -41,9 +41,9 @@ public:
 	//- solve the matrix with this solver
 	virtual matrix::solverPerformance solve
 	(
-		scalarField& x,
+		scalarVector& x,
 		const matrix& A,
-		const scalarField& b
+		const scalarVector& b
 	) const;
 
 	void SET_preconditioner(matrix::preconditioner& precond)

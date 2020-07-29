@@ -11,16 +11,16 @@
 UNAP::eigenDiagPCG::eigenDiagPCG
 (
 	const matrix& A,
-	scalarField& x,
-	const scalarField& b,
+	scalarVector& x,
+	const scalarVector& b,
 	const matrix::preconditioner& precond,
 	const label nDiagPCGs
 )
 :
 	maxEigenValue_(0.0)
 {
-	scalarField alphas(nDiagPCGs, 0.0);
-	scalarField betas(nDiagPCGs, 0.0);
+	scalarVector alphas(nDiagPCGs, 0.0);
+	scalarVector betas(nDiagPCGs, 0.0);
 
 	//- do some PCG loops to recode alphas and betas
 	//- x is renewed during this process
@@ -48,26 +48,26 @@ UNAP::eigenDiagPCG::eigenDiagPCG
 void UNAP::eigenDiagPCG::diagPCGLoops
 (
     const matrix& A,
-    scalarField& x,
-    const scalarField& b,
+    scalarVector& x,
+    const scalarVector& b,
     const matrix::preconditioner& precond,
     const label nDiagPCGs,
-    scalarField& alphas,
-    scalarField& betas
+    scalarVector& alphas,
+    scalarVector& betas
 ) const
 {
     label nCells = x.size();
     scalar* xPtr = x.begin();
 
-    scalarField pA(nCells);
+    scalarVector pA(nCells);
     scalar* pAPtr = pA.begin();
 
-    scalarField wA(nCells);
+    scalarVector wA(nCells);
     scalar* wAPtr = wA.begin();
 
     const scalar* rDPtr = precond.rD().begin();
 
-    scalarField rA(nCells);
+    scalarVector rA(nCells);
     scalar* rAPtr = rA.begin();
 
     const scalar* bPtr = b.begin();
@@ -125,17 +125,16 @@ void UNAP::eigenDiagPCG::diagPCGLoops
             gSum_host(&arrays1, &slave_userFunc_digPrecondSum);
         };
 #endif
-        reduceSum(wArA);
+        reduceSum(&wArA);
 
         if((mag(wArA)) <  VSMALL)
         {
 #ifdef DEBUG
-            if(MYID == 0)
-            {
-                COUT << "In " << __FILE__ << " " << __LINE__ << ENDL;
-                COUT << "Warning: singularity in calculating eigenvalue! " << ENDL;
-                COUT << "The value of search directions is too small:  wArA = " << wArA << ENDL;
-            }
+
+            UNAPCOUT << "In " << __FILE__ << " " << __LINE__ << ENDL;
+            UNAPCOUT << "Warning: singularity in calculating eigenvalue! " << ENDL;
+            UNAPCOUT << "The value of search directions is too small:  wArA = " << wArA << ENDL;
+   
 #endif
             break;
         }
@@ -207,7 +206,7 @@ void UNAP::eigenDiagPCG::diagPCGLoops
             gSum_host(&arrays1, &slave_userFunc_sumProd);
         }
 #endif
-        reduceSum(wApA);
+        reduceSum(&wApA);
 
         //- update solution and residual
         scalar alpha = wArA/wApA;
@@ -241,8 +240,8 @@ void UNAP::eigenDiagPCG::diagPCGLoops
 
 void UNAP::eigenDiagPCG::computeMaxEig
 (
-	const scalarField& alphas,
-    const scalarField& betas,
+	const scalarVector& alphas,
+    const scalarVector& betas,
     const label nPCGs,
     const label k
 ) const
@@ -279,8 +278,8 @@ void UNAP::eigenDiagPCG::computeMaxEig
 
 void UNAP::eigenDiagPCG::computeValueForMatrix
 (
-	const scalarField& alphas,
-    const scalarField& betas,
+	const scalarVector& alphas,
+    const scalarVector& betas,
     scalar** TriMatrix,
     const label nPCGs
 ) const

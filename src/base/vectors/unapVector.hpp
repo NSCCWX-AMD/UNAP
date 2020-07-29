@@ -104,11 +104,11 @@ public:
 	void SET_zero();
 };
 
-typedef Vector<label>  labelField;
-typedef Vector<scalar> scalarField;
+typedef Vector<label>  labelVector;
+typedef Vector<scalar> scalarVector;
 
-scalar dot(const scalarField &v1,
-		   const scalarField &v2);
+scalar dot(const scalarVector &v1,
+		   const scalarVector &v2);
 
 template <typename T>
 Vector<T>::Vector()
@@ -287,7 +287,7 @@ Vector<T> &Vector<T>::operator+=(const Vector<T>& v)
 #ifdef DEBUG
 	if(length_ != v.length_)
 	{
-		COUT << "ERROR in " << __FILE__ << " " << __LINE__
+		UNAPCOUT << "ERROR in " << __FILE__ << " " << __LINE__
 			 << ": The length of two vectors is not same!" << ENDL;
 		ERROR_EXIT;
 	}
@@ -309,7 +309,7 @@ Vector<T> &Vector<T>::operator-=(const Vector<T>& v)
 #ifdef DEBUG
 	if(length_ != v.length_)
 	{
-		COUT << "ERROR in " << __FILE__ << " " << __LINE__
+		UNAPCOUT << "ERROR in " << __FILE__ << " " << __LINE__
 			 << ": The length of two vectors is not same!" << ENDL;
 		ERROR_EXIT;
 	}
@@ -387,7 +387,7 @@ void Vector<T>::SET_size(const label newSize)
 #ifdef DEBUG
 	if (newSize < 0)
 	{
-	    COUT << "Error in vector SET_size: "
+	    UNAPCOUT << "Error in vector SET_size: "
 	        << "bad new set size " << newSize
 	        << ENDL;
 
@@ -437,7 +437,7 @@ T Vector<T>::Sum() const
 	{
 		sum += val[i];
 	}
-	reduceSum(sum);
+	reduceSum(&sum);
 	return sum;
 }
 
@@ -463,12 +463,12 @@ T Vector<T>::SumMag() const
 	}
 	else
 	{
-		COUT << "ERROR in " << __FILE__ << " " << __LINE__
+		UNAPCOUT << "ERROR in " << __FILE__ << " " << __LINE__
 			 << ": illegal data type!" << ENDL;
 		ERROR_EXIT;
 	}
 
-	reduceSum(sum);
+	reduceSum(&sum);
 
 	return sum;
 }
@@ -486,7 +486,7 @@ T Vector<T>::SumSqr() const
 		sum += val[i]*val[i];
 	}
 
-	reduceSum(sum);
+	reduceSum(&sum);
 	return sum;
 }
 
