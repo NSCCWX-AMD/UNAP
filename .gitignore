@@ -7,4 +7,5 @@ exData/*
 *mod
 *.o
 install
-doc
+doc/*
+.tune_err
