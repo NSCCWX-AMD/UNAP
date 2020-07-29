@@ -5,3 +5,6 @@ src/utilities/*
 exData/*
 .vscode/*
 *mod
+*.o
+install
+doc
