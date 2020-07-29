@@ -4,9 +4,9 @@
 #include "unapMatrix.hpp"
 
 #ifdef SW_SLAVE
+#include "iterator.hpp"
 #include "multiLevelBlockIterator.hpp"
 #include "rowSubsectionIterator.hpp"
-#include "iterator.hpp"
 #endif
 
 //- to do
@@ -14,339 +14,267 @@
 
 namespace UNAP
 {
-class lduMatrix
-:
-	public matrix
+class lduMatrix : public matrix
 {
 private:
+  //- number of cells
+  label nCells_;
 
-    //- number of cells
-    label nCells_;
+  //- addressing
+  labelVector *lowerAddrPtr_, *upperAddrPtr_;
 
-    //- addressing
-    labelVector *lowerAddrPtr_, *upperAddrPtr_;
+  //- coefficients (not including interfaces)
+  scalarVector *lowerPtr_, *diagPtr_, *upperPtr_;
 
-	//- coefficients (not including interfaces)
-    scalarVector *lowerPtr_, *diagPtr_, *upperPtr_;
+  //- interfaces
+  interfaces *interfacesPtr_;
 
-    //- interfaces
-    interfaces* interfacesPtr_;
+  //- losort addressing
+  mutable labelVector *losortPtr_;
 
-    //- losort addressing
-    mutable labelVector* losortPtr_;
+  //- owner start addressing
+  mutable labelVector *ownerStartPtr_;
 
-    //- owner start addressing
-    mutable labelVector* ownerStartPtr_;
+  //- losort start addressing
+  mutable labelVector *losortStartPtr_;
 
-    //- losort start addressing
-    mutable labelVector* losortStartPtr_;
+  //- calculate losort
+  void calcLosort() const;
 
-    //- calculate losort
-    void calcLosort() const;
+  //- calculate owner start
+  void calcOwnerStart() const;
 
-    //- calculate owner start
-    void calcOwnerStart() const;
-
-    //- calculate losort start
-    void calcLosortStart() const;
+  //- calculate losort start
+  void calcLosortStart() const;
 
 #ifdef SW_SLAVE
-    //- multi-level block iterator
-    UNAT::MultiLevelBlockIterator *mlbIter_;
+  //- multi-level block iterator
+  UNAT::MultiLevelBlockIterator *mlbIter_;
 
-    //- start from 1
-    //- has negative value, which stands for lower
-    label* unatEdgeMap_;
+  //- start from 1
+  //- has negative value, which stands for lower
+  label *unatEdgeMap_;
 
-    //- start from 0
-    label* unatCellMap_;
+  //- start from 0
+  label *unatCellMap_;
 
+  //- row subsection iterator
+  UNAT::RowSubsectionIterator *rssIter_;
 
-    //- row subsection iterator
-    UNAT::RowSubsectionIterator* rssIter_;
-
-
-    UNAT::Iterator* unatIter_;
-
+  UNAT::Iterator *unatIter_;
 
 #endif
 
-
 public:
-    //- constructors
+  //- constructors
 
-    lduMatrix();
+  lduMatrix();
 
-    lduMatrix
-    (
-        const label& nCells,
-        const labelVector& lowerAddr,
-        const labelVector& upperAddr,
-        const scalarVector& lower,
-        const scalarVector& diag,
-        const scalarVector& upper
-    );
+  lduMatrix(const label &nCells,
+            const labelVector &lowerAddr,
+            const labelVector &upperAddr,
+            const scalarVector &lower,
+            const scalarVector &diag,
+            const scalarVector &upper);
 
-    lduMatrix
-    (
-        const label& nCells,
-        const labelVector& lowerAddr,
-        const labelVector& upperAddr,
-        const scalarVector& lower,
-        const scalarVector& diag,
-        const scalarVector& upper,
-        const bool reUse
-    );
+  lduMatrix(const label &nCells,
+            const labelVector &lowerAddr,
+            const labelVector &upperAddr,
+            const scalarVector &lower,
+            const scalarVector &diag,
+            const scalarVector &upper,
+            const bool reUse);
 
-    //- constructor
-    //- only topology
-    lduMatrix
-    (
-        const label& nCells,
-        const labelVector& lowerAddr,
-        const labelVector& upperAddr
-    );
+  //- constructor
+  //- only topology
+  lduMatrix(const label &nCells,
+            const labelVector &lowerAddr,
+            const labelVector &upperAddr);
 
-    lduMatrix
-    (
-        const label& nCells,
-        const labelVector& lowerAddr,
-        const labelVector& upperAddr,
-        const bool reUse
-    );
+  lduMatrix(const label &nCells,
+            const labelVector &lowerAddr,
+            const labelVector &upperAddr,
+            const bool reUse);
 
-    //- destructor
-    ~lduMatrix();
+  //- destructor
+  ~lduMatrix();
 
+  //- access to addressing
+  virtual labelVector &lowerAddr() const;
+  virtual labelVector &upperAddr() const;
 
-    //- access to addressing
-    virtual labelVector& lowerAddr() const;
-    virtual labelVector& upperAddr() const;
+  //- access to coefficients
+  virtual scalarVector &lower() const;
+  virtual scalarVector &diag() const;
+  virtual scalarVector &upper() const;
 
-	//- access to coefficients
-    virtual scalarVector& lower() const;
-    virtual scalarVector& diag () const;
-    virtual scalarVector& upper() const;
+  void SET_lowerAddr(labelVector &newLowerAddr)
+  {
+    ALLOCATE_POINTER(lowerAddrPtr_, newLowerAddr, labelVector)
+  }
 
-    void SET_lowerAddr(labelVector& newLowerAddr)
+  void SET_upperAddr(labelVector &newUpperAddr)
+  {
+    ALLOCATE_POINTER(upperAddrPtr_, newUpperAddr, labelVector)
+  }
+
+  void SET_lower(scalarVector &newLower)
+  {
+    if (this->symm())
     {
-        ALLOCATE_POINTER(lowerAddrPtr_, newLowerAddr, labelVector)
+      lowerPtr_ = NULL;
+      // COUT << "Here works" << ENDL;
     }
 
-    void SET_upperAddr(labelVector& newUpperAddr)
+    ALLOCATE_POINTER(lowerPtr_, newLower, scalarVector)
+  }
+
+  void SET_lower(label newSize)
+  {
+    DELETE_OBJECT_POINTER(lowerPtr_)
+
+    lowerPtr_ = new scalarVector(newSize);
+  }
+
+  void SET_upper(scalarVector &newUpper)
+  {
+    ALLOCATE_POINTER(upperPtr_, newUpper, scalarVector)
+  }
+
+  void SET_upper(label newSize)
+  {
+    DELETE_OBJECT_POINTER(upperPtr_)
+
+    upperPtr_ = new scalarVector(newSize);
+  }
+
+  void SET_diag(scalarVector &newDiag)
+  {
+    ALLOCATE_POINTER(diagPtr_, newDiag, scalarVector)
+  }
+
+  void SET_diag(label newSize)
+  {
+    DELETE_OBJECT_POINTER(diagPtr_)
+
+    diagPtr_ = new scalarVector(newSize);
+  }
+
+  scalarVector &diag() { return *diagPtr_; }
+
+  void freeLower()
+  {
+    if (!this->symm())
     {
-        ALLOCATE_POINTER(upperAddrPtr_, newUpperAddr, labelVector)
+      DELETE_OBJECT_POINTER(lowerPtr_);
+      lowerPtr_ = upperPtr_;
     }
+  }
 
-    void SET_lower(scalarVector& newLower)
+  void setSymm()
+  {
+    if (upperPtr_)
     {
-        if(this->symm())
-        {
-            lowerPtr_ = NULL;
-            // COUT << "Here works" << ENDL;
-        }
-
-        ALLOCATE_POINTER(lowerPtr_, newLower, scalarVector)
+      lowerPtr_ = upperPtr_;
     }
-
-    void SET_lower(label newSize)
+    else if (lowerPtr_)
     {
-        DELETE_OBJECT_POINTER(lowerPtr_)
-
-        lowerPtr_ =  new scalarVector(newSize);
+      upperPtr_ = lowerPtr_;
     }
+  }
 
-    void SET_upper(scalarVector& newUpper)
+  //- access to symmetric or asymmetric
+  virtual bool symm() const
+  {
+    if (lowerPtr_ == upperPtr_)
     {
-        ALLOCATE_POINTER(upperPtr_, newUpper, scalarVector)
+      return true;
     }
-
-    void SET_upper(label newSize)
+    else
     {
-        DELETE_OBJECT_POINTER(upperPtr_)
-
-        upperPtr_ =  new scalarVector(newSize);
+      return false;
     }
+  }
 
-    void SET_diag(scalarVector& newDiag)
-    {
-        ALLOCATE_POINTER(diagPtr_, newDiag, scalarVector)
-    }
+  virtual label size() const { return nCells_; }
 
-    void SET_diag(label newSize)
-    {
-        DELETE_OBJECT_POINTER(diagPtr_)
+  //- access to nCells
+  virtual label nCells() const { return nCells_; }
 
-        diagPtr_ =  new scalarVector(newSize);
-    }
+  void size(label size) { nCells_ = size; }
 
-    scalarVector& diag()
-    {
-        return *diagPtr_;
-    }
+  virtual void spMV(scalarVector &Apsi, const scalarVector &psi) const;
 
-    void freeLower()
-    {
-        if(!this->symm())
-        {
-            DELETE_OBJECT_POINTER(lowerPtr_);
-            lowerPtr_ = upperPtr_;
-        }
-    }
+  //- return losort addressing
+  const labelVector &losortAddr() const;
 
-    void setSymm()
-    {
-        if(upperPtr_)
-        {
-            lowerPtr_ = upperPtr_;
-        }
-        else if(lowerPtr_)
-        {
-            upperPtr_ = lowerPtr_;
-        }
-    }
+  //- return owner start addressing
+  const labelVector &ownerStartAddr() const;
 
-    //- access to symmetric or asymmetric
-    virtual bool symm() const
-    {
-        if(lowerPtr_ == upperPtr_)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
+  //- return losort start addressing
+  const labelVector &losortStartAddr() const;
 
-    virtual label size() const
-    {
-        return nCells_;
-    }
+  virtual interfaces &matrixInterfaces() const { return *interfacesPtr_; }
 
-    //- access to nCells
-    virtual label nCells() const
-    {
-        return nCells_;
-    }
+  virtual void matrixInterfaces(interfaces &a) { interfacesPtr_ = &a; }
 
-    void size(label size)
-    {
-        nCells_ = size;
-    }
+  void matrixInterfaces(const label size)
+  {
+    PtrList<patch> *patchesPtr = new PtrList<patch>(size);
+    interfacesPtr_ = new interfaces(*patchesPtr);
+  }
 
+  void createInterfacesTopology(const label nNeiProcs,
+                                const label *destRank,
+                                const label *offDiagRows,
+                                const label *offDiagStarts);
 
-    virtual void spMV
-    (
-    	scalarVector& Apsi,
-		const scalarVector& psi
-    ) const;
+  void fillInterfacesCofficients(const label *offDiagStarts,
+                                 const scalar *offDiagCoeffs);
 
-    //- return losort addressing
-    const labelVector& losortAddr() const;
+  //- initialize interfaces
+  virtual void initInterfaces(const scalarVector &psi) const;
 
-    //- return owner start addressing
-    const labelVector& ownerStartAddr() const;
+  //- update interfaces
+  virtual void updateInterfaces(scalarVector &Apsi) const;
 
-    //- return losort start addressing
-    const labelVector& losortStartAddr() const;
+  //- fill coefficients
+  void setMatrixCoeffients(const scalarVector &diag,
+                           const scalarVector &upper,
+                           const scalarVector &lower);
 
-    virtual interfaces& matrixInterfaces() const
-    {
-        return *interfacesPtr_;
-    }
+  void setMatrixCoeffients(const scalarVector &diag,
+                           const scalarVector &upper,
+                           const scalarVector &lower,
+                           const bool reuse);
 
-    virtual void matrixInterfaces(interfaces& a)
-    {
-        interfacesPtr_ = &a;
-    }
+  //- fill topology
+  void setMatrixTopology(const labelVector &upperAddr,
+                         const labelVector &lowerAddr,
+                         const bool reUse);
 
-    void matrixInterfaces(const label size)
-    {
-        PtrList<patch>* patchesPtr = new PtrList<patch> (size);
-        interfacesPtr_ = new interfaces(*patchesPtr);
-    }
-
-    void createInterfacesTopology
-    (
-        const label   nNeiProcs,
-        const label*  destRank,
-        const label*  offDiagRows,
-        const label*  offDiagStarts
-    );
-
-    void fillInterfacesCofficients
-    (
-        const label*   offDiagStarts,
-        const scalar*  offDiagCoeffs
-    );
-
-    //- initialize interfaces
-    virtual void initInterfaces(const scalarVector& psi) const;
-
-    //- update interfaces
-    virtual void updateInterfaces(scalarVector& Apsi) const;
-
-    //- fill coefficients
-    void setMatrixCoeffients
-    (
-        const scalarVector& diag,
-        const scalarVector& upper,
-        const scalarVector& lower
-    );
-
-    void setMatrixCoeffients
-    (
-        const scalarVector& diag,
-        const scalarVector& upper,
-        const scalarVector& lower,
-        const bool reuse
-    );
-
-    //- fill topology
-    void setMatrixTopology
-    (
-        const labelVector& upperAddr,
-        const labelVector& lowerAddr,
-        const bool reUse
-    );
-
-    void setMatrixTopology
-    (
-        const labelVector& upperAddr,
-        const labelVector& lowerAddr
-    );
+  void setMatrixTopology(const labelVector &upperAddr,
+                         const labelVector &lowerAddr);
 
 #ifdef SW_SLAVE
-    void constructMLBIterator();
+  void constructMLBIterator();
 
-    UNAT::MultiLevelBlockIterator* mlbIter() const
-    {
-        return mlbIter_;
-    }
+  UNAT::MultiLevelBlockIterator *mlbIter() const { return mlbIter_; }
 
-    void reorderLDUValues();
+  void reorderLDUValues();
 
-    void restoreVector(scalarVector& vv);
+  void restoreVector(scalarVector &vv);
 
-    void reorderVector(scalarVector& vv);
+  void reorderVector(scalarVector &vv);
 
-    const label* unatEdgeMap() const
-    {
-        return unatEdgeMap_;
-    }
+  const label *unatEdgeMap() const { return unatEdgeMap_; }
 
-    const label* unatCellMap() const
-    {
-        return unatCellMap_;
-    }
+  const label *unatCellMap() const { return unatCellMap_; }
 
-
-    void constructRSSIterator();
-
+  void constructRSSIterator();
 
 #endif
 };
 
-} //- namespace UNAP
-#endif //- LDUMATRIX_HPP
+}  // namespace UNAP
+#endif  //- LDUMATRIX_HPP

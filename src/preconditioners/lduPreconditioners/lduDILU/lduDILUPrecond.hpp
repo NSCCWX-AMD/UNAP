@@ -7,50 +7,30 @@ namespace UNAP
 {
 class lduMatrix;
 
-class lduDILUPrecond
-:
-	public matrix::preconditioner
+class lduDILUPrecond : public matrix::preconditioner
 {
 private:
+  //- the reciprocal diagonal
+  scalarVector rD_;
 
-	//- the reciprocal diagonal
-	scalarVector rD_;
-
-	//- lduMatrix
-	const lduMatrix* APtr_;
+  //- lduMatrix
+  const lduMatrix *APtr_;
 
 public:
+  //- constructor
+  lduDILUPrecond(const lduMatrix &A);
 
-	//- constructor
-	lduDILUPrecond
-	(
-		const lduMatrix& A
-	);
+  //- destructor
+  virtual ~lduDILUPrecond() {}
 
-	//- destructor
-	virtual ~lduDILUPrecond()
-    {}
+  //- calculate the reciprocal of the preconditioned diagonal
+  static void calcReciprocalD(scalarVector &rD, const lduMatrix &A);
 
-    //- calculate the reciprocal of the preconditioned diagonal
-    static void calcReciprocalD
-    (
-    	scalarVector& rD,
-    	const lduMatrix& A
-    );
+  virtual void precondition(scalarVector &w, const scalarVector &r) const;
 
-    virtual void precondition
-    (
-        scalarVector& w,
-        const scalarVector& r
-    ) const;
-
-    virtual const scalarVector& rD() const
-    {
-    	return rD_;
-    }
-
+  virtual const scalarVector &rD() const { return rD_; }
 };
 
-} //- end namespace UNAP
+}  // namespace UNAP
 
-#endif //- LDUDILUPRECOND_HPP
+#endif  //- LDUDILUPRECOND_HPP

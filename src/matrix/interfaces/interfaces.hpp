@@ -1,75 +1,57 @@
 #ifndef INTERFACES_HPP
 #define INTERFACES_HPP
 
-#include "patch.hpp"
 #include "PtrList.hpp"
+#include "patch.hpp"
 
 namespace UNAP
 {
-
 class patch;
 
 class interfaces
 {
 private:
+  PtrList<patch> &patches_;
 
-	PtrList<patch>& patches_;
+  //- send buffer for initializing and updating matrix interfaces
+  mutable scalar *sendBuffer_;
 
-	//- send buffer for initializing and updating matrix interfaces
-    mutable scalar* sendBuffer_;
+  //- receive buffer for initializing and updating matrix interfaces
+  mutable scalar *recvBuffer_;
 
-    //- receive buffer for initializing and updating matrix interfaces
-    mutable scalar* recvBuffer_;
+  //- mpi requests of sends and receives for updating interfaces
+  mutable MPI_Request *sendRecvRequests_;
 
-    //- mpi requests of sends and receives for updating interfaces
-    mutable MPI_Request* sendRecvRequests_;
+  mutable string *sendRecvTaskName_;
 
-    mutable string* sendRecvTaskName_;
+  //- locPosition
+  mutable label *locPosition_;
 
-    //- locPosition
-    mutable label* locPosition_;
-
-    //- destRank
-    mutable label* destRank_;
+  //- destRank
+  mutable label *destRank_;
 
 public:
+  interfaces(const label size);
 
-    interfaces(const label size);
+  interfaces(PtrList<patch> &patches);
 
-	interfaces(PtrList<patch>& patches);
+  virtual ~interfaces();
 
-	virtual ~interfaces();
+  //- Initialize the update of interfaced interfaces
+  //  for matrix operations
+  virtual void initMatrixInterfaces(const scalarVector &psi) const;
 
-	//- Initialize the update of interfaced interfaces
-    //  for matrix operations
-    virtual void initMatrixInterfaces
-    (
-        const scalarVector& psi
-    ) const;
+  //- update interfaced interfaces for matrix operations
+  virtual void updateMatrixInterfaces(scalarVector &result) const;
 
-    //- update interfaced interfaces for matrix operations
-    virtual void updateMatrixInterfaces
-    (
-        scalarVector& result
-    ) const;
+  virtual patch &patchList(const label i) const { return patches_[i]; }
 
-    virtual patch& patchList(const label i) const
-    {
-        return patches_[i];
-    }
+  PtrList<patch> &patchList() { return patches_; }
 
-    PtrList<patch>& patchList()
-    {
-        return patches_;
-    }
+  virtual label size() const { return patches_.size(); }
 
-    virtual label size() const
-    {
-        return patches_.size();
-    }
-
-    void reorderIntFaceCells(const label* cellMap);
+  void reorderIntFaceCells(const label *cellMap);
 };
 
-} //- end namespace UNAP
-#endif //- INTERFACES_HPP
+}  // namespace UNAP
+#endif  //- INTERFACES_HPP

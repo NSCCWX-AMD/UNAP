@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
 #include <iostream>
 
 using namespace std;
@@ -10,29 +11,24 @@ using namespace std;
 class A
 {
 protected:
-	int a1_;
-	double a2_;
+  int a1_;
+  double a2_;
 
 public:
-	A(int i, double v);
-	~A()
-	{}
+  A(int i, double v);
+  ~A() {}
 
-	virtual void display() const = 0;
+  virtual void display() const = 0;
 };
 
-class B
-:
-	public A
+class B : public A
 {
 private:
-
 public:
-	B(int i, double v);
-	~B()
-	{}
+  B(int i, double v);
+  ~B() {}
 
-	virtual void display() const;
+  virtual void display() const;
 };
 
 #endif

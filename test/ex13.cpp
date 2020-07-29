@@ -1,16 +1,18 @@
 #include <math.h>
+#include <string.h>
+
+#include <sstream>
+
 #include "MG.hpp"
-#include "lduAgglomeration.hpp"
-#include "chebySmoother.hpp"
-#include "lduGaussSeidelSmoother.hpp"
-#include "matrixConversion.hpp"
 #include "PBiCGStab.hpp"
 #include "PCG.hpp"
-#include "lduDiagPrecond.hpp"
+#include "chebySmoother.hpp"
+#include "lduAgglomeration.hpp"
 #include "lduDICPrecond.hpp"
 #include "lduDILUPrecond.hpp"
-#include <sstream>
-#include <string.h>
+#include "lduDiagPrecond.hpp"
+#include "lduGaussSeidelSmoother.hpp"
+#include "matrixConversion.hpp"
 #include "printUNAP.hpp"
 #include "readFromHypre.hpp"
 
@@ -26,64 +28,56 @@
 
 using namespace UNAP;
 
-#define LOCATEFILE(newName, fileName, dir) \
-{ \
-	std::ostringstream os; \
-	os << dir << NPROCS << "/" << fileName << ".txt." << std::setfill('0') << std::setw(5) << MYID; \
-	strcpy(newName, os.str().c_str()); \
-} \
-
+#define LOCATEFILE(newName, fileName, dir)                                 \
+  {                                                                        \
+    std::ostringstream os;                                                 \
+    os << dir << NPROCS << "/" << fileName << ".txt." << std::setfill('0') \
+       << std::setw(5) << MYID;                                            \
+    strcpy(newName, os.str().c_str());                                     \
+  }
 
 int main()
 {
-	/* Initialize MPI */
-   	unapMPI::initMPI();
+  /* Initialize MPI */
+  unapMPI::initMPI();
 #ifdef SW_SLAVE
-	swacc_init();
+  swacc_init();
 #endif
 
-	const char* dir = "./exData/hypre/int_test/p";
-   	char fileName[200];
+  const char *dir = "./exData/hypre/int_test/p";
+  char fileName[200];
 
-   	if(PARRUN)
-   	{
-   		UNAP::unapMPI::unapCommunicator().barrier() ;
-   	}
+  if (PARRUN)
+  {
+    UNAP::unapMPI::unapCommunicator().barrier();
+  }
 
+  UNAPCOUT << "Start reading data" << ENDL;
 
-	UNAPCOUT << "Start reading data" << ENDL;
-	
+  lduMatrix lduA;
+  LOCATEFILE(fileName, "A_u", dir);
+  constructLDUMatrixFromHypre(lduA, fileName);
 
-   	lduMatrix lduA;
-   	LOCATEFILE(fileName, "A_u", dir);
-   	constructLDUMatrixFromHypre(lduA, fileName);
+  label nCells = lduA.size();
+  scalarVector b(nCells);
 
-   	label nCells = lduA.size();
-   	scalarVector b(nCells);
+  LOCATEFILE(fileName, "b_u", dir);
+  constructVectorFromHypre(b, fileName);
 
-   	LOCATEFILE(fileName, "b_u", dir);
-   	constructVectorFromHypre(b, fileName);
+  if (PARRUN)
+  {
+    UNAP::unapMPI::unapCommunicator().barrier();
+  }
 
-   	if(PARRUN)
-   	{
-   		UNAP::unapMPI::unapCommunicator().barrier() ;
-   	}
-
-  
-	COUT << "Finish reading data" << ENDL;
-	
-
-
-
-
+  COUT << "Finish reading data" << ENDL;
 
 #ifdef SW_SLAVE
-	swacc_end();
+  swacc_end();
 #endif
 
 #ifdef SWTIMER
-	swTimer::printTimer();
+  swTimer::printTimer();
 #endif
 
-	MPI_Finalize();
+  MPI_Finalize();
 }

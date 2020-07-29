@@ -3,6 +3,6 @@
 
 #include "vectorOps_struct.h"
 
-void scalingFactor_host(MVM_Arrays*);
+void scalingFactor_host(MVM_Arrays *);
 
 #endif
