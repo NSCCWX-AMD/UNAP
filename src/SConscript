@@ -22,7 +22,7 @@ src_include = list(build_lninclude(env))
 for d in subdirs:
     SConscript(os.path.join(d, 'SConscript'), exports=['env', 'src_include'])
 
-program_inc = []
+program_inc = ['/home/export/online3/amd_dev1/guhf/utilities_dev/install/linux64icpcDPOpt/include']
 program_libs = []
 objs_all = []
 

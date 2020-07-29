@@ -5,8 +5,10 @@ cxxfile = ['ex11.cpp']
 
 fortranfile = ['ex12f.f90']
 
-program_inc = []
-program_libs = ['unap', 'stdc++']
+program_inc = ['/home/export/online3/amd_dev1/guhf/utilities_dev/install/linux64icpcDPOpt/include']
+program_libs = ['unap', 'utilities', 'stdc++',]
+
+env['LIBPATH_COMMON'].append('/home/export/online3/amd_dev1/guhf/utilities_dev/install/linux64icpcDPOpt/lib')
 
 if env['PLATFORM'] == 'windows':
     program_libs.append(['mpi', 'fmpich2g'])
