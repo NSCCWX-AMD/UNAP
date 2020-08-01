@@ -10,6 +10,8 @@
 #ifndef UNAPVECTOR_HPP
 #define UNAPVECTOR_HPP
 
+#include <string.h>
+
 #include "unap.hpp"
 #include "unapMPI.hpp"
 
@@ -112,7 +114,7 @@ Vector<T>::Vector(const Vector<T> &v) : length_(v.length_), values_(NULL)
   if (length_ > 0)
   {
     values_ = new T[length_];
-    forAll(i, length_) { values_[i] = v.values_[i]; }
+    memcpy(values_, v.values_, length_ * sizeof(T));
   }
 }
 
@@ -123,7 +125,7 @@ Vector<T>::Vector(const T *val, const label &length)
   if (length_ > 0)
   {
     values_ = new T[length_];
-    forAll(i, length_) { values_[i] = val[i]; }
+    memcpy(values_, val, length_ * sizeof(T));
   }
 }
 
@@ -140,7 +142,7 @@ Vector<T>::Vector(const T *val, const label &length, const bool reUse)
     if (length_ > 0)
     {
       values_ = new T[length_];
-      forAll(i, length_) { values_[i] = val[i]; }
+      memcpy(values_, val, length_ * sizeof(T));
     }
   }
 }
@@ -188,7 +190,7 @@ Vector<T> &Vector<T>::operator=(const Vector<T> &v)
 
     if (length_ > 0)
     {
-      forAll(i, length_) { values_[i] = v.values_[i]; }
+      memcpy(values_, v.values_, length_ * sizeof(T));
     }
     return *this;
   }

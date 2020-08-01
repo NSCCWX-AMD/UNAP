@@ -15,8 +15,8 @@
 
 // using namespace UNAP;
 
-#define RETURN_VALUE(x, objectX, nCells) \
-  forAll(i, nCells) { x[i] = objectX[i]; }
+#define RETURN_VALUE(xnew, xold, nCells) \
+  memcpy(xnew, xold, nCells*sizeof(scalar));
 
 #define PTR2OBJ(ptr, cls, obj)  \
   cls *ptr##_tmp = (cls *)*ptr; \
@@ -214,7 +214,7 @@ void UNAP::pcgsolversolve_(scalar *xValue,
 
 #endif
 
-  RETURN_VALUE(xValue, x, nCells)
+  RETURN_VALUE(xValue, x.begin(), nCells)
   *num_iterationsPtr = solverPerf.nIterations();
   *res_normPtr = solverPerf.finalResidual();
 
@@ -288,7 +288,7 @@ void UNAP::pbicgstabsolversolve_(scalar *xValue,
 
 #endif
 
-  RETURN_VALUE(xValue, x, nCells)
+  RETURN_VALUE(xValue, x.begin(), nCells)
   *num_iterationsPtr = solverPerf.nIterations();
   *res_normPtr = solverPerf.finalResidual();
 
@@ -399,7 +399,7 @@ void UNAP::mgsolversolve_(scalar *xValue,
 
 #endif
 
-  RETURN_VALUE(xValue, x, nCells)
+  RETURN_VALUE(xValue, x.begin(), nCells)
   *num_iterationsPtr = solverPerf.nIterations();
   *res_normPtr = solverPerf.finalResidual();
 
@@ -550,13 +550,13 @@ void UNAP::fill_sw_matrix_coefficients__(long int *APtrPtr,
   scalar *upperData = lduA.upper().begin();
   scalar *diagData = lduA.diag().begin();
 
-  forAll(i, nCells) { diagData[i] = diagPtr[i]; }
+  memcpy(diagData, diagPtr, nCells*sizeof(scalar));
 
   // #ifdef SW_SLAVE
   // 	lduA.reorderVector(lduA.diag());
   // #endif
 
-  forAll(i, nFaces) { upperData[i] = upperPtr[i]; }
+  memcpy(upperData, upperPtr, nFaces*sizeof(scalar));
 
   if (!symm)
   {
@@ -757,7 +757,7 @@ void UNAP::sw_solve_mg__(long int *mgPtrPtr,
   lduA.restoreVector(x);
 #endif
 
-  RETURN_VALUE(xPtr, x, nCells);
+  RETURN_VALUE(xPtr, x.begin(), nCells);
 
 #ifdef DEBUG
 
@@ -873,7 +873,7 @@ void UNAP::sw_solve_pbicgstab__(long int *solverPtrPtr,
   lduA.restoreVector(x);
 #endif
 
-  RETURN_VALUE(xPtr, x, nCells);
+  RETURN_VALUE(xPtr, x.begin(), nCells);
 
 #ifdef DEBUG
 
