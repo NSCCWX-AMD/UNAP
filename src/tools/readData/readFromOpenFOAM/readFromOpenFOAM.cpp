@@ -294,7 +294,7 @@ void UNAP::constructLDUInterfacesFromOpenFOAM(lduMatrix &lduA,
 
         if (pam == 1)
         {
-          localData[j] = -atof(s.c_str());
+          localData[j] = atof(s.c_str());
         }
         pam++;
       }
