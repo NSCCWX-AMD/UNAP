@@ -18,8 +18,9 @@ UNAP::eigenDiagPCG::eigenDiagPCG(const matrix &A,
   if (A.getCommunicator() != b.getCommunicator() &&
       b.getCommunicator() != x.getCommunicator())
   {
-    std::cout << "Error" << __FILE__ << " " << __LINE__
-              << "The communicators between A, b and c are different\n";
+    A.getCommunicator()->log()
+        << "Error" << __FILE__ << " " << __LINE__
+        << "The communicators between A, b and c are different\n";
     ERROR_EXIT;
   }
   Communicator *comm = x.getCommunicator();
@@ -44,8 +45,9 @@ void UNAP::eigenDiagPCG::diagPCGLoops(const matrix &A,
   if (A.getCommunicator() != b.getCommunicator() &&
       b.getCommunicator() != x.getCommunicator())
   {
-    std::cout << "Error" << __FILE__ << " " << __LINE__
-              << "The communicators between A, b and c are different\n";
+    A.getCommunicator()->log()
+        << "Error" << __FILE__ << " " << __LINE__
+        << "The communicators between A, b and c are different\n";
     ERROR_EXIT;
   }
 
@@ -123,10 +125,10 @@ void UNAP::eigenDiagPCG::diagPCGLoops(const matrix &A,
     {
 #ifdef DEBUG
 
-      std::cout << "In " << __FILE__ << " " << __LINE__ << ENDL;
-      std::cout << "Warning: singularity in calculating eigenvalue! " << ENDL;
-      std::cout << "The value of search directions is too small:  wArA = "
-                << wArA << ENDL;
+      comm->log() << "In " << __FILE__ << " " << __LINE__ << ENDL;
+      comm->log() << "Warning: singularity in calculating eigenvalue! " << ENDL;
+      comm->log() << "The value of search directions is too small:  wArA = "
+                  << wArA << ENDL;
 
 #endif
       break;

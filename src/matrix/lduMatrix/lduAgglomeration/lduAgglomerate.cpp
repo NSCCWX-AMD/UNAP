@@ -74,7 +74,7 @@ void UNAP::lduAgglomeration::agglomerate(const scalarVector &faceWeights)
 
 #ifdef DEBUG
 
-  std::cout << nCreatedLevels << " coarse levels created!" << ENDL;
+  commcator_->log() << nCreatedLevels << " coarse levels created!" << ENDL;
 
 #endif
 }

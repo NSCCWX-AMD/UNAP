@@ -29,7 +29,7 @@ void UNAP::interfaces::initMatrixInterfaces(const scalarVector &psi) const
     commcator_ = psi.getCommunicator();
   else if (commcator_ != psi.getCommunicator())
   {
-    std::cout
+    commcator_->log()
         << "Error" << __FILE__ << " " << __LINE__
         << "The communicators between interfaces and Apsi are different\n";
     ERROR_EXIT;
@@ -92,7 +92,7 @@ void UNAP::interfaces::updateMatrixInterfaces(scalarVector &Apsi) const
 {
   if (commcator_ != Apsi.getCommunicator())
   {
-    std::cout
+    commcator_->log()
         << "Error" << __FILE__ << " " << __LINE__
         << "The communicators between interfaces and Apsi are different\n";
     ERROR_EXIT;

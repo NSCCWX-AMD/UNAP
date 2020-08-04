@@ -60,41 +60,41 @@ int main()
     other_comm->barrier();
   }
 
-  if (!myId) std::cout << "Start reading diagonal of A" << ENDL;
+  other_comm->log() << "Start reading diagonal of A" << ENDL;
 
   lduMatrix lduA(other_comm);
   LOCATEFILE(fileName, "A_p", dir);
   constructLDUMatrixFromOpenFOAM(lduA, fileName);
 
-  if (!myId) std::cout << "End reading diagonal of A" << ENDL;
+  other_comm->log() << "End reading diagonal of A" << ENDL;
 
   if (nProcs > 1)
   {
-    if (!myId) std::cout << "Start reading interfaces" << ENDL;
+    other_comm->log() << "Start reading interfaces" << ENDL;
 
     LOCATEFILE(fileName, "interfaces_p", dir);
     constructLDUInterfacesFromOpenFOAM(lduA, fileName);
 
-    if (!myId) std::cout << "End reading interfaces" << ENDL;
+    other_comm->log() << "End reading interfaces" << ENDL;
   }
 
   label nCells = lduA.size();
   label nFaces = lduA.upper().size();
   scalarVector b(nCells, other_comm);
 
-  if (!myId) std::cout << "Start reading b" << ENDL;
+  other_comm->log() << "Start reading b" << ENDL;
 
   LOCATEFILE(fileName, "b_p", dir);
   constructVectorFromOpenFOAM(b, fileName);
 
-  if (!myId) std::cout << "End reading b" << ENDL;
+  other_comm->log() << "End reading b" << ENDL;
 
   if (nProcs > 1)
   {
     other_comm->barrier();
   }
 
-  if (!myId) std::cout << "Finish reading data" << ENDL;
+  other_comm->log() << "Finish reading data" << ENDL;
 
   scalar tol = 0.0;
   scalar relTol = 1e-6;
@@ -118,18 +118,13 @@ int main()
 
   if (useMG)
   {
-    if (!myId)
-    {
-      std::cout
-          << " *************************************************************"
-             " \n\n ";
-      std::cout
-          << "                        use  MG   solver                      "
-             " \n\n ";
-      std::cout
-          << " *************************************************************"
-             " \n\n ";
-    }
+    other_comm->log()
+        << " *************************************************************"
+           " \n\n "
+        << "                        use  MG   solver                      "
+           " \n\n "
+        << " *************************************************************"
+           " \n\n ";
 
     scalarVector weights(nFaces, other_comm);
     forAll(i, nFaces) { weights[i] = mag(lduA.upper()[i]); }
@@ -139,15 +134,16 @@ int main()
     aggl.agglomerate(weights);
 
     PtrList<matrix::smoother> sm(aggl.size());
-    if (myId) std::cout.rdbuf(nullptr);
+
     forAll(i, aggl.size())
     {
-      std::cout << "At coarse level " << i << ":" << ENDL;
+      other_comm->log() << "At coarse level " << i << ":" << ENDL;
       lduMatrix &cm = aggl.coarseMatrix(i);
       label cnCells = cm.size();
       label cnFaces = cm.upperAddr().size();
 
-      std::cout << "nCells = " << cnCells << ", nFaces = " << cnFaces << ENDL;
+      other_comm->log() << "nCells = " << cnCells << ", nFaces = " << cnFaces
+                        << ENDL;
 
       labelVector cpostV(cnCells, other_comm);
       labelVector cpostE(cnFaces, other_comm);
@@ -232,25 +228,19 @@ int main()
 #ifdef SWTIMER
     swTimer::endTimer("MG Solve");
 #endif
-    if (!myId)
-      std::cout << "After " << solverPerf.nIterations()
-                << " iterations, the solution is converged!" << ENDL
-                << "finalResidual " << solverPerf.finalResidual() << ENDL;
+    other_comm->log() << "After " << solverPerf.nIterations()
+                      << " iterations, the solution is converged!" << ENDL
+                      << "finalResidual " << solverPerf.finalResidual() << ENDL;
   }
   else if (usePBiCGStab)
   {
-    if (!myId)
-    {
-      std::cout
-          << " *************************************************************"
-             " \n\n ";
-      std::cout
-          << "                        use  PBiCGStab  solver                "
-             " \n\n ";
-      std::cout
-          << " *************************************************************"
-             " \n\n ";
-    }
+    other_comm->log()
+        << " *************************************************************"
+           " \n\n "
+        << "                        use  PBiCGStab  solver                "
+           " \n\n "
+        << " *************************************************************"
+           " \n\n ";
 
 #ifdef UNAT_MLB
     lduA.constructMLBIterator();
@@ -295,25 +285,19 @@ int main()
     swTimer::endTimer("MLB restore");
 #endif
 #endif
-    if (!myId)
-      std::cout << "After " << solverPerf.nIterations()
-                << " iterations, the solution is converged!" << ENDL
-                << "finalResidual " << solverPerf.finalResidual() << ENDL;
+    other_comm->log() << "After " << solverPerf.nIterations()
+                      << " iterations, the solution is converged!" << ENDL
+                      << "finalResidual " << solverPerf.finalResidual() << ENDL;
   }
   else
   {
-    if (!myId)
-    {
-      std::cout
-          << " *************************************************************"
-             " \n\n ";
-      std::cout
-          << "                          use  PCG  solver                    "
-             " \n\n ";
-      std::cout
-          << " *************************************************************"
-             " \n\n ";
-    }
+    other_comm->log()
+        << " *************************************************************"
+           " \n\n "
+        << "                          use  PCG  solver                    "
+           " \n\n "
+        << " *************************************************************"
+           " \n\n ";
 
     // lduDiagPrecond precond(lduA);
 
@@ -328,18 +312,16 @@ int main()
 
     matrix::solverPerformance solverPerf = PCGSolver.solve(x, lduA, b);
 
-    if (!myId)
-      std::cout << "After " << solverPerf.nIterations()
-                << " iterations, the solution is converged!" << ENDL
-                << "finalResidual " << solverPerf.finalResidual() << ENDL;
+    other_comm->log() << "After " << solverPerf.nIterations()
+                      << " iterations, the solution is converged!" << ENDL
+                      << "finalResidual " << solverPerf.finalResidual() << ENDL;
   }
 
   // test scalar byte and label byte
 
-  if (!myId)
-    std::cout << "test byte: \n"
-              << "label " << sizeof(label) << " ,scalar " << sizeof(scalar)
-              << std::endl;
+  other_comm->log() << "test byte: \n"
+                    << "label " << sizeof(label) << " ,scalar "
+                    << sizeof(scalar) << std::endl;
 
 #ifdef SW_SLAVE
   swlu_prof_print();

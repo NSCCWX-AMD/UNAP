@@ -252,7 +252,7 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix &lduA, const char *fileName)
         lduA, nNeiProcs, neiProcNo, faceStart, faceCells, valOffDiag);
     other_comm->barrier();
 
-    std::cout << "start print interfaces" << ENDL;
+    other_comm->log() << "start print interfaces" << ENDL;
 
     printInterfaces(lduA, "interfaces");
   }

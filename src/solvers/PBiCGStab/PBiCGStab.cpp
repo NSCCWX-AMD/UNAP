@@ -24,9 +24,9 @@ UNAP::PBiCGStab::PBiCGStab(matrix::preconditioner &precond)
 {
   if (&precond == NULL)
   {
-    std::cout << "ERROR in " << __FILE__ << " " << __LINE__
-              << "The preconditioner does not exist! \n"
-              << ENDL;
+    commcator_->log() << "ERROR in " << __FILE__ << " " << __LINE__
+                      << "The preconditioner does not exist! \n"
+                      << ENDL;
     ERROR_EXIT;
   }
   else
@@ -44,9 +44,10 @@ UNAP::matrix::solverPerformance UNAP::PBiCGStab::solve(
   if (x.getCommunicator() != A.getCommunicator() &&
       A.getCommunicator() != this->commcator_)
   {
-    std::cout << "ERROR in " << __FILE__ << " " << __LINE__
-              << "The communicators between A, x and  solver are different\n"
-              << ENDL;
+    commcator_->log()
+        << "ERROR in " << __FILE__ << " " << __LINE__
+        << "The communicators between A, x and  solver are different\n"
+        << ENDL;
     ERROR_EXIT;
   }
   label nCells = x.size();
@@ -119,17 +120,18 @@ UNAP::matrix::solverPerformance UNAP::PBiCGStab::solve(
   scalar normFactor = this->normFactor(b);
   IFPRINT
   {
-    std::cout << "At nIter = ";
+    commcator_->log() << "At nIter = ";
     std::cout.width(5);
-    std::cout << solverPerf.nIterations();
-    std::cout << ",   ini res = ";
+    commcator_->log() << solverPerf.nIterations();
+    commcator_->log() << ",   ini res = ";
     std::cout.width(11);
     std::cout.setf(std::ios::scientific);
-    std::cout << solverPerf.initialResidual();
-    std::cout << ",   rel res = ";
-    std::cout << solverPerf.initialResidual() / solverPerf.initialResidual();
-    std::cout << ",   rhs  norm = ";
-    std::cout << normFactor << ENDL;
+    commcator_->log() << solverPerf.initialResidual();
+    commcator_->log() << ",   rel res = ";
+    commcator_->log() << solverPerf.initialResidual() /
+                             solverPerf.initialResidual();
+    commcator_->log() << ",   rhs  norm = ";
+    commcator_->log() << normFactor << ENDL;
   }
 #endif
 
@@ -180,7 +182,7 @@ UNAP::matrix::solverPerformance UNAP::PBiCGStab::solve(
     if (solverPerf.checkSingularity(mag(rA0rA)))
     {
 #ifdef DEBUG
-      IFPRINT { std::cout << "singularity! rA0rA = " << rA0rA << ENDL; }
+      IFPRINT { commcator_->log() << "singularity! rA0rA = " << rA0rA << ENDL; }
 #endif
       break;
     }
@@ -303,17 +305,17 @@ UNAP::matrix::solverPerformance UNAP::PBiCGStab::solve(
       solverPerf.previousResidual() = solverPerf.finalResidual();
       IFPRINT
       {
-        std::cout << "At nIter = ";
+        commcator_->log() << "At nIter = ";
         std::cout.width(5);
-        std::cout << solverPerf.nIterations();
-        std::cout << ",   fin res = ";
+        commcator_->log() << solverPerf.nIterations();
+        commcator_->log() << ",   fin res = ";
         std::cout.width(11);
         std::cout.setf(std::ios::scientific);
-        std::cout << solverPerf.finalResidual();
-        std::cout << ",   rel res = ";
-        std::cout << solverPerf.finalResidual() / normFactor;
-        std::cout << ",   conv rate = ";
-        std::cout << convergenceRate << ENDL;
+        commcator_->log() << solverPerf.finalResidual();
+        commcator_->log() << ",   rel res = ";
+        commcator_->log() << solverPerf.finalResidual() / normFactor;
+        commcator_->log() << ",   conv rate = ";
+        commcator_->log() << convergenceRate << ENDL;
       }
 #endif
       return solverPerf;
@@ -398,17 +400,17 @@ UNAP::matrix::solverPerformance UNAP::PBiCGStab::solve(
     solverPerf.previousResidual() = solverPerf.finalResidual();
     IFPRINT
     {
-      std::cout << "At nIter = ";
+      commcator_->log() << "At nIter = ";
       std::cout.width(5);
-      std::cout << solverPerf.nIterations() + 1;
-      std::cout << ",   fin res = ";
+      commcator_->log() << solverPerf.nIterations() + 1;
+      commcator_->log() << ",   fin res = ";
       std::cout.width(11);
       std::cout.setf(std::ios::scientific);
-      std::cout << solverPerf.finalResidual();
-      std::cout << ",   rel res = ";
-      std::cout << solverPerf.finalResidual() / normFactor;
-      std::cout << ",   conv rate = ";
-      std::cout << convergenceRate << ENDL;
+      commcator_->log() << solverPerf.finalResidual();
+      commcator_->log() << ",   rel res = ";
+      commcator_->log() << solverPerf.finalResidual() / normFactor;
+      commcator_->log() << ",   conv rate = ";
+      commcator_->log() << convergenceRate << ENDL;
     }
 #endif
 

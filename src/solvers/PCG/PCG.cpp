@@ -14,9 +14,9 @@ UNAP::PCG::PCG(matrix::preconditioner &precond)
 {
   if (&precond == NULL)
   {
-    std::cout << "ERROR in " << __FILE__ << " " << __LINE__
-              << "The preconditioner does not exist! \n"
-              << ENDL;
+    commcator_->log() << "ERROR in " << __FILE__ << " " << __LINE__
+                      << "The preconditioner does not exist! \n"
+                      << ENDL;
     ERROR_EXIT;
   }
   else
@@ -65,19 +65,20 @@ UNAP::matrix::solverPerformance UNAP::PCG::solve(scalarVector &x,
 #ifdef DEBUG
   IFPRINT
   {
-    std::cout << "At nIter = ";
+    commcator_->log() << "At nIter = ";
     std::cout.width(5);
-    std::cout << solverPerf.nIterations();
-    std::cout << ",   ini res = ";
+    commcator_->log() << solverPerf.nIterations();
+    commcator_->log() << ",   ini res = ";
     std::cout.width(11);
-    std::cout << solverPerf.initialResidual();
-    std::cout << ",   rel res = ";
+    commcator_->log() << solverPerf.initialResidual();
+    commcator_->log() << ",   rel res = ";
     std::cout.width(11);
-    std::cout << solverPerf.initialResidual() / solverPerf.initialResidual();
-    std::cout << ",   b norm = ";
+    commcator_->log() << solverPerf.initialResidual() /
+                             solverPerf.initialResidual();
+    commcator_->log() << ",   b norm = ";
     std::cout.width(11);
     std::cout.setf(std::ios::scientific);
-    std::cout << normFactor << ENDL;
+    commcator_->log() << normFactor << ENDL;
   }
 #endif
 
@@ -95,7 +96,7 @@ UNAP::matrix::solverPerformance UNAP::PCG::solve(scalarVector &x,
     if (solverPerf.checkSingularity(mag(wArA)))
     {
 #ifdef DEBUG
-      IFPRINT { std::cout << "singularity! wArA = " << wArA << ENDL; }
+      IFPRINT { commcator_->log() << "singularity! wArA = " << wArA << ENDL; }
 #endif
       break;
     }
@@ -131,15 +132,15 @@ UNAP::matrix::solverPerformance UNAP::PCG::solve(scalarVector &x,
 #ifdef DEBUG
     IFPRINT
     {
-      std::cout << "At nIter = ";
+      commcator_->log() << "At nIter = ";
       std::cout.width(5);
-      std::cout << solverPerf.nIterations() + 1;
-      std::cout << ",   fin res = ";
+      commcator_->log() << solverPerf.nIterations() + 1;
+      commcator_->log() << ",   fin res = ";
       std::cout.width(11);
-      std::cout << solverPerf.finalResidual();
-      std::cout << ",   rel res = ";
+      commcator_->log() << solverPerf.finalResidual();
+      commcator_->log() << ",   rel res = ";
       std::cout.width(11);
-      std::cout << solverPerf.finalResidual() / normFactor << ENDL;
+      commcator_->log() << solverPerf.finalResidual() / normFactor << ENDL;
     }
 #endif
   } while ((++solverPerf.nIterations() < maxIter_ &&

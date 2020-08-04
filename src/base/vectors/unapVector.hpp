@@ -228,8 +228,8 @@ Vector<T> &Vector<T>::operator+=(const Vector<T> &v)
 #ifdef DEBUG
   if (length_ != v.length_)
   {
-    std::cout << "ERROR in " << __FILE__ << " " << __LINE__
-              << ": The length of two vectors is not same!" << ENDL;
+    commcator_->log() << "ERROR in " << __FILE__ << " " << __LINE__
+                      << ": The length of two vectors is not same!" << ENDL;
     ERROR_EXIT;
   }
 #endif
@@ -246,8 +246,8 @@ Vector<T> &Vector<T>::operator-=(const Vector<T> &v)
 #ifdef DEBUG
   if (length_ != v.length_)
   {
-    std::cout << "ERROR in " << __FILE__ << " " << __LINE__
-              << ": The length of two vectors is not same!" << ENDL;
+    commcator_->log() << "ERROR in " << __FILE__ << " " << __LINE__
+                      << ": The length of two vectors is not same!" << ENDL;
     ERROR_EXIT;
   }
 #endif
@@ -312,8 +312,8 @@ void Vector<T>::SET_size(const label newSize)
 #ifdef DEBUG
   if (newSize < 0)
   {
-    std::cout << "Error in vector SET_size: "
-              << "bad new set size " << newSize << ENDL;
+    commcator_->log() << "Error in vector SET_size: "
+                      << "bad new set size " << newSize << ENDL;
 
     ERROR_EXIT;
   }
@@ -377,9 +377,8 @@ T Vector<T>::SumMag() const
   }
   else
   {
-    if (!commcator_->getMyId())
-      std::cout << "ERROR in " << __FILE__ << " " << __LINE__
-                << ": illegal data type!" << ENDL;
+    commcator_->log() << "ERROR in " << __FILE__ << " " << __LINE__
+                      << ": illegal data type!" << ENDL;
     ERROR_EXIT;
   }
 

@@ -24,7 +24,7 @@ class unapMPI
   bool parRun_;
   static CommData unapLabel_;
   static CommData unapScalar_;
-  Communicator *unapCommunicator_;
+  Communicator *commcator_;
 
  public:
   unapMPI();
@@ -43,7 +43,7 @@ class unapMPI
   //- number of this process
   label myProcNo() { return myProcNo_; }
 
-  Communicator *unapCommunicator() { return unapCommunicator_; }
+  Communicator *unapCommunicator() { return commcator_; }
 
   //- int type
   static MPI_Datatype &unapLabel() { return unapLabel_; }

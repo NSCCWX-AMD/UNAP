@@ -10,9 +10,10 @@ void UNAP::sortData(scalarVector &data,
   if (data.getCommunicator() != order.getCommunicator() &&
       cellFaces.getCommunicator() != data.getCommunicator())
   {
-    std::cout << "Error: " << __FILE__ << " in " << __LINE__
-              << "The Communicator between data , order and cellFaces are "
-                 "different!\n";
+    data.getCommunicator()->log()
+        << "Error: " << __FILE__ << " in " << __LINE__
+        << "The Communicator between data , order and cellFaces are "
+           "different!\n";
   }
   const label nCells = cellFaces.size();
 

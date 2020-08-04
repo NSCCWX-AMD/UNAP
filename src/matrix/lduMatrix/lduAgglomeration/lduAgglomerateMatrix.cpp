@@ -60,7 +60,7 @@ void UNAP::lduAgglomeration::agglomerateMatrix(const label fineLevelIndex)
         }
         else
         {
-          std::cout
+          commcator_->log()
               << "Error in agglomerateMatrix: Inconsistent addressing between "
               << "fine and coarse grids." << ENDL;
           ERROR_EXIT;

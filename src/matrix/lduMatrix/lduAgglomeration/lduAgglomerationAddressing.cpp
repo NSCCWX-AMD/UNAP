@@ -21,11 +21,12 @@ void UNAP::lduAgglomeration::agglomerateLduAddressing(
 #ifdef DEBUG
   if (restrictMap.size() != fineA.nCells())
   {
-    std::cout << "Error in agglomerateLduAddressing: restrict map does not "
-                 "correspond to fine level."
-              << ENDL;
-    std::cout << "Sizes: restrictMap: " << restrictMap.size()
-              << " nEqns: " << fineA.nCells() << ENDL;
+    commcator_->log()
+        << "Error in agglomerateLduAddressing: restrict map does not "
+           "correspond to fine level."
+        << ENDL;
+    commcator_->log() << "Sizes: restrictMap: " << restrictMap.size()
+                      << " nEqns: " << fineA.nCells() << ENDL;
     ERROR_EXIT;
   }
 #endif

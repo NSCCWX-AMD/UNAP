@@ -3,18 +3,18 @@
 CommData UNAP::unapMPI::unapLabel_ = COMM_INT;
 CommData UNAP::unapMPI::unapScalar_ = COMM_DOUBLE;
 
-UNAP::unapMPI::unapMPI() : unapCommunicator_(NULL)
+UNAP::unapMPI::unapMPI() : commcator_(NULL)
 {
   int initialized;
   MPI_Initialized(&initialized);
   if (!initialized)
   {
     COMM::init(NULL, NULL);
-    unapCommunicator_ = &COMM::getGlobalComm();
+    commcator_ = &COMM::getGlobalComm();
   }
 
-  nProcs_ = unapCommunicator_->getMySize();
-  myProcNo_ = unapCommunicator_->getMyId();
+  nProcs_ = commcator_->getMySize();
+  myProcNo_ = commcator_->getMyId();
 
   if (nProcs_ > 1)
   {
@@ -35,9 +35,8 @@ UNAP::unapMPI::unapMPI() : unapCommunicator_(NULL)
   }
   else
   {
-    if (!myProcNo_)
-      std::cout << "Error: label is not neither a int nor a long int type!"
-                << ENDL;
+    commcator_->log()
+        << "Error: label is not neither a int nor a long int type!" << ENDL;
 
     ERROR_EXIT;
   }
@@ -52,9 +51,8 @@ UNAP::unapMPI::unapMPI() : unapCommunicator_(NULL)
   }
   else
   {
-    if (!myProcNo_)
-      std::cout << "Error: scalar is not neither a float nor a double type!"
-                << ENDL;
+    commcator_->log()
+        << "Error: scalar is not neither a float nor a double type!" << ENDL;
 
     ERROR_EXIT;
   }
@@ -62,10 +60,10 @@ UNAP::unapMPI::unapMPI() : unapCommunicator_(NULL)
 
 void UNAP::unapMPI::initMPI(Communicator *other_comm)
 {
-  unapCommunicator_ = other_comm;
+  commcator_ = other_comm;
 
-  nProcs_ = unapCommunicator_->getMySize();
-  myProcNo_ = unapCommunicator_->getMyId();
+  nProcs_ = commcator_->getMySize();
+  myProcNo_ = commcator_->getMyId();
 
   if (nProcs_ > 1)
   {
@@ -86,9 +84,8 @@ void UNAP::unapMPI::initMPI(Communicator *other_comm)
   }
   else
   {
-    if (!myProcNo_)
-      std::cout << "Error: label is not neither a int nor a long int type!"
-                << ENDL;
+    commcator_->log()
+        << "Error: label is not neither a int nor a long int type!" << ENDL;
     ERROR_EXIT;
   }
 
@@ -102,9 +99,8 @@ void UNAP::unapMPI::initMPI(Communicator *other_comm)
   }
   else
   {
-    if (!myProcNo_)
-      std::cout << "Error: scalar is not neither a float nor a double type!"
-                << ENDL;
+    commcator_->log()
+        << "Error: scalar is not neither a float nor a double type!" << ENDL;
     ERROR_EXIT;
   }
 }
