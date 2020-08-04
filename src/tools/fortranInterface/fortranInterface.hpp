@@ -193,6 +193,16 @@ extern "C"
 
   void sw_solver_destroy_pbicgstab__(long int *solverPtrPtr);
 
+  void createinterfaces__(label64 *APtrPtr,
+                          label64 *offDiagRows,
+                          label64 *offDiagCols,
+                          label *offDiagPids,
+                          label *cellNumPtr,
+                          label *faceNumPtr,
+                          label *postOrders);
+
+  void printvector__(scalar *data, label *size, char *name);
+
 #ifdef __cplusplus
 }
 #endif

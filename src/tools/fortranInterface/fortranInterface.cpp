@@ -16,7 +16,7 @@
 // using namespace UNAP;
 
 #define RETURN_VALUE(xnew, xold, nCells) \
-  memcpy(xnew, xold, nCells*sizeof(scalar));
+  memcpy(xnew, xold, nCells * sizeof(scalar));
 
 #define PTR2OBJ(ptr, cls, obj)  \
   cls *ptr##_tmp = (cls *)*ptr; \
@@ -550,13 +550,13 @@ void UNAP::fill_sw_matrix_coefficients__(long int *APtrPtr,
   scalar *upperData = lduA.upper().begin();
   scalar *diagData = lduA.diag().begin();
 
-  memcpy(diagData, diagPtr, nCells*sizeof(scalar));
+  memcpy(diagData, diagPtr, nCells * sizeof(scalar));
 
   // #ifdef SW_SLAVE
   // 	lduA.reorderVector(lduA.diag());
   // #endif
 
-  memcpy(upperData, upperPtr, nFaces*sizeof(scalar));
+  memcpy(upperData, upperPtr, nFaces * sizeof(scalar));
 
   if (!symm)
   {
@@ -908,4 +908,235 @@ void UNAP::sw_solver_destroy_pbicgstab__(long int *solverPtrPtr)
 {
   PTR2OBJ(solverPtrPtr, PBiCGStab, solver)
   delete &solver;
+}
+
+#include <algorithm>
+#include <map>
+#include <vector>
+
+using std::make_pair;
+using std::map;
+using std::pair;
+using std::vector;
+// using UNAP::label;
+// using UNAP::label64;
+
+bool compare(pair<label, pair<label, pair<label64, label64> > > a,
+             pair<label, pair<label, pair<label64, label64> > > b)
+{
+  if (a.second.first == b.second.first)
+  {
+    if (a.second.second.first == b.second.second.first)
+    {
+      return a.second.second.second < b.second.second.second;
+    }
+
+    return a.second.second.first < b.second.second.first;
+  }
+
+  return a.second.first < b.second.first;
+}
+
+void UNAP::createinterfaces__(label64 *APtrPtr,
+                              label64 *offDiagRows,
+                              label64 *offDiagCols,
+                              label *offDiagPids,
+                              label *cellNumPtr,
+                              label *faceNumPtr,
+                              label *postOrders)
+{
+  label64 cellNum = *cellNumPtr;
+  label faceNum = *faceNumPtr;
+
+  label64 *partitionInfo = new label64[NPROCS + 1];
+
+  partitionInfo[0] = 0;
+  MPI_Allgather(
+      &cellNum, 1, MPI_LONG, &partitionInfo[1], 1, MPI_LONG, MPI_COMM_WORLD);
+
+  forAll(i, NPROCS) { partitionInfo[i + 1] += partitionInfo[i]; }
+
+  label64 nCellsAll = partitionInfo[NPROCS];
+
+  forAll(i, faceNum)
+  {
+    offDiagRows[i] += partitionInfo[MYID];
+    offDiagCols[i] += partitionInfo[offDiagPids[i]];
+  }
+
+  //- find neighbor processor ID for every face
+  vector<pair<label, pair<label, pair<label64, label64> > > > vec;
+  forAll(i, faceNum)
+  {
+    label64 IDIn, IDOut;
+    IDIn = offDiagRows[i];
+    IDOut = offDiagCols[i];
+
+    bool FIND = false;
+    //- get the assumed neighbor processor ID,
+    //- by assuming that all cells are partitioned uniformly
+    label procAssume = IDOut / (nCellsAll / NPROCS);
+
+    if (IDOut < nCellsAll)
+    {
+      if (procAssume > NPROCS - 1) procAssume = NPROCS - 1;
+
+      do
+      {
+        if (IDOut >= partitionInfo[procAssume + 1])
+        {
+          procAssume++;
+        }
+        else if (IDOut < partitionInfo[procAssume])
+        {
+          procAssume--;
+        }
+        else
+        {
+          //- do nothing
+          FIND = true;
+        }
+      } while (!FIND);
+    }
+    else
+    {
+      printf(
+          "Error: cell ID exceeds the total cell number: cell ID = %ld, total "
+          "number = %ld!\n",
+          IDOut,
+          nCellsAll);
+    }
+
+    //- smaller IDs are placed in the left
+    //- thus all processors will follow the same discipline
+    //- and produce the same patch faces order
+    if (IDIn > IDOut && MYID != procAssume)
+    {
+      label64 temp = IDIn;
+      IDIn = IDOut;
+      IDOut = temp;
+    }
+
+    vec.push_back(make_pair(i, make_pair(procAssume, make_pair(IDIn, IDOut))));
+  }
+
+  //- sort faces in order of neighbor processors
+  std::sort(vec.begin(), vec.end(), compare);
+
+  map<label, vector<pair<label, pair<label64, label64> > > > mapCells;
+
+  //- split the faces in order of neighbor processors
+  forAll(i, faceNum)
+  {
+    label NbrProcID = vec[i].second.first;
+    label64 cellID1 = vec[i].second.second.first;
+    label64 cellID2 = vec[i].second.second.second;
+    label originOrder = vec[i].first;
+    label64 localCellID;
+    label64 nbrCellID;
+
+    if (MYID == NbrProcID)
+    {
+      localCellID = cellID1;
+      nbrCellID = cellID2;
+    }
+    else
+    {
+      //- find the cellIDs belonging to current processor
+      //- and storage them
+      if (cellID1 >= partitionInfo[MYID] && cellID1 < partitionInfo[MYID + 1])
+      {
+        localCellID = cellID1;
+        nbrCellID = cellID2;
+      }
+      else if (cellID2 >= partitionInfo[MYID] &&
+               cellID2 < partitionInfo[MYID + 1])
+      {
+        localCellID = cellID2;
+        nbrCellID = cellID1;
+      }
+      //- myProNo + 1 == NPROCS
+      //- 最右端闭合
+      else if (cellID2 == partitionInfo[MYID + 1])
+      {
+        localCellID = cellID2;
+        nbrCellID = cellID1;
+      }
+      else
+      {
+        printf(
+            "Error: cell is not in the target Processor, please check! At proc"
+            " = "
+            "%d, elements from %ld to %ld, cell1 = %ld, cell2 = %ld\n",
+            MYID,
+            partitionInfo[MYID],
+            partitionInfo[MYID + 1],
+            cellID1,
+            cellID2);
+        ERROR_EXIT;
+      }
+    }
+
+    mapCells[NbrProcID].push_back(
+        make_pair(originOrder, make_pair(localCellID, nbrCellID)));
+  }
+
+  PTR2OBJ(APtrPtr, lduMatrix, lduA)
+
+  const label nNeiProcs = mapCells.size();
+
+  PtrList<patch> *patchesPtr = new PtrList<patch>(nNeiProcs);
+
+  map<label, vector<pair<label, pair<label64, label64> > > >::iterator it;
+  label intI = 0;
+  label fid = 0;
+  for (it = mapCells.begin(), intI = 0; it != mapCells.end(), intI < nNeiProcs;
+       it++, intI++)
+  {
+    label nbrID = it->first;
+    label localSize = (it->second).size();
+
+    patch *patchIPtr = new patch(localSize, MYID, nbrID);
+    label *localFaceCells = new label[localSize];
+    // label *localFaceCells2 = new label[localSize];
+
+    forAll(faceI, localSize)
+    {
+      localFaceCells[faceI] =
+          (it->second)[faceI].second.first - partitionInfo[MYID];
+      // localFaceCells2[faceI] =
+          // (it->second)[faceI].second.second - partitionInfo[nbrID];
+
+      // postOrders[fid] = (it->second)[faceI].first;
+      postOrders[(it->second)[faceI].first] = fid;
+      // offDiagRows[fid] = (it->second)[faceI].second.first;
+      // offDiagCols[fid] = (it->second)[faceI].second.second;
+      fid++;
+    }
+
+    labelVector *locFaceCellsPtr =
+        new labelVector(localFaceCells, localSize, true);
+    scalarVector *localDataPtr = new scalarVector(localSize);
+
+    // labelVector *locFaceCells2Ptr =
+        // new labelVector(localFaceCells2, localSize, true);
+
+    patchIPtr->faceCells(*locFaceCellsPtr);
+    // patchIPtr->faceCells2(*locFaceCells2Ptr);
+    patchIPtr->patchCoeffs(*localDataPtr);
+
+    patchesPtr->setLevel(intI, *patchIPtr);
+  }
+
+  interfaces *interfacesLocalPtr = new interfaces(*patchesPtr);
+  lduA.matrixInterfaces(*interfacesLocalPtr);
+
+  DELETE_POINTER(partitionInfo);
+}
+
+void UNAP::printvector__(scalar *data, label *size, char *fname)
+{
+  scalarVector pp(data, *size);
+  printVector(pp, fname);
+  MPI_Barrier(MPI_COMM_WORLD);
 }
