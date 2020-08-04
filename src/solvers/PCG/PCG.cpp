@@ -50,10 +50,9 @@ UNAP::matrix::solverPerformance UNAP::PCG::solve(scalarVector &x,
   //- calculate initial residual field
   forAll(i, nCells) { rAPtr[i] = bPtr[i] - wAPtr[i]; }
 
-#ifdef DEBUG
+
   //- calculate normalisation factor
   scalar normFactor = this->normFactor(b);
-#endif
 
   solverPerf.initialResidual() = this->normFactor(rA);
   solverPerf.finalResidual() = solverPerf.initialResidual();
@@ -69,13 +68,15 @@ UNAP::matrix::solverPerformance UNAP::PCG::solve(scalarVector &x,
     UNAPCOUT << solverPerf.initialResidual();
     UNAPCOUT << ",   rel res = ";
     std::cout.width(11);
-    UNAPCOUT << solverPerf.initialResidual() / solverPerf.initialResidual();
+    UNAPCOUT << solverPerf.initialResidual() / normFactor;
     UNAPCOUT << ",   b norm = ";
     std::cout.width(11);
     std::cout.setf(std::ios::scientific);
     UNAPCOUT << normFactor << ENDL;
   }
 #endif
+
+  solverPerf.initialResidual() = normFactor;
 
   do
   {
@@ -88,7 +89,7 @@ UNAP::matrix::solverPerformance UNAP::PCG::solve(scalarVector &x,
     wArA = dot(wA, rA);
 
     // --- Test for singularity
-    if (solverPerf.checkSingularity(mag(wArA)))
+    if (solverPerf.checkSingularity(mag(wArA) / normFactor))
     {
 #ifdef DEBUG
       IFPRINT { UNAPCOUT << "singularity! wArA = " << wArA << ENDL; }

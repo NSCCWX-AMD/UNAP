@@ -60,9 +60,10 @@ UNAP::matrix::solverPerformance UNAP::MGSolver::solve(
   solverPerf.finalResidual() = solverPerf.initialResidual();
   solverPerf.previousResidual() = solverPerf.finalResidual();
 
-#ifdef DEBUG
   //- calculate normalization factor
   scalar normFactor = this->normFactor(b);
+
+#ifdef DEBUG
   IFPRINT
   {
     UNAPCOUT << "At cycle = ";
@@ -73,12 +74,14 @@ UNAP::matrix::solverPerformance UNAP::MGSolver::solve(
     std::cout.setf(std::ios::scientific);
     UNAPCOUT << solverPerf.initialResidual();
     UNAPCOUT << ",   rel res = ";
-    UNAPCOUT << solverPerf.initialResidual() / solverPerf.initialResidual();
+    UNAPCOUT << solverPerf.initialResidual() / normFactor;
     UNAPCOUT << ",   rhs  norm = ";
     UNAPCOUT << normFactor << ENDL;
   }
 // swTimer::startTimer("MG Vcycle");
 #endif
+
+  solverPerf.initialResidual() = normFactor;
 
   if (!solverPerf.checkConvergence(
           tolerance_, relTol_, solverPerf.nIterations(), minIter_))
