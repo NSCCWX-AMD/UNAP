@@ -64,11 +64,18 @@ void UNAP::printInterfaces(const lduMatrix &A, const char *fileName)
 {
   const interfaces &matrixInter = A.matrixInterfaces();
   label numInterfaces = matrixInter.size();
+  label numFaces = 0;
 
   std::ofstream fout;
   FILEOPEN(fout, fileName);
 
-  fout << "neighbor processors: " << numInterfaces << std::endl;
+  for (int i = 0; i < numInterfaces; ++i)
+  {
+    patch &patchI = matrixInter.patchList(i);
+    numFaces += patchI.size();
+  }
+  fout << "neighbor processors: " << numInterfaces
+       << " faces number: " << numFaces << std::endl;
 
   for (int i = 0; i < numInterfaces; ++i)
   {
