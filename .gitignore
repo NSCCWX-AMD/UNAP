@@ -2,7 +2,7 @@
 build/*
 src/utilities/*
 *pyc
-exData/*
+exData
 .vscode/*
 *mod
 *.o
