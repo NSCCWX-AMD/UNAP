@@ -119,7 +119,6 @@ extern "C"
                                      const scalar *lowerPtr);
 
   void fill_sw_matrix_interfaces_coefficients__(long int *APtrPtr,
-                                                const label *offDiagStartsPtr,
                                                 const scalar *offDiagCoeffs);
 
   //- mg

@@ -16,7 +16,7 @@
 // using namespace UNAP;
 
 #if defined(SW_SLAVE)
-  extern UNAT::MultiLevelBlockIterator* mlbIter;
+extern UNAT::MultiLevelBlockIterator *mlbIter;
 #endif
 
 #define RETURN_VALUE(xnew, xold, nCells) \
@@ -570,10 +570,8 @@ void UNAP::fill_sw_matrix_coefficients__(long int *APtrPtr,
   }
 }
 
-void UNAP::fill_sw_matrix_interfaces_coefficients__(
-    long int *APtrPtr,
-    const label *offDiagStartsPtr,
-    const scalar *offDiagCoeffs)
+void UNAP::fill_sw_matrix_interfaces_coefficients__(long int *APtrPtr,
+                                                    const scalar *offDiagCoeffs)
 {
   PTR2OBJ(APtrPtr, lduMatrix, lduA)
 
@@ -581,16 +579,18 @@ void UNAP::fill_sw_matrix_interfaces_coefficients__(
 
   const label nNeiProcs = lduAInter.size();
 
+  label start = 0;
+
   forAll(intI, nNeiProcs)
   {
     patch &patchI = lduAInter.patchList(intI);
-    const label localSize = offDiagStartsPtr[intI + 1] - offDiagStartsPtr[intI];
+    const label localSize = patchI.size();
     scalar *localData = patchI.patchCoeffs().begin();
 
     forAll(faceI, localSize)
     {
-      label start = offDiagStartsPtr[intI] + faceI - 1;
       localData[faceI] = offDiagCoeffs[start];
+      start++;
     }
   }
 }
