@@ -16,7 +16,7 @@ namespace UNAP
 {
 class lduMatrix : public matrix
 {
-private:
+ private:
   //- number of cells
   label nCells_;
 
@@ -65,17 +65,10 @@ private:
 
 #endif
 
-public:
+ public:
   //- constructors
 
-  lduMatrix();
-
-  lduMatrix(const label &nCells,
-            const labelVector &lowerAddr,
-            const labelVector &upperAddr,
-            const scalarVector &lower,
-            const scalarVector &diag,
-            const scalarVector &upper);
+  lduMatrix(Communicator *other_comm);
 
   lduMatrix(const label &nCells,
             const labelVector &lowerAddr,
@@ -83,18 +76,29 @@ public:
             const scalarVector &lower,
             const scalarVector &diag,
             const scalarVector &upper,
-            const bool reUse);
+            Communicator *other_comm);
+
+  lduMatrix(const label &nCells,
+            const labelVector &lowerAddr,
+            const labelVector &upperAddr,
+            const scalarVector &lower,
+            const scalarVector &diag,
+            const scalarVector &upper,
+            const bool reUse,
+            Communicator *other_comm);
 
   //- constructor
   //- only topology
   lduMatrix(const label &nCells,
             const labelVector &lowerAddr,
-            const labelVector &upperAddr);
+            const labelVector &upperAddr,
+            Communicator *other_comm);
 
   lduMatrix(const label &nCells,
             const labelVector &lowerAddr,
             const labelVector &upperAddr,
-            const bool reUse);
+            const bool reUse,
+            Communicator *other_comm);
 
   //- destructor
   ~lduMatrix();
@@ -133,7 +137,7 @@ public:
   {
     DELETE_OBJECT_POINTER(lowerPtr_)
 
-    lowerPtr_ = new scalarVector(newSize);
+    lowerPtr_ = new scalarVector(newSize, this->commcator_);
   }
 
   void SET_upper(scalarVector &newUpper)
@@ -145,7 +149,7 @@ public:
   {
     DELETE_OBJECT_POINTER(upperPtr_)
 
-    upperPtr_ = new scalarVector(newSize);
+    upperPtr_ = new scalarVector(newSize, this->commcator_);
   }
 
   void SET_diag(scalarVector &newDiag)
@@ -157,7 +161,7 @@ public:
   {
     DELETE_OBJECT_POINTER(diagPtr_)
 
-    diagPtr_ = new scalarVector(newSize);
+    diagPtr_ = new scalarVector(newSize, this->commcator_);
   }
 
   scalarVector &diag() { return *diagPtr_; }
@@ -221,7 +225,7 @@ public:
   void matrixInterfaces(const label size)
   {
     PtrList<patch> *patchesPtr = new PtrList<patch>(size);
-    interfacesPtr_ = new interfaces(*patchesPtr);
+    interfacesPtr_ = new interfaces(*patchesPtr, this->commcator_);
   }
 
   void createInterfacesTopology(const label nNeiProcs,

@@ -12,7 +12,7 @@ int main()
   forAll(i, nCells)
   {
     x[i] = ((scalar)i + 0.2) / 0.4;
-    UNAPCOUT << "x = " << x[i] << ENDL;
+    std::cout << "x = " << x[i] << ENDL;
   }
 
   labelVector lowerAddr(nCells);
@@ -37,7 +37,7 @@ int main()
 
   forAll(i, nCells)
   {
-    UNAPCOUT << "i = " << i << ", Apsi = " << Apsi[i] << ENDL;
+    std::cout << "i = " << i << ", Apsi = " << Apsi[i] << ENDL;
   }
 
   //- for checking the correct

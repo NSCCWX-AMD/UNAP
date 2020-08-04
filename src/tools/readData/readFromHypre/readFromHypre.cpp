@@ -12,6 +12,7 @@ using namespace std;
 
 void UNAP::constructLDUMatrixFromHypre(lduMatrix &lduA, const char *fileName)
 {
+  Communicator *other_comm = lduA.getCommunicator();
   ifstream dataFile;
   dataFile.open(fileName);
   vector<string> vec;
@@ -57,34 +58,35 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix &lduA, const char *fileName)
   }
 
   //- in fact, there is no need to know end in every processor, except for the
-  //last processor
-  labelVector procStart(NPROCS);
-  labelVector procEnd(NPROCS);
+  // last processor
+  label nProcs = other_comm->getMySize();
+  labelVector procStart(nProcs, other_comm);
+  labelVector procEnd(nProcs, other_comm);
 
-  if (PARRUN)
+  if (nProcs > 1)
   {
-    UNAP::unapMPI::unapCommunicator().barrier();
-    UNAP::unapMPI::unapCommunicator().allGather("allgather1",
-                                                &rStart,
-                                                1 * sizeof(label),
-                                                procStart.values(),
-                                                1 * sizeof(label));
-    UNAP::unapMPI::unapCommunicator().allGather("allgather2",
-                                                &rEnd,
-                                                1 * sizeof(label),
-                                                procEnd.values(),
-                                                1 * sizeof(label));
-    UNAP::unapMPI::unapCommunicator().finishTask("allgather1");
-    UNAP::unapMPI::unapCommunicator().finishTask("allgather2");
+    other_comm->barrier();
+    other_comm->allGather("allgather1",
+                          &rStart,
+                          1 * sizeof(label),
+                          procStart.values(),
+                          1 * sizeof(label));
+    other_comm->allGather("allgather2",
+                          &rEnd,
+                          1 * sizeof(label),
+                          procEnd.values(),
+                          1 * sizeof(label));
+    other_comm->finishTask("allgather1");
+    other_comm->finishTask("allgather2");
   }
 
   const label nCells = rEnd - rStart + 1;
 
   const label nnzAll = vec.size() - 1;
 
-  labelVector row(nnzAll);
-  labelVector col(nnzAll);
-  scalarVector val(nnzAll);
+  labelVector row(nnzAll, other_comm);
+  labelVector col(nnzAll, other_comm);
+  scalarVector val(nnzAll, other_comm);
 
   {
     std::vector<std::string>::iterator it;
@@ -121,7 +123,7 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix &lduA, const char *fileName)
   label nnzOffDiagPart = 0;
   label upperSize = 0;
 
-  labelVector procCounts(NPROCS);
+  labelVector procCounts(nProcs, other_comm);
 
   vector<label> faceToProcNOVec;
 
@@ -137,7 +139,7 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix &lduA, const char *fileName)
     }
     else
     {
-      forAll(j, NPROCS)
+      forAll(j, nProcs)
       {
         if (col[i] >= procStart[j] && col[i] <= procEnd[j])
         {
@@ -150,7 +152,7 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix &lduA, const char *fileName)
   }
 
   label nNeiProcs = 0;
-  forAll(i, NPROCS)
+  forAll(i, nProcs)
   {
     if (procCounts[i] > 0)
     {
@@ -158,11 +160,11 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix &lduA, const char *fileName)
     }
   }
 
-  labelVector nFacesInProc(nNeiProcs);
-  labelVector neiProcNo(nNeiProcs);
+  labelVector nFacesInProc(nNeiProcs, other_comm);
+  labelVector neiProcNo(nNeiProcs, other_comm);
   nNeiProcs = 0;
   map<int, int> mapProcID;
-  forAll(i, NPROCS)
+  forAll(i, nProcs)
   {
     if (procCounts[i] > 0)
     {
@@ -173,14 +175,14 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix &lduA, const char *fileName)
     }
   }
 
-  labelVector rowLoc(nnzDiagPart);
-  labelVector colLoc(nnzDiagPart);
-  scalarVector valLoc(nnzDiagPart);
+  labelVector rowLoc(nnzDiagPart, other_comm);
+  labelVector colLoc(nnzDiagPart, other_comm);
+  scalarVector valLoc(nnzDiagPart, other_comm);
 
-  labelVector rowOffDiag(nnzOffDiagPart);
-  labelVector colOffDiag(nnzOffDiagPart);
-  labelVector faceToProcNO(nnzOffDiagPart);
-  scalarVector valOffDiag(nnzOffDiagPart);
+  labelVector rowOffDiag(nnzOffDiagPart, other_comm);
+  labelVector colOffDiag(nnzOffDiagPart, other_comm);
+  labelVector faceToProcNO(nnzOffDiagPart, other_comm);
+  scalarVector valOffDiag(nnzOffDiagPart, other_comm);
 
   forAll(i, nnzOffDiagPart) { faceToProcNO[i] = faceToProcNOVec[i]; }
 
@@ -204,19 +206,24 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix &lduA, const char *fileName)
     }
   }
 
-  reorderCOO(
-      valLoc.values(), rowLoc.values(), colLoc.values(), nCells, nnzDiagPart);
+  reorderCOO(valLoc.values(),
+             rowLoc.values(),
+             colLoc.values(),
+             nCells,
+             nnzDiagPart,
+             other_comm);
 
   lduMatrix &diagA = coo2ldu(valLoc.values(),
                              rowLoc.values(),
                              colLoc.values(),
                              nCells,
                              nnzDiagPart,
-                             0);
+                             0,
+                             other_comm);
 
   // printLDUMatrix(diagA, "A_diag");
 
-  labelVector faceStart(nNeiProcs + 1);
+  labelVector faceStart(nNeiProcs + 1, other_comm);
   forAll(i, nNeiProcs) { faceStart[i + 1] = faceStart[i] + nFacesInProc[i]; }
 
   sortInterFaces(valOffDiag,
@@ -236,16 +243,16 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix &lduA, const char *fileName)
   lduA.setMatrixTopology(diagA.upperAddr(), diagA.lowerAddr(), reUse);
   lduA.setMatrixCoeffients(diagA.diag(), diagA.upper(), diagA.lower(), reUse);
 
-  labelVector faceCells(nnzOffDiagPart);
+  labelVector faceCells(nnzOffDiagPart, other_comm);
   forAll(i, nnzOffDiagPart) { faceCells[i] = rowOffDiag[i] - rStart; }
 
-  if (PARRUN)
+  if (nProcs > 1)
   {
     constructLDUInterfacesFromHypre(
         lduA, nNeiProcs, neiProcNo, faceStart, faceCells, valOffDiag);
-    // UNAP::unapMPI::unapCommunicator().barrier();
+    other_comm->barrier();
 
-    // UNAPCOUT << "start print interfaces" << ENDL;
+    other_comm->log() << "start print interfaces" << ENDL;
 
     // printInterfaces(lduA, "interfaces");
   }
@@ -263,11 +270,14 @@ void UNAP::sortInterFaces(scalarVector &val,
                           const labelVector &globalRowStart,
                           const labelVector &globalRowEnd)
 {
-  labelVector procCounts(procSize);
+  Communicator *other_comm = globalRowEnd.getCommunicator();
 
-  scalarVector valTemp(faceSize);
-  labelVector rowTemp(faceSize);
-  labelVector colTemp(faceSize);
+  label myId = other_comm->getMyId();
+  labelVector procCounts(procSize, other_comm);
+
+  scalarVector valTemp(faceSize, other_comm);
+  labelVector rowTemp(faceSize, other_comm);
+  labelVector colTemp(faceSize, other_comm);
 
   //- sort as processor
   forAll(i, faceSize)
@@ -286,16 +296,16 @@ void UNAP::sortInterFaces(scalarVector &val,
     label procNO = neiProcNo[i];
     label localSize = faceStart[i + 1] - faceStart[i];
 
-    scalarVector valTemp2(localSize);
-    labelVector rowTemp2(localSize);
-    labelVector colTemp2(localSize);
+    scalarVector valTemp2(localSize, other_comm);
+    labelVector rowTemp2(localSize, other_comm);
+    labelVector colTemp2(localSize, other_comm);
 
     //- sort lower part
-    if (procNO < MYID)
+    if (procNO < myId)
     {
       label nCols = globalRowEnd[procNO] - globalRowStart[procNO] + 1;
 
-      labelVector countsInCol(nCols);
+      labelVector countsInCol(nCols, other_comm);
       forAll(j, localSize)
       {
         label globalPosition = faceStart[i] + j;
@@ -303,7 +313,7 @@ void UNAP::sortInterFaces(scalarVector &val,
         countsInCol[colLocal]++;
       }
 
-      labelVector countsInColOffsets(nCols + 1);
+      labelVector countsInColOffsets(nCols + 1, other_comm);
 
       forAll(j, nCols)
       {
@@ -335,18 +345,18 @@ void UNAP::sortInterFaces(scalarVector &val,
     //- sort upper part
     else
     {
-      label nRows = globalRowEnd[MYID] - globalRowStart[MYID] + 1;
+      label nRows = globalRowEnd[myId] - globalRowStart[myId] + 1;
 
-      labelVector countsInRow(nRows);
+      labelVector countsInRow(nRows, other_comm);
 
       forAll(j, localSize)
       {
         label globalPosition = faceStart[i] + j;
-        label rowLocal = rowTemp[globalPosition] - globalRowStart[MYID];
+        label rowLocal = rowTemp[globalPosition] - globalRowStart[myId];
         countsInRow[rowLocal]++;
       }
 
-      labelVector countsInRowOffsets(nRows + 1);
+      labelVector countsInRowOffsets(nRows + 1, other_comm);
 
       forAll(j, nRows)
       {
@@ -354,11 +364,11 @@ void UNAP::sortInterFaces(scalarVector &val,
         countsInRow[j] = 0;
       }
 
-      labelVector posInRow(localSize);
+      labelVector posInRow(localSize, other_comm);
       forAll(j, localSize)
       {
         label globalPosition = faceStart[i] + j;
-        label rowLocal = rowTemp[globalPosition] - globalRowStart[MYID];
+        label rowLocal = rowTemp[globalPosition] - globalRowStart[myId];
 
         label localRowSize =
             countsInRowOffsets[rowLocal + 1] - countsInRowOffsets[rowLocal];
@@ -376,7 +386,7 @@ void UNAP::sortInterFaces(scalarVector &val,
       forAll(j, localSize)
       {
         label globalPosition = faceStart[i] + j;
-        label rowLocal = rowTemp[globalPosition] - globalRowStart[MYID];
+        label rowLocal = rowTemp[globalPosition] - globalRowStart[myId];
         label localPosition = countsInRowOffsets[rowLocal] + posInRow[j];
         valTemp2[localPosition] = valTemp[globalPosition];
         rowTemp2[localPosition] = rowTemp[globalPosition];
@@ -408,13 +418,15 @@ void UNAP::constructLDUInterfacesFromHypre(lduMatrix &lduA,
                                            const labelVector &faceCells,
                                            const scalarVector &data)
 {
+  Communicator *other_comm = data.getCommunicator();
+  label myId = other_comm->getMyId();
   PtrList<patch> *patchesPtr = new PtrList<patch>(nNeiProcs);
 
   forAll(intI, nNeiProcs)
   {
     const label neighborID = destRank[intI];
     const label localSize = locPosition[intI + 1] - locPosition[intI];
-    patch *patchIPtr = new patch(localSize, MYID, neighborID);
+    patch *patchIPtr = new patch(localSize, myId, neighborID);
 
     scalar *localData = new scalar[localSize];
     label *localFaceCells = new label[localSize];
@@ -426,8 +438,10 @@ void UNAP::constructLDUInterfacesFromHypre(lduMatrix &lduA,
       localFaceCells[faceI] = faceCells[start];
     }
 
-    scalarVector *patchCoeffsPtr = new scalarVector(localData, localSize);
-    labelVector *locFaceCellsPtr = new labelVector(localFaceCells, localSize);
+    scalarVector *patchCoeffsPtr =
+        new scalarVector(localData, localSize, other_comm);
+    labelVector *locFaceCellsPtr =
+        new labelVector(localFaceCells, localSize, other_comm);
 
     delete[] localData;
     delete[] localFaceCells;
@@ -438,7 +452,7 @@ void UNAP::constructLDUInterfacesFromHypre(lduMatrix &lduA,
     patchesPtr->setLevel(intI, *patchIPtr);
   }
 
-  interfaces *interfacesLocalPtr = new interfaces(*patchesPtr);
+  interfaces *interfacesLocalPtr = new interfaces(*patchesPtr, other_comm);
   lduA.matrixInterfaces(*interfacesLocalPtr);
 }
 
@@ -483,15 +497,15 @@ void UNAP::constructVectorFromHypre(scalarVector &b, const char *fileName)
 
   if ((nCells + 1) != vec.size())
   {
-    UNAPCOUT << "Error in reading " << fileName << ": reading "
-             << vec.size() - 1 << " lines, while nCells = " << nCells << ENDL;
+    std::cout << "Error in reading " << fileName << ": reading "
+              << vec.size() - 1 << " lines, while nCells = " << nCells << ENDL;
     ERROR_EXIT;
   }
 
   if (nCells != b.size())
   {
-    UNAPCOUT << "Error in " << fileName << ": fill size = " << nCells
-             << ", while allocated size = " << b.size() << ENDL;
+    std::cout << "Error in " << fileName << ": fill size = " << nCells
+              << ", while allocated size = " << b.size() << ENDL;
     ERROR_EXIT;
   }
 

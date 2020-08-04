@@ -12,23 +12,27 @@
 
 #define IFPRINT if (!MYID && ifPrint_)
 
-UNAP::PBiCGStab::PBiCGStab() : deletePrecondPtr_(false), precondPtr_(NULL)
+UNAP::PBiCGStab::PBiCGStab(Communicator *other_comm)
+    : deletePrecondPtr_(false), precondPtr_(NULL), matrix::solver(other_comm)
 {
-  precondPtr_ = new matrix::preconditioner;
+  precondPtr_ = new matrix::preconditioner(other_comm);
   deletePrecondPtr_ = true;
 }
 
 UNAP::PBiCGStab::PBiCGStab(matrix::preconditioner &precond)
-    : deletePrecondPtr_(false), precondPtr_(NULL)
+    : deletePrecondPtr_(false), precondPtr_(NULL), matrix::solver(NULL)
 {
   if (&precond == NULL)
   {
-    precondPtr_ = new matrix::preconditioner;
-    deletePrecondPtr_ = true;
+    commcator_->log() << "ERROR in " << __FILE__ << " " << __LINE__
+                      << "The preconditioner does not exist! \n"
+                      << ENDL;
+    ERROR_EXIT;
   }
   else
   {
     precondPtr_ = &precond;
+    this->setCommunicator(precond.getCommunicator());
   }
 }
 
@@ -37,21 +41,30 @@ UNAP::matrix::solverPerformance UNAP::PBiCGStab::solve(
 {
   matrix::solverPerformance solverPerf;
 
+  if (x.getCommunicator() != A.getCommunicator() &&
+      A.getCommunicator() != this->commcator_)
+  {
+    commcator_->log()
+        << "ERROR in " << __FILE__ << " " << __LINE__
+        << "The communicators between A, x and  solver are different\n"
+        << ENDL;
+    ERROR_EXIT;
+  }
   label nCells = x.size();
 
   scalar *xPtr = x.values();
   const scalar *bPtr = b.values();
 
-  scalarVector pA(nCells);
+  scalarVector pA(nCells, this->commcator_);
   scalar *pAPtr = pA.values();
 
-  scalarVector yA(nCells);
+  scalarVector yA(nCells, this->commcator_);
   scalar *yAPtr = yA.values();
 
-  scalarVector rA(nCells);
+  scalarVector rA(nCells, this->commcator_);
   scalar *rAPtr = rA.values();
 
-  scalarVector rA0(nCells);
+  scalarVector rA0(nCells, this->commcator_);
   scalar *rA0Ptr = rA0.values();
 
   //- calculate A.psi
@@ -108,32 +121,31 @@ UNAP::matrix::solverPerformance UNAP::PBiCGStab::solve(
 #ifdef DEBUG
   IFPRINT
   {
-    UNAPCOUT << "At nIter = ";
+    commcator_->log() << "At nIter = ";
     std::cout.width(5);
-    UNAPCOUT << solverPerf.nIterations();
-    UNAPCOUT << ",   ini res = ";
+    commcator_->log() << solverPerf.nIterations();
+    commcator_->log() << ",   ini res = ";
     std::cout.width(11);
     std::cout.setf(std::ios::scientific);
-    UNAPCOUT << solverPerf.initialResidual();
-    UNAPCOUT << ",   rel res = ";
-    UNAPCOUT << solverPerf.initialResidual() / normFactor;
-    UNAPCOUT << ",   rhs  norm = ";
-    UNAPCOUT << normFactor << ENDL;
+    commcator_->log() << solverPerf.initialResidual();
+    commcator_->log() << ",   rel res = ";
+    commcator_->log() << solverPerf.initialResidual() /
+                             solverPerf.initialResidual();
+    commcator_->log() << ",   rhs  norm = ";
+    commcator_->log() << normFactor << ENDL;
   }
 #endif
 
-  solverPerf.initialResidual() = normFactor;
-
-  scalarVector AyA(nCells);
+  scalarVector AyA(nCells, this->commcator_);
   scalar *AyAPtr = AyA.values();
 
-  scalarVector sA(nCells);
+  scalarVector sA(nCells, this->commcator_);
   scalar *sAPtr = sA.values();
 
-  scalarVector zA(nCells);
+  scalarVector zA(nCells, this->commcator_);
   scalar *zAPtr = zA.values();
 
-  scalarVector tA(nCells);
+  scalarVector tA(nCells, this->commcator_);
   scalar *tAPtr = tA.values();
 
   //- initial values not used
@@ -171,7 +183,7 @@ UNAP::matrix::solverPerformance UNAP::PBiCGStab::solve(
     if (solverPerf.checkSingularity(mag(rA0rA) / normFactor))
     {
 #ifdef DEBUG
-      IFPRINT { UNAPCOUT << "singularity! rA0rA = " << rA0rA << ENDL; }
+      IFPRINT { commcator_->log() << "singularity! rA0rA = " << rA0rA << ENDL; }
 #endif
       break;
     }
@@ -294,17 +306,17 @@ UNAP::matrix::solverPerformance UNAP::PBiCGStab::solve(
       solverPerf.previousResidual() = solverPerf.finalResidual();
       IFPRINT
       {
-        UNAPCOUT << "At nIter = ";
+        commcator_->log() << "At nIter = ";
         std::cout.width(5);
-        UNAPCOUT << solverPerf.nIterations();
-        UNAPCOUT << ",   fin res = ";
+        commcator_->log() << solverPerf.nIterations();
+        commcator_->log() << ",   fin res = ";
         std::cout.width(11);
         std::cout.setf(std::ios::scientific);
-        UNAPCOUT << solverPerf.finalResidual();
-        UNAPCOUT << ",   rel res = ";
-        UNAPCOUT << solverPerf.finalResidual() / normFactor;
-        UNAPCOUT << ",   conv rate = ";
-        UNAPCOUT << convergenceRate << ENDL;
+        commcator_->log() << solverPerf.finalResidual();
+        commcator_->log() << ",   rel res = ";
+        commcator_->log() << solverPerf.finalResidual() / normFactor;
+        commcator_->log() << ",   conv rate = ";
+        commcator_->log() << convergenceRate << ENDL;
       }
 #endif
       return solverPerf;
@@ -389,17 +401,17 @@ UNAP::matrix::solverPerformance UNAP::PBiCGStab::solve(
     solverPerf.previousResidual() = solverPerf.finalResidual();
     IFPRINT
     {
-      UNAPCOUT << "At nIter = ";
+      commcator_->log() << "At nIter = ";
       std::cout.width(5);
-      UNAPCOUT << solverPerf.nIterations() + 1;
-      UNAPCOUT << ",   fin res = ";
+      commcator_->log() << solverPerf.nIterations() + 1;
+      commcator_->log() << ",   fin res = ";
       std::cout.width(11);
       std::cout.setf(std::ios::scientific);
-      UNAPCOUT << solverPerf.finalResidual();
-      UNAPCOUT << ",   rel res = ";
-      UNAPCOUT << solverPerf.finalResidual() / normFactor;
-      UNAPCOUT << ",   conv rate = ";
-      UNAPCOUT << convergenceRate << ENDL;
+      commcator_->log() << solverPerf.finalResidual();
+      commcator_->log() << ",   rel res = ";
+      commcator_->log() << solverPerf.finalResidual() / normFactor;
+      commcator_->log() << ",   conv rate = ";
+      commcator_->log() << convergenceRate << ENDL;
     }
 #endif
 

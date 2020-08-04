@@ -86,12 +86,12 @@ int main()
           n1 - n0 + nZerosCells[(i - 1) * (N - 1) + j - 1];
     }
 
-  // UNAPCOUT << "Number of non zeros in upper coefficients is " << nZeros <<
+  // std::cout << "Number of non zeros in upper coefficients is " << nZeros <<
   // ENDL;
 
   // forAll(i, nCells+1)
   // {
-  // 	UNAPCOUT << "nZerosCells = " << nZerosCells[i] << ENDL;
+  // 	std::cout << "nZerosCells = " << nZerosCells[i] << ENDL;
   // }
 
   labelVector lowerAddr(nZeros);
@@ -140,9 +140,9 @@ int main()
   // PBiCGStabSolver.SET_maxIter(50);
 
   matrix::solverPerformance solverPerf = PBiCGStabSolver.solve(x, *A, b);
-  UNAPCOUT << "After " << solverPerf.nIterations()
-           << " iterations, the solution is converged!" << ENDL;
-  UNAPCOUT << "Let me check now: " << ENDL;
+  std::cout << "After " << solverPerf.nIterations()
+            << " iterations, the solution is converged!" << ENDL;
+  std::cout << "Let me check now: " << ENDL;
 
   label okNums = 0;
   scalar relErr = 0.001;
@@ -157,21 +157,21 @@ int main()
       scalar err = fabs((x[pos] - uExact) / (uExact + SMALL));
 
       if (err > relErr)
-        UNAPCOUT << "err = " << err << ", uExact = " << uExact
-                 << ", uComput = " << x[pos] << ENDL;
+        std::cout << "err = " << err << ", uExact = " << uExact
+                  << ", uComput = " << x[pos] << ENDL;
       else
         okNums++;
     }
 
   if (okNums == nCells)
   {
-    UNAPCOUT << "No cell's error is larger than " << relErr * 100 << "%."
-             << ENDL;
+    std::cout << "No cell's error is larger than " << relErr * 100 << "%."
+              << ENDL;
   }
   else
   {
-    UNAPCOUT << "The number of cells is " << nCells << ", while only " << okNums
-             << " cells have correct solutions." << ENDL;
+    std::cout << "The number of cells is " << nCells << ", while only "
+              << okNums << " cells have correct solutions." << ENDL;
   }
 
   delete[] bAll;

@@ -20,31 +20,41 @@ namespace UNAP
 template <typename T>
 class Vector
 {
-private:
+ private:
   label length_;
   T *values_;
+  Communicator *commcator_;
 
-public:
+ public:
   //- constructors
   //- length(0), values(NULL)
-  Vector();
+  Vector(Communicator *other_comm);
 
-  Vector(const label length);
+  Vector(const label length, Communicator *other_comm);
 
   //- copy from an existing vector
   Vector(const Vector<T> &v);
 
   //- copy from an existing array with a giving length
-  Vector(const T *val, const label &length);
+  Vector(const T *val, const label &length, Communicator *other_comm);
 
   //- copy from an existing array with a giving length
-  Vector(const T *val, const label &length, const bool reUse);
+  Vector(const T *val,
+         const label &length,
+         const bool reUse,
+         Communicator *other_comm);
 
   //- build a vector with a given length and same value
-  Vector(const label length, const T value);
+  Vector(const label length, const T value, Communicator *other_comm);
 
   //- destructor
   virtual ~Vector();
+
+  // - set communicator
+  void setCommunicator(Communicator *other_comm) { commcator_ = other_comm; }
+
+  // - get communicator
+  Communicator *getCommunicator() const { return commcator_; }
 
   //- return ith value
   inline T &operator[](const label i) { return (this->values_[i]); }
@@ -94,12 +104,14 @@ typedef Vector<scalar> scalarVector;
 scalar dot(const scalarVector &v1, const scalarVector &v2);
 
 template <typename T>
-Vector<T>::Vector() : length_(0), values_(NULL)
+Vector<T>::Vector(Communicator *other_comm) : length_(0), values_(NULL)
 {
+  commcator_ = other_comm;
 }
 
 template <typename T>
-Vector<T>::Vector(const label length) : length_(length), values_(NULL)
+Vector<T>::Vector(const label length, Communicator *other_comm)
+    : length_(length), values_(NULL), commcator_(other_comm)
 {
   if (length_ > 0)
   {
@@ -109,7 +121,8 @@ Vector<T>::Vector(const label length) : length_(length), values_(NULL)
 }
 
 template <typename T>
-Vector<T>::Vector(const Vector<T> &v) : length_(v.length_), values_(NULL)
+Vector<T>::Vector(const Vector<T> &v)
+    : length_(v.length_), values_(NULL), commcator_(v.commcator_)
 {
   if (length_ > 0)
   {
@@ -119,8 +132,8 @@ Vector<T>::Vector(const Vector<T> &v) : length_(v.length_), values_(NULL)
 }
 
 template <typename T>
-Vector<T>::Vector(const T *val, const label &length)
-    : length_(length), values_(NULL)
+Vector<T>::Vector(const T *val, const label &length, Communicator *other_comm)
+    : length_(length), values_(NULL), commcator_(other_comm)
 {
   if (length_ > 0)
   {
@@ -130,8 +143,11 @@ Vector<T>::Vector(const T *val, const label &length)
 }
 
 template <typename T>
-Vector<T>::Vector(const T *val, const label &length, const bool reUse)
-    : length_(length), values_(NULL)
+Vector<T>::Vector(const T *val,
+                  const label &length,
+                  const bool reUse,
+                  Communicator *other_comm)
+    : length_(length), values_(NULL), commcator_(other_comm)
 {
   if (reUse)
   {
@@ -148,7 +164,8 @@ Vector<T>::Vector(const T *val, const label &length, const bool reUse)
 }
 
 template <typename T>
-Vector<T>::Vector(const label len, const T value) : length_(len), values_(NULL)
+Vector<T>::Vector(const label len, const T value, Communicator *other_comm)
+    : length_(len), values_(NULL), commcator_(other_comm)
 {
   if (length_ > 0)
   {
@@ -176,6 +193,7 @@ Vector<T> &Vector<T>::operator=(const Vector<T> &v)
   }
   else
   {
+    this->commcator_ = v.commcator_;
     if (length_ != v.length_)
     {
       if (this->values_)
@@ -212,8 +230,8 @@ Vector<T> &Vector<T>::operator+=(const Vector<T> &v)
 #ifdef DEBUG
   if (length_ != v.length_)
   {
-    UNAPCOUT << "ERROR in " << __FILE__ << " " << __LINE__
-             << ": The length of two vectors is not same!" << ENDL;
+    commcator_->log() << "ERROR in " << __FILE__ << " " << __LINE__
+                      << ": The length of two vectors is not same!" << ENDL;
     ERROR_EXIT;
   }
 #endif
@@ -230,8 +248,8 @@ Vector<T> &Vector<T>::operator-=(const Vector<T> &v)
 #ifdef DEBUG
   if (length_ != v.length_)
   {
-    UNAPCOUT << "ERROR in " << __FILE__ << " " << __LINE__
-             << ": The length of two vectors is not same!" << ENDL;
+    commcator_->log() << "ERROR in " << __FILE__ << " " << __LINE__
+                      << ": The length of two vectors is not same!" << ENDL;
     ERROR_EXIT;
   }
 #endif
@@ -296,8 +314,8 @@ void Vector<T>::SET_size(const label newSize)
 #ifdef DEBUG
   if (newSize < 0)
   {
-    UNAPCOUT << "Error in vector SET_size: "
-             << "bad new set size " << newSize << ENDL;
+    commcator_->log() << "Error in vector SET_size: "
+                      << "bad new set size " << newSize << ENDL;
 
     ERROR_EXIT;
   }
@@ -341,7 +359,7 @@ T Vector<T>::Sum() const
   label len = this->length_;
   T *val = this->values_;
   forAll(i, len) { sum += val[i]; }
-  reduceSum(&sum);
+  reduceSum(&sum, commcator_);
   return sum;
 }
 
@@ -361,12 +379,12 @@ T Vector<T>::SumMag() const
   }
   else
   {
-    UNAPCOUT << "ERROR in " << __FILE__ << " " << __LINE__
-             << ": illegal data type!" << ENDL;
+    commcator_->log() << "ERROR in " << __FILE__ << " " << __LINE__
+                      << ": illegal data type!" << ENDL;
     ERROR_EXIT;
   }
 
-  reduceSum(&sum);
+  reduceSum(&sum, commcator_);
 
   return sum;
 }
@@ -380,7 +398,7 @@ T Vector<T>::SumSqr() const
 
   forAll(i, len) { sum += val[i] * val[i]; }
 
-  reduceSum(&sum);
+  reduceSum(&sum, commcator_);
   return sum;
 }
 

@@ -60,7 +60,7 @@ void UNAP::lduAgglomeration::agglomerateMatrix(const label fineLevelIndex)
         }
         else
         {
-          UNAPCOUT
+          commcator_->log()
               << "Error in agglomerateMatrix: Inconsistent addressing between "
               << "fine and coarse grids." << ENDL;
           ERROR_EXIT;
@@ -100,7 +100,7 @@ void UNAP::lduAgglomeration::agglomerateMatrix(const label fineLevelIndex)
     }
   }
 
-  if (PARRUN)
+  if (this->commcator_->getMySize() > 1)
   {
     const interfaces &fineInterfaces = fineMatrix.matrixInterfaces();
     interfaces &coarseInterfaces = coarseMatrix.matrixInterfaces();
@@ -115,7 +115,7 @@ void UNAP::lduAgglomeration::agglomerateMatrix(const label fineLevelIndex)
       const label finePatchFacesSize = fineInterfaces.patchList(inti).size();
 
       scalarVector *coarsePatchCoeffsPtr =
-          new scalarVector(coarsePatchFacesSize);
+          new scalarVector(coarsePatchFacesSize, this->commcator_);
       scalarVector &coarsePatchCoeffs = *coarsePatchCoeffsPtr;
 
       labelVector &faceRestrictAddressing =

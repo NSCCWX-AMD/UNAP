@@ -2,7 +2,8 @@
 
 #include "lduMatrix.hpp"
 
-UNAP::lduDILUPrecond::lduDILUPrecond(const lduMatrix &A) : rD_(A.diag())
+UNAP::lduDILUPrecond::lduDILUPrecond(const lduMatrix &A)
+    : rD_(A.diag()), matrix::preconditioner(A.getCommunicator())
 {
   APtr_ = &A;
   calcReciprocalD(rD_, A);

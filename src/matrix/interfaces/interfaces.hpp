@@ -10,7 +10,7 @@ class patch;
 
 class interfaces
 {
-private:
+ private:
   PtrList<patch> &patches_;
 
   //- send buffer for initializing and updating matrix interfaces
@@ -23,17 +23,22 @@ private:
   mutable MPI_Request *sendRecvRequests_;
 
   mutable string *sendTaskName_;
+
   mutable string *recvTaskName_;
+
   //- locPosition
   mutable label *locPosition_;
 
   //- destRank
   mutable label *destRank_;
 
-public:
-  interfaces(const label size);
+  //- communicator
+  mutable Communicator *commcator_;
 
-  interfaces(PtrList<patch> &patches);
+ public:
+  interfaces(const label size, Communicator *other_comm);
+
+  interfaces(PtrList<patch> &patches, Communicator *other_comm);
 
   virtual ~interfaces();
 
@@ -51,6 +56,12 @@ public:
   virtual label size() const { return patches_.size(); }
 
   void reorderIntFaceCells(const label *cellMap);
+
+  // - set communicator
+  void setCommunicator(Communicator *other_comm) { commcator_ = other_comm; }
+
+  // - get communicator
+  Communicator *getCommunicator() const { return commcator_; }
 };
 
 }  // namespace UNAP

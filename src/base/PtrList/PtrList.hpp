@@ -17,12 +17,12 @@ namespace UNAP
 template <typename T>
 class PtrList
 {
-private:
+ private:
   label size_;
 
   T **ptrs_;
 
-public:
+ public:
   //- constructor
   //- null constructor
   PtrList();
@@ -148,8 +148,8 @@ inline void PtrList<T>::SET_size(const label newSize)
 #ifdef DEBUG
   if (newSize < 0)
   {
-    UNAPCOUT << "Error in PtrList SET_size: "
-             << "bad new set size " << newSize << ENDL;
+    std::cout << "Error in PtrList SET_size: "
+              << "bad new set size " << newSize << ENDL;
 
     ERROR_EXIT;
   }
@@ -214,9 +214,9 @@ void PtrList<T>::removeLevel(const label leveli)
   }
   else
   {
-    UNAPCOUT << "Error: removeLevel failed!" << ENDL;
-    UNAPCOUT << "Number of levels is " << oldSize
-             << ", while the level tended to delete is " << leveli << ENDL;
+    std::cout << "Error: removeLevel failed!" << ENDL;
+    std::cout << "Number of levels is " << oldSize
+              << ", while the level tended to delete is " << leveli << ENDL;
     ERROR_EXIT;
   }
 }
@@ -230,9 +230,9 @@ void PtrList<T>::setLevel(const label leveli, T &obj)
   }
   else
   {
-    UNAPCOUT << "Error: setLevel failed!" << ENDL;
-    UNAPCOUT << "Number of levels is " << size_
-             << ", while the level tended to set is " << leveli << ENDL;
+    std::cout << "Error: setLevel failed!" << ENDL;
+    std::cout << "Number of levels is " << size_
+              << ", while the level tended to set is " << leveli << ENDL;
     ERROR_EXIT;
   }
 }

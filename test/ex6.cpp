@@ -45,10 +45,10 @@ int main()
         -8.0 * pi * pi * sin(2 * pi * i * dx) * sin(2 * pi * j * dy);
   }
 
-  // UNAPCOUT << "bAll: " << ENDL;
+  // std::cout << "bAll: " << ENDL;
   // forAll(i, (N+1)*(N+1))
   // {
-  // 	UNAPCOUT << bAll[i] << ENDL;
+  // 	std::cout << bAll[i] << ENDL;
   // }
 
   scalar *xAll = new scalar[(N + 1) * (N + 1)];
@@ -64,10 +64,10 @@ int main()
     }
   }
 
-  // UNAPCOUT << "xAll: " << ENDL;
+  // std::cout << "xAll: " << ENDL;
   // forAll(i, (N+1)*(N+1))
   // {
-  // 	UNAPCOUT << xAll[i] << ENDL;
+  // 	std::cout << xAll[i] << ENDL;
   // }
 
   scalarVector b(nCells);
@@ -99,7 +99,8 @@ int main()
   labelVector lowerAddr(nZeros);
   labelVector upperAddr(nZeros);
 
-  UNAPCOUT << "Number of non zeros in upper coefficients is " << nZeros << ENDL;
+  std::cout << "Number of non zeros in upper coefficients is " << nZeros
+            << ENDL;
 
   label nStart = 0;
   for (int i = 1; i < N; i++)
@@ -158,9 +159,9 @@ int main()
 
   matrix::solverPerformance solverPerf = MG.solve(x, lduA, b);
 
-  UNAPCOUT << "After " << solverPerf.nIterations()
-           << " iterations, the solution is converged!" << ENDL;
-  UNAPCOUT << "Let me check now: " << ENDL;
+  std::cout << "After " << solverPerf.nIterations()
+            << " iterations, the solution is converged!" << ENDL;
+  std::cout << "Let me check now: " << ENDL;
 
   label okNums = 0;
   scalar relErr = 0.001;
@@ -175,21 +176,21 @@ int main()
       scalar err = fabs((x[pos] - uExact) / (uExact + SMALL));
 
       if (err > relErr && fabs(uExact) > max(relTol, tol))
-        UNAPCOUT << "err = " << err << ", uExact = " << uExact
-                 << ", uComput = " << x[pos] << ENDL;
+        std::cout << "err = " << err << ", uExact = " << uExact
+                  << ", uComput = " << x[pos] << ENDL;
       else
         okNums++;
     }
 
   if (okNums == nCells)
   {
-    UNAPCOUT << "No cell's error is larger than " << relErr * 100 << "%."
-             << ENDL;
+    std::cout << "No cell's error is larger than " << relErr * 100 << "%."
+              << ENDL;
   }
   else
   {
-    UNAPCOUT << "The number of cells is " << nCells << ", while only " << okNums
-             << " cells have correct solutions." << ENDL;
+    std::cout << "The number of cells is " << nCells << ", while only "
+              << okNums << " cells have correct solutions." << ENDL;
   }
 
   delete[] bAll;

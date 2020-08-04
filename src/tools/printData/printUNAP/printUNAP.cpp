@@ -29,7 +29,7 @@ void UNAP::printLDUMatrix(const lduMatrix &A, const char *fileName)
   }
 
   std::ofstream fout;
-  FILEOPEN(fout, fileName);
+  FILEOPEN(fout, fileName, A.getCommunicator()->getMyId());
   fout << "nCells: " << nCells << " "
        << "nnz: " << nnz << " "
        << "symm: " << symm << std::endl;
@@ -67,7 +67,7 @@ void UNAP::printInterfaces(const lduMatrix &A, const char *fileName)
   label numFaces = 0;
 
   std::ofstream fout;
-  FILEOPEN(fout, fileName);
+  FILEOPEN(fout, fileName, A.getCommunicator()->getMyId());
 
   for (int i = 0; i < numInterfaces; ++i)
   {

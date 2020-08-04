@@ -6,6 +6,11 @@ extern "C"
 {
 #endif
 
+  // 初始化MPI环境 返回communicator
+  void comminit_(long int *CommPtr);
+
+  void commgetmyidsize_(long int *CommPtr, int *rank, int *size);
+
   void ldumatrixcreat_(long int *APtrPtr,
                        int *nCells,
                        int *upperSize,
@@ -13,7 +18,8 @@ extern "C"
                        int *upperAddr,
                        double *lower,
                        double *diag,
-                       double *upper);
+                       double *upper,
+                       long int *commPtr);
 
   void coo2ldumatrixcreat_(long int *APtrPtr,
                            const double *dataPtr,
@@ -21,7 +27,8 @@ extern "C"
                            const int *columnPtr,
                            const int *nCells,
                            const int *size,
-                           const int *symm);
+                           const int *symm,
+                           long int *commPtr);
 
   void csr2ldumatrixcreat_(long int *APtrPtr,
                            const double *dataPtr,
@@ -29,7 +36,8 @@ extern "C"
                            const int *columnPtr,
                            const int *nCells,
                            const int *size,
-                           const int *symm);
+                           const int *symm,
+                           long int *commPtr);
 
   void matrixinterfacescreat_(long int *APtrPtr,
                               const int *nNeiProcs,

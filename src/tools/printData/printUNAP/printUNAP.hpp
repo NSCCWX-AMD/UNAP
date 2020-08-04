@@ -7,9 +7,9 @@
 
 #include "lduMatrix.hpp"
 
-#define FILEOPEN(fout, fileName)                 \
-  std::ostringstream os;                         \
-  os << fileName << "_" << UNAP::MYID << ".txt"; \
+#define FILEOPEN(fout, fileName, MYID)     \
+  std::ostringstream os;                   \
+  os << fileName << "_" << MYID << ".txt"; \
   fout.open(os.str().c_str())
 
 #define FILECLOSE(fout, fileName) fout.close()
@@ -30,7 +30,7 @@ void UNAP::printVector(const T &v, const char *fileName)
   const label size = v.size();
   std::ofstream fout;
 
-  FILEOPEN(fout, fileName);
+  FILEOPEN(fout, fileName, v.getCommunicator()->getMyId());
 
   fout << "nCells: " << size << std::endl;
   forAll(i, size)

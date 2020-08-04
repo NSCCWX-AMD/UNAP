@@ -7,9 +7,9 @@ namespace UNAP
 {
 class lduAgglomeration : public matrix::agglomeration
 {
-private:
+ private:
   //- direction of cell loop for the current level
-  static bool forward_;
+  bool forward_;
 
   //- max number of levels
   label maxLevels_;
@@ -70,7 +70,7 @@ private:
 
   const lduMatrix &matrixLevel(const label leveli) const;
 
-public:
+ public:
   //- constructors
   lduAgglomeration(const lduMatrix &A);
 

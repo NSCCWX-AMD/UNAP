@@ -27,34 +27,49 @@ extern UNAT::MultiLevelBlockIterator *mlbIter;
   CHECK_POINTER(ptr##_tmp)      \
   cls &obj = *ptr##_tmp;
 
-void UNAP::ldumatrixcreat_(label64 *APtrPtr,
+void UNAP::comminit_(long int *commPtr)
+{
+  COMM::init(NULL, NULL);
+  *(Communicator **)commPtr = &COMM::getGlobalComm();
+}
+
+void UNAP::commgetmyidsize_(long int *commPtr, int *rank, int *size)
+{
+  Communicator *commcator = (Communicator *)*commPtr;
+  *rank = commcator->getMyId();
+  *size = commcator->getMySize();
+}
+
+void UNAP::ldumatrixcreat_(long int *APtrPtr,
                            label *nCellsPtr,
                            label *upperSizePtr,
                            label *lowerAddrValue,
                            label *upperAddrValue,
                            scalar *lowerValue,
                            scalar *diagValue,
-                           scalar *upperValue)
+                           scalar *upperValue,
+                           long int *commPtr)
 {
+  Communicator *commcator = (Communicator *)*commPtr;
   label nCells = *nCellsPtr;
   label upperSize = *upperSizePtr;
-  labelVector lowerAddr(lowerAddrValue, upperSize);
-  labelVector upperAddr(upperAddrValue, upperSize);
+  labelVector lowerAddr(lowerAddrValue, upperSize, commcator);
+  labelVector upperAddr(upperAddrValue, upperSize, commcator);
 
-  scalarVector diag(diagValue, nCells);
-  scalarVector upper(upperValue, upperSize);
+  scalarVector diag(diagValue, nCells, commcator);
+  scalarVector upper(upperValue, upperSize, commcator);
 
   scalarVector &lower = upper;
   scalarVector *lowerPtr = NULL;
 
   if (lowerValue != upperValue)
   {
-    lowerPtr = new scalarVector(lowerValue, upperSize);
+    lowerPtr = new scalarVector(lowerValue, upperSize, commcator);
     lower = *lowerPtr;
   }
 
-  *(lduMatrix **)APtrPtr =
-      new lduMatrix(nCells, lowerAddr, upperAddr, lower, diag, upper);
+  *(lduMatrix **)APtrPtr = new lduMatrix(
+      nCells, lowerAddr, upperAddr, lower, diag, upper, commcator);
 
   DELETE_OBJECT_POINTER(lowerPtr)
 }
@@ -65,9 +80,10 @@ void UNAP::coo2ldumatrixcreat_(label64 *APtrPtr,
                                const label *fColsPtr,
                                const label *nCellsPtr,
                                const label *sizePtr,
-                               const label *symmPtr)
+                               const label *symmPtr,
+                               long int *commPtr)
 {
-  unapMPI::initMPI();
+  Communicator *commcator = (Communicator *)*commPtr;
   label *cRowsPtr = new label[*sizePtr];
   label *cColsPtr = new label[*sizePtr];
   scalar *cValsPtr = new scalar[*sizePtr];
@@ -85,10 +101,10 @@ void UNAP::coo2ldumatrixcreat_(label64 *APtrPtr,
   else
     symm = false;
 
-  reorderCOO(cValsPtr, cRowsPtr, cColsPtr, *nCellsPtr, *sizePtr);
+  reorderCOO(cValsPtr, cRowsPtr, cColsPtr, *nCellsPtr, *sizePtr, commcator);
 
-  lduMatrix &lduA =
-      coo2ldu(cValsPtr, cRowsPtr, cColsPtr, *nCellsPtr, *sizePtr, symm);
+  lduMatrix &lduA = coo2ldu(
+      cValsPtr, cRowsPtr, cColsPtr, *nCellsPtr, *sizePtr, symm, commcator);
 
   *(lduMatrix **)APtrPtr = &lduA;
 
@@ -103,11 +119,12 @@ void UNAP::csr2ldumatrixcreat_(label64 *APtrPtr,
                                const label *fColsPtr,
                                const label *nCellsPtr,
                                const label *sizePtr,
-                               const label *symmPtr)
+                               const label *symmPtr,
+                               long int *commPtr)
 {
-  unapMPI::initMPI();
-  lduMatrix &lduA =
-      csr2ldu(dataPtr, fRowsPtr, fColsPtr, *nCellsPtr, *sizePtr, *symmPtr);
+  Communicator *commcator = (Communicator *)*commPtr;
+  lduMatrix &lduA = csr2ldu(
+      dataPtr, fRowsPtr, fColsPtr, *nCellsPtr, *sizePtr, *symmPtr, commcator);
 
   *(lduMatrix **)APtrPtr = &lduA;
 }
@@ -123,6 +140,8 @@ void UNAP::matrixinterfacescreat_(label64 *APtrPtr,
   CHECK_POINTER(APtr)
   lduMatrix &lduA = *APtr;
 
+  label myId = APtr->getCommunicator()->getMyId();
+
   const label nNeiProcs = *nNeiProcsPtr;
 
   PtrList<patch> *patchesPtr = new PtrList<patch>(nNeiProcs);
@@ -131,7 +150,7 @@ void UNAP::matrixinterfacescreat_(label64 *APtrPtr,
   {
     const label neighborID = destRankPtr[intI] - 1;
     const label localSize = locPositionPtr[intI + 1] - locPositionPtr[intI];
-    patch *patchIPtr = new patch(localSize, MYID, neighborID);
+    patch *patchIPtr = new patch(localSize, myId, neighborID);
 
     scalar *localData = new scalar[localSize];
     label *localFaceCells = new label[localSize];
@@ -143,8 +162,10 @@ void UNAP::matrixinterfacescreat_(label64 *APtrPtr,
       localFaceCells[faceI] = faceCellsPtr[start] - 1;
     }
 
-    scalarVector *patchCoeffsPtr = new scalarVector(localData, localSize);
-    labelVector *locFaceCellsPtr = new labelVector(localFaceCells, localSize);
+    scalarVector *patchCoeffsPtr =
+        new scalarVector(localData, localSize, APtr->getCommunicator());
+    labelVector *locFaceCellsPtr =
+        new labelVector(localFaceCells, localSize, APtr->getCommunicator());
 
     delete[] localData;
     delete[] localFaceCells;
@@ -155,7 +176,8 @@ void UNAP::matrixinterfacescreat_(label64 *APtrPtr,
     patchesPtr->setLevel(intI, *patchIPtr);
   }
 
-  interfaces *interfacesLocalPtr = new interfaces(*patchesPtr);
+  interfaces *interfacesLocalPtr =
+      new interfaces(*patchesPtr, APtr->getCommunicator());
   lduA.matrixInterfaces(*interfacesLocalPtr);
 }
 
@@ -171,13 +193,13 @@ void UNAP::pcgsolversolve_(scalar *xValue,
                            label *num_iterationsPtr,
                            scalar *res_normPtr)
 {
-  label nCells = *nCellsPtr;
-  scalarVector x(xValue, nCells);
-  scalarVector b(bValue, nCells);
-
   lduMatrix *APtr = (lduMatrix *)*APtrPtr;
   CHECK_POINTER(APtr)
   lduMatrix &lduA = *APtr;
+
+  label nCells = *nCellsPtr;
+  scalarVector x(xValue, nCells, lduA.getCommunicator());
+  scalarVector b(bValue, nCells, lduA.getCommunicator());
 
   label precondType = *precondTypePtr;
 
@@ -208,12 +230,12 @@ void UNAP::pcgsolversolve_(scalar *xValue,
 
   if (solverPerf.converged())
   {
-    UNAPCOUT << "After " << solverPerf.nIterations()
-             << " iterations, the solution is converged!" << ENDL;
+    std::cout << "After " << solverPerf.nIterations()
+              << " iterations, the solution is converged!" << ENDL;
   }
   else
   {
-    UNAPCOUT << "The PCG solver reaches the maximum iterations." << ENDL;
+    std::cout << "The PCG solver reaches the maximum iterations." << ENDL;
   }
 
 #endif
@@ -238,13 +260,13 @@ void UNAP::pbicgstabsolversolve_(scalar *xValue,
                                  label *num_iterationsPtr,
                                  scalar *res_normPtr)
 {
-  label nCells = *nCellsPtr;
-  scalarVector x(xValue, nCells);
-  scalarVector b(bValue, nCells);
-
   lduMatrix *APtr = (lduMatrix *)*APtrPtr;
   CHECK_POINTER(APtr)
   lduMatrix &lduA = *APtr;
+
+  label nCells = *nCellsPtr;
+  scalarVector x(xValue, nCells, APtr->getCommunicator());
+  scalarVector b(bValue, nCells, APtr->getCommunicator());
 
   label precondType = *precondTypePtr;
 
@@ -282,12 +304,12 @@ void UNAP::pbicgstabsolversolve_(scalar *xValue,
 
   if (solverPerf.converged())
   {
-    UNAPCOUT << "After " << solverPerf.nIterations()
-             << " iterations, the solution is converged!" << ENDL;
+    std::cout << "After " << solverPerf.nIterations()
+              << " iterations, the solution is converged!" << ENDL;
   }
   else
   {
-    UNAPCOUT << "The PBiCGStab solver reaches the maximum iterations." << ENDL;
+    std::cout << "The PBiCGStab solver reaches the maximum iterations." << ENDL;
   }
 
 #endif
@@ -314,18 +336,18 @@ void UNAP::mgsolversolve_(scalar *xValue,
                           scalar *res_normPtr,
                           scalar *faceAreaPtr)
 {
-  label nCells = *nCellsPtr;
-  scalarVector x(xValue, nCells);
-  scalarVector b(bValue, nCells);
-
   lduMatrix *APtr = (lduMatrix *)*APtrPtr;
   CHECK_POINTER(APtr)
   lduMatrix &lduA = *APtr;
 
+  label nCells = *nCellsPtr;
+  scalarVector x(xValue, nCells, lduA.getCommunicator());
+  scalarVector b(bValue, nCells, lduA.getCommunicator());
+
   // printLDUMatrix(lduA, "unap_A_p");
   // printInterfaces(lduA, "unap_interfaces_p");
 
-  UNAP::unapMPI::unapCommunicator().barrier();
+  lduA.getCommunicator()->barrier();
 
   label agglType = *agglTypePtr;
 
@@ -333,7 +355,7 @@ void UNAP::mgsolversolve_(scalar *xValue,
 
   if (agglType == 1)
   {
-    scalarVector weights(lduA.upper().size());
+    scalarVector weights(lduA.upper().size(), lduA.getCommunicator());
 
     scalar average = lduA.upper().SumSqrt();
 
@@ -343,7 +365,8 @@ void UNAP::mgsolversolve_(scalar *xValue,
   }
   else if (agglType == 2)
   {
-    scalarVector weights(faceAreaPtr, lduA.upper().size());
+    scalarVector weights(
+        faceAreaPtr, lduA.upper().size(), lduA.getCommunicator());
     agglPtr = new lduAgglomeration(lduA);
 
     // printVector(weights, "old_facearea");
@@ -359,7 +382,8 @@ void UNAP::mgsolversolve_(scalar *xValue,
   {
     forAll(i, (*agglPtr).size())
     {
-      lduGaussSeidelSmoother *smLocPtr = new lduGaussSeidelSmoother;
+      lduGaussSeidelSmoother *smLocPtr =
+          new lduGaussSeidelSmoother(lduA.getCommunicator());
       sm.setLevel(i, *smLocPtr);
     }
   }
@@ -367,7 +391,7 @@ void UNAP::mgsolversolve_(scalar *xValue,
   {
     forAll(i, (*agglPtr).size())
     {
-      chebySmoother *smLocPtr = new chebySmoother;
+      chebySmoother *smLocPtr = new chebySmoother(lduA.getCommunicator());
       sm.setLevel(i, *smLocPtr);
     }
   }
@@ -393,12 +417,12 @@ void UNAP::mgsolversolve_(scalar *xValue,
 
   if (solverPerf.converged())
   {
-    UNAPCOUT << "After " << solverPerf.nIterations()
-             << " cycles, the solution is converged!" << ENDL;
+    std::cout << "After " << solverPerf.nIterations()
+              << " cycles, the solution is converged!" << ENDL;
   }
   else
   {
-    UNAPCOUT << "The Multigrid solver reaches the maximum cycles." << ENDL;
+    std::cout << "The Multigrid solver reaches the maximum cycles." << ENDL;
   }
 
 #endif
@@ -411,9 +435,14 @@ void UNAP::mgsolversolve_(scalar *xValue,
   DELETE_OBJECT_POINTER(APtr)
 }
 
-void UNAP::reordercoo_(
-    scalar *val, label *row, label *col, label *nCellsPtr, label *sizePtr)
+void UNAP::reordercoo_(scalar *val,
+                       label *row,
+                       label *col,
+                       label *nCellsPtr,
+                       label *sizePtr,
+                       long int *commPtr)
 {
+  Communicator *commcator = (Communicator *)*commPtr;
   if (row[0] != 0)
   {
     forAll(i, *sizePtr)
@@ -422,53 +451,67 @@ void UNAP::reordercoo_(
       col[i] = col[i] - 1;
     }
   }
-  reorderCOO(val, row, col, *nCellsPtr, *sizePtr);
+  reorderCOO(val, row, col, *nCellsPtr, *sizePtr, commcator);
 }
 
-void UNAP::reorderuface__(
-    label *row, label *col, label *nCellsPtr, label *sizePtr, label *newOrder)
+void UNAP::reorderuface__(label *row,
+                          label *col,
+                          label *nCellsPtr,
+                          label *sizePtr,
+                          label *newOrder,
+                          long int *commPtr)
 {
+  Communicator *commcator = (Communicator *)*commPtr;
   forAll(i, *sizePtr)
   {
     row[i] = row[i] - 1;
     col[i] = col[i] - 1;
   }
 
-  reorderUFace(row, col, *nCellsPtr, *sizePtr, newOrder);
+  reorderUFace(row, col, *nCellsPtr, *sizePtr, newOrder, commcator);
 }
 
-void UNAP::reorderlface__(
-    label *row, label *col, label *nCellsPtr, label *sizePtr, label *newOrder)
+void UNAP::reorderlface__(label *row,
+                          label *col,
+                          label *nCellsPtr,
+                          label *sizePtr,
+                          label *newOrder,
+                          long int *commPtr)
 {
+  Communicator *commcator = (Communicator *)*commPtr;
   forAll(i, *sizePtr)
   {
     row[i] = row[i] - 1;
     col[i] = col[i] - 1;
   }
 
-  reorderLFace(row, col, *nCellsPtr, *sizePtr, newOrder);
+  reorderLFace(row, col, *nCellsPtr, *sizePtr, newOrder, commcator);
 }
 
-void UNAP::reordervalue__(scalar *val, label *newOrder, label *sizePtr)
+void UNAP::reordervalue__(scalar *val,
+                          label *newOrder,
+                          label *sizePtr,
+                          long int *commPtr)
 {
-  reorderValue(val, newOrder, *sizePtr);
+  Communicator *commcator = (Communicator *)*commPtr;
+  reorderValue(val, newOrder, *sizePtr, commcator);
 }
 
 void UNAP::contruct_sw_matrix__(label64 *APtrPtr,
                                 const label *nCellsPtr,
                                 const label *rowsPtr,
                                 const label *colsPtr,
-                                const label *sizePtr)
+                                const label *sizePtr,
+                                long int *commPtr)
 {
-  unapMPI::initMPI();
-
+  Communicator *commcator = (Communicator *)*commPtr;
   const label nCells = *nCellsPtr;
   const label size = *sizePtr;
 
-  labelVector *upperAddrPtr = new labelVector(size);
+  labelVector *upperAddrPtr = new labelVector(size, commcator);
   labelVector &upperAddr = *upperAddrPtr;
 
-  labelVector *lowerAddrPtr = new labelVector(size);
+  labelVector *lowerAddrPtr = new labelVector(size, commcator);
   labelVector &lowerAddr = *lowerAddrPtr;
 
   forAll(i, size)
@@ -477,14 +520,14 @@ void UNAP::contruct_sw_matrix__(label64 *APtrPtr,
     lowerAddr[i] = rowsPtr[i];
   }
 
-  scalarVector *diagPtr = new scalarVector(nCells);
+  scalarVector *diagPtr = new scalarVector(nCells, commcator);
   scalarVector &diag = *diagPtr;
 
-  scalarVector *upperPtr = new scalarVector(size);
+  scalarVector *upperPtr = new scalarVector(size, commcator);
   scalarVector &upper = *upperPtr;
 
-  lduMatrix *lduAPtr =
-      new lduMatrix(nCells, lowerAddr, upperAddr, upper, diag, upper, true);
+  lduMatrix *lduAPtr = new lduMatrix(
+      nCells, lowerAddr, upperAddr, upper, diag, upper, true, commcator);
   *(lduMatrix **)APtrPtr = lduAPtr;
 }
 
@@ -495,6 +538,8 @@ void UNAP::contruct_sw_matrix_interfaces__(label64 *APtrPtr,
                                            const label *offDiagStartsPtr)
 {
   PTR2OBJ(APtrPtr, lduMatrix, lduA)
+  Communicator *commcator = lduA.getCommunicator();
+  label myId = commcator->getMyId();
 
   const label nNeiProcs = *nNeiProcsPtr;
 
@@ -504,7 +549,7 @@ void UNAP::contruct_sw_matrix_interfaces__(label64 *APtrPtr,
   {
     const label neighborID = destRankPtr[intI] - 1;
     const label localSize = offDiagStartsPtr[intI + 1] - offDiagStartsPtr[intI];
-    patch *patchIPtr = new patch(localSize, MYID, neighborID);
+    patch *patchIPtr = new patch(localSize, myId, neighborID);
 
     label *localFaceCells = new label[localSize];
 
@@ -515,8 +560,8 @@ void UNAP::contruct_sw_matrix_interfaces__(label64 *APtrPtr,
     }
 
     labelVector *locFaceCellsPtr =
-        new labelVector(localFaceCells, localSize, true);
-    scalarVector *localDataPtr = new scalarVector(localSize);
+        new labelVector(localFaceCells, localSize, true, commcator);
+    scalarVector *localDataPtr = new scalarVector(localSize, commcator);
 
     patchIPtr->faceCells(*locFaceCellsPtr);
     patchIPtr->patchCoeffs(*localDataPtr);
@@ -524,7 +569,7 @@ void UNAP::contruct_sw_matrix_interfaces__(label64 *APtrPtr,
     patchesPtr->setLevel(intI, *patchIPtr);
   }
 
-  interfaces *interfacesLocalPtr = new interfaces(*patchesPtr);
+  interfaces *interfacesLocalPtr = new interfaces(*patchesPtr, commcator);
   lduA.matrixInterfaces(*interfacesLocalPtr);
 }
 
@@ -548,7 +593,7 @@ void UNAP::fill_sw_matrix_coefficients__(label64 *APtrPtr,
   const label nCells = lduA.size();
   const label nFaces = lduA.upperAddr().size();
 
-  // UNAPCOUT << "In unap, nCells = " << nCells << ", nFaces = " << nFaces <<
+  // std::cout << "In unap, nCells = " << nCells << ", nFaces = " << nFaces <<
   // ENDL;
 
   scalar *upperData = lduA.upper().begin();
@@ -560,8 +605,8 @@ void UNAP::fill_sw_matrix_coefficients__(label64 *APtrPtr,
 
   if (!symm)
   {
-    // UNAPCOUT << "symm = " << symm << ENDL;
-    scalarVector lower(lowerPtr, nFaces);
+    // std::cout << "symm = " << symm << ENDL;
+    scalarVector lower(lowerPtr, nFaces, lduA.getCommunicator());
     lduA.SET_lower(lower);
   }
   else if (!lduA.symm())
@@ -608,10 +653,10 @@ void UNAP::contruct_solver_mg__(label64 *mgPtrPtr,
 
   const label nFaces = lduA.upper().size();
 
-  scalarVector weights(weightsPtr, nFaces);
+  scalarVector weights(weightsPtr, nFaces, lduA.getCommunicator());
 
   // printVector(weights, "new_facearea");
-  // UNAPCOUT << "finish writing" << ENDL;
+  // std::cout << "finish writing" << ENDL;
   // return;
 
   lduAgglomeration *agglPtr = new lduAgglomeration(lduA);
@@ -630,28 +675,29 @@ void UNAP::contruct_solver_mg__(label64 *mgPtrPtr,
 
   if (smootherType == 1)
   {
-    UNAPCOUT << "Gauss-Seidel smoother used in AMG." << ENDL;
+    std::cout << "Gauss-Seidel smoother used in AMG." << ENDL;
 
     forAll(i, coarseLevels)
     {
-      lduGaussSeidelSmoother *smLocPtr = new lduGaussSeidelSmoother;
+      lduGaussSeidelSmoother *smLocPtr =
+          new lduGaussSeidelSmoother(lduA.getCommunicator());
       sm.setLevel(i, *smLocPtr);
     }
   }
   else if (smootherType == 2)
   {
-    UNAPCOUT << "Chebyshev smoother used in AMG." << ENDL;
+    std::cout << "Chebyshev smoother used in AMG." << ENDL;
 
     forAll(i, coarseLevels)
     {
-      chebySmoother *smLocPtr = new chebySmoother;
+      chebySmoother *smLocPtr = new chebySmoother(lduA.getCommunicator());
       sm.setLevel(i, *smLocPtr);
     }
   }
   else
   {
-    UNAPCOUT << "ERROR: smoother type is not recognized!" << ENDL;
-    UNAPCOUT << "Valid option is: 1--GaussSeidel, 2--Chebyshev" << ENDL;
+    std::cout << "ERROR: smoother type is not recognized!" << ENDL;
+    std::cout << "Valid option is: 1--GaussSeidel, 2--Chebyshev" << ENDL;
   }
 
   MGSolver *MGPtr = new MGSolver(lduA, *agglPtr, sm);
@@ -730,15 +776,15 @@ void UNAP::sw_solve_mg__(label64 *mgPtrPtr,
 
   const label nCells = lduA.size();
 
-  scalarVector x(xPtr, nCells);
-  scalarVector b(bPtr, nCells);
+  scalarVector x(xPtr, nCells, lduA.getCommunicator());
+  scalarVector b(bPtr, nCells, lduA.getCommunicator());
 
   MG.SET_ifPrint(true);
 
   // printLDUMatrix(lduA, "new_A_p");
   // printInterfaces(lduA, "new_interfaces_p");
   // printVector(b, "new_b");
-  // UNAPCOUT << "finish writing" << ENDL;
+  // std::cout << "finish writing" << ENDL;
   // return;
 
   printMessage("Start solving in AMG solver");
@@ -750,12 +796,12 @@ void UNAP::sw_solve_mg__(label64 *mgPtrPtr,
 
   if (solverPerf.converged())
   {
-    UNAPCOUT << "After " << solverPerf.nIterations()
-             << " cycles, the solution is converged!" << ENDL;
+    std::cout << "After " << solverPerf.nIterations()
+              << " cycles, the solution is converged!" << ENDL;
   }
   else
   {
-    UNAPCOUT << "The Multigrid solver reaches the maximum cycles." << ENDL;
+    std::cout << "The Multigrid solver reaches the maximum cycles." << ENDL;
   }
 
 #endif
@@ -764,9 +810,11 @@ void UNAP::sw_solve_mg__(label64 *mgPtrPtr,
 }
 
 //- PBiCGStab solver solve and controls
-void UNAP::contruct_solver_pbicgstab__(label64 *solverPtrPtr)
+void UNAP::contruct_solver_pbicgstab__(long int *solverPtrPtr,
+                                       long int *commPtr)
 {
-  PBiCGStab *solverPtr = new PBiCGStab();
+  Communicator *commcator = (Communicator *)*commPtr;
+  PBiCGStab *solverPtr = new PBiCGStab(commcator);
 
   *(PBiCGStab **)solverPtrPtr = solverPtr;
 }
@@ -827,8 +875,8 @@ void UNAP::sw_solver_pbicgstab_set_precond__(label64 *solverPtrPtr,
   }
   else
   {
-    UNAPCOUT << "ERROR: preconditioner type is not recognized!" << ENDL;
-    UNAPCOUT << "Valid option is: 1--diagonal, 2--DIC, 3--DILU" << ENDL;
+    std::cout << "ERROR: preconditioner type is not recognized!" << ENDL;
+    std::cout << "Valid option is: 1--diagonal, 2--DIC, 3--DILU" << ENDL;
   }
 }
 
@@ -843,8 +891,8 @@ void UNAP::sw_solve_pbicgstab__(label64 *solverPtrPtr,
 
   const label nCells = lduA.size();
 
-  scalarVector x(xPtr, nCells);
-  scalarVector b(bPtr, nCells);
+  scalarVector x(xPtr, nCells, lduA.getCommunicator());
+  scalarVector b(bPtr, nCells, lduA.getCommunicator());
 
   solver.SET_ifPrint(true);
 
@@ -857,12 +905,12 @@ void UNAP::sw_solve_pbicgstab__(label64 *solverPtrPtr,
 
   if (solverPerf.converged())
   {
-    UNAPCOUT << "After " << solverPerf.nIterations()
-             << " iterations, the solution is converged!" << ENDL;
+    std::cout << "After " << solverPerf.nIterations()
+              << " iterations, the solution is converged!" << ENDL;
   }
   else
   {
-    UNAPCOUT << "The PBiCGStab solver reaches the maximum iterations." << ENDL;
+    std::cout << "The PBiCGStab solver reaches the maximum iterations." << ENDL;
   }
 
 #endif
@@ -926,22 +974,32 @@ void UNAP::createinterfaces__(label64 *APtrPtr,
                               label *faceNumPtr,
                               label *postOrders)
 {
+  PTR2OBJ(APtrPtr, lduMatrix, lduA)
+  Communicator *commcator = lduA.getCommunicator();
+
+  label nProcs = commcator->getMySize();
+  label myId = commcator->getMyId();
+
   label64 cellNum = *cellNumPtr;
   label faceNum = *faceNumPtr;
 
-  label64 *partitionInfo = new label64[NPROCS + 1];
+  label64 *partitionInfo = new label64[nProcs + 1];
 
   partitionInfo[0] = 0;
-  MPI_Allgather(
-      &cellNum, 1, MPI_LONG, &partitionInfo[1], 1, MPI_LONG, MPI_COMM_WORLD);
 
-  forAll(i, NPROCS) { partitionInfo[i + 1] += partitionInfo[i]; }
+  commcator->allGather("allgather",
+                       &cellNum,
+                       1 * sizeof(label64),
+                       &partitionInfo[1],
+                       1 * sizeof(label64));
 
-  label64 nCellsAll = partitionInfo[NPROCS];
+  forAll(i, nProcs) { partitionInfo[i + 1] += partitionInfo[i]; }
+
+  label64 nCellsAll = partitionInfo[nProcs];
 
   forAll(i, faceNum)
   {
-    offDiagRows[i] += partitionInfo[MYID];
+    offDiagRows[i] += partitionInfo[myId];
     offDiagCols[i] += partitionInfo[offDiagPids[i]];
   }
 
@@ -956,11 +1014,11 @@ void UNAP::createinterfaces__(label64 *APtrPtr,
     bool FIND = false;
     //- get the assumed neighbor processor ID,
     //- by assuming that all cells are partitioned uniformly
-    label procAssume = IDOut / (nCellsAll / NPROCS);
+    label procAssume = IDOut / (nCellsAll / nProcs);
 
     if (IDOut < nCellsAll)
     {
-      if (procAssume > NPROCS - 1) procAssume = NPROCS - 1;
+      if (procAssume > nProcs - 1) procAssume = nProcs - 1;
 
       do
       {
@@ -991,7 +1049,7 @@ void UNAP::createinterfaces__(label64 *APtrPtr,
     //- smaller IDs are placed in the left
     //- thus all processors will follow the same discipline
     //- and produce the same patch faces order
-    if (IDIn > IDOut && MYID != procAssume)
+    if (IDIn > IDOut && myId != procAssume)
     {
       label64 temp = IDIn;
       IDIn = IDOut;
@@ -1016,7 +1074,7 @@ void UNAP::createinterfaces__(label64 *APtrPtr,
     label64 localCellID;
     label64 nbrCellID;
 
-    if (MYID == NbrProcID)
+    if (myId == NbrProcID)
     {
       localCellID = cellID1;
       nbrCellID = cellID2;
@@ -1025,20 +1083,20 @@ void UNAP::createinterfaces__(label64 *APtrPtr,
     {
       //- find the cellIDs belonging to current processor
       //- and storage them
-      if (cellID1 >= partitionInfo[MYID] && cellID1 < partitionInfo[MYID + 1])
+      if (cellID1 >= partitionInfo[myId] && cellID1 < partitionInfo[myId + 1])
       {
         localCellID = cellID1;
         nbrCellID = cellID2;
       }
-      else if (cellID2 >= partitionInfo[MYID] &&
-               cellID2 < partitionInfo[MYID + 1])
+      else if (cellID2 >= partitionInfo[myId] &&
+               cellID2 < partitionInfo[myId + 1])
       {
         localCellID = cellID2;
         nbrCellID = cellID1;
       }
       //- myProNo + 1 == NPROCS
       //- 最右端闭合
-      else if (cellID2 == partitionInfo[MYID + 1])
+      else if (cellID2 == partitionInfo[myId + 1])
       {
         localCellID = cellID2;
         nbrCellID = cellID1;
@@ -1049,9 +1107,9 @@ void UNAP::createinterfaces__(label64 *APtrPtr,
             "Error: cell is not in the target Processor, please check! At proc"
             " = "
             "%d, elements from %ld to %ld, cell1 = %ld, cell2 = %ld\n",
-            MYID,
-            partitionInfo[MYID],
-            partitionInfo[MYID + 1],
+            myId,
+            partitionInfo[myId],
+            partitionInfo[myId + 1],
             cellID1,
             cellID2);
         ERROR_EXIT;
@@ -1061,8 +1119,6 @@ void UNAP::createinterfaces__(label64 *APtrPtr,
     mapCells[NbrProcID].push_back(
         make_pair(originOrder, make_pair(localCellID, nbrCellID)));
   }
-
-  PTR2OBJ(APtrPtr, lduMatrix, lduA)
 
   const label nNeiProcs = mapCells.size();
 
@@ -1077,16 +1133,16 @@ void UNAP::createinterfaces__(label64 *APtrPtr,
     label nbrID = it->first;
     label localSize = (it->second).size();
 
-    patch *patchIPtr = new patch(localSize, MYID, nbrID);
+    patch *patchIPtr = new patch(localSize, myId, nbrID);
     label *localFaceCells = new label[localSize];
     label *localFaceCells2 = new label[localSize];
 
     forAll(faceI, localSize)
     {
       localFaceCells[faceI] =
-          (it->second)[faceI].second.first - partitionInfo[MYID];
+          (it->second)[faceI].second.first - partitionInfo[myId];
       localFaceCells2[faceI] =
-          (it->second)[faceI].second.second - partitionInfo[nbrID];
+          (it->second)[faceI].second.second - partitionInfo[myId];
 
       // postOrders[fid] = (it->second)[faceI].first;
       postOrders[(it->second)[faceI].first] = fid;
@@ -1096,11 +1152,11 @@ void UNAP::createinterfaces__(label64 *APtrPtr,
     }
 
     labelVector *locFaceCellsPtr =
-        new labelVector(localFaceCells, localSize, true);
-    scalarVector *localDataPtr = new scalarVector(localSize);
+        new labelVector(localFaceCells, localSize, true, commcator);
+    scalarVector *localDataPtr = new scalarVector(localSize, commcator);
 
     labelVector *locFaceCells2Ptr =
-        new labelVector(localFaceCells2, localSize, true);
+        new labelVector(localFaceCells2, localSize, true, commcator);
 
     patchIPtr->faceCells(*locFaceCellsPtr);
     patchIPtr->faceCells2(*locFaceCells2Ptr);
@@ -1109,15 +1165,19 @@ void UNAP::createinterfaces__(label64 *APtrPtr,
     patchesPtr->setLevel(intI, *patchIPtr);
   }
 
-  interfaces *interfacesLocalPtr = new interfaces(*patchesPtr);
+  interfaces *interfacesLocalPtr = new interfaces(*patchesPtr, commcator);
   lduA.matrixInterfaces(*interfacesLocalPtr);
 
   DELETE_POINTER(partitionInfo);
 }
 
-void UNAP::printvector__(scalar *data, label *size, char *fname)
+void UNAP::printvector__(scalar *data,
+                         label *size,
+                         char *fname,
+                         long int *commPtr)
 {
-  scalarVector pp(data, *size);
+  Communicator *commcator = (Communicator *)*commPtr;
+  scalarVector pp(data, *size, commcator);
   printVector(pp, fname);
   MPI_Barrier(MPI_COMM_WORLD);
 }

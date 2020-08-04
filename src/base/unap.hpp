@@ -18,6 +18,10 @@
 #include <typeinfo>
 
 #include "utilities.h"
+
+// TODO: 临时这么做 (编译通过)
+// #define PARRUN 2
+// #define MYID 1
 // #include "swMacro.h"
 
 // define sw data type
@@ -43,20 +47,20 @@ unsigned int sleep(const unsigned int);
 #define VGREAT (1.0e+128)
 
 //- check if pointer exists
-#define CHECK_POINTER(ptr)                                                 \
-  if (!ptr)                                                                \
-  {                                                                        \
-    UNAPCOUT << "ERROR in " << __FILE__ << " " << __LINE__ << ": " << #ptr \
-             << " is NULL!" << ENDL;                                       \
-    ERROR_EXIT;                                                            \
+#define CHECK_POINTER(ptr)                                                  \
+  if (!ptr)                                                                 \
+  {                                                                         \
+    std::cout << "ERROR in " << __FILE__ << " " << __LINE__ << ": " << #ptr \
+              << " is NULL!" << ENDL;                                       \
+    ERROR_EXIT;                                                             \
   }
 
-#define ALLOCATE_POINTER(ptr, oldObj, T) \
-  {                                      \
-    DELETE_OBJECT_POINTER(ptr)           \
-    ptr = new T(oldObj.size());          \
-    T &newObj = *ptr;                    \
-    newObj = oldObj;                     \
+#define ALLOCATE_POINTER(ptr, oldObj, T)                  \
+  {                                                       \
+    DELETE_OBJECT_POINTER(ptr)                            \
+    ptr = new T(oldObj.size(), oldObj.getCommunicator()); \
+    T &newObj = *ptr;                                     \
+    newObj = oldObj;                                      \
   }
 
 template <typename T>
@@ -88,7 +92,7 @@ T mag(T v)
 
 #define printMessage(ss)       \
   MPI_Barrier(MPI_COMM_WORLD); \
-  UNAPCOUT << ss << ENDL;
+  std::cout << ss << ENDL;
 
 }  // namespace UNAP
 

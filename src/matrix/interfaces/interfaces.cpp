@@ -1,13 +1,14 @@
 #include "interfaces.hpp"
 
-UNAP::interfaces::interfaces(PtrList<patch> &patches)
+UNAP::interfaces::interfaces(PtrList<patch> &patches, Communicator *other_comm)
     : patches_(patches),
       sendBuffer_(NULL),
       recvBuffer_(NULL),
       sendTaskName_(NULL),
       recvTaskName_(NULL),
       locPosition_(NULL),
-      destRank_(NULL)
+      destRank_(NULL),
+      commcator_(other_comm)
 {
 }
 
@@ -24,6 +25,16 @@ UNAP::interfaces::~interfaces()
 
 void UNAP::interfaces::initMatrixInterfaces(const scalarVector &psi) const
 {
+  if (!commcator_)
+    commcator_ = psi.getCommunicator();
+  else if (commcator_ != psi.getCommunicator())
+  {
+    commcator_->log()
+        << "Error" << __FILE__ << " " << __LINE__
+        << "The communicators between interfaces and Apsi are different\n";
+    ERROR_EXIT;
+  }
+  label myId = commcator_->getMyId();
   label numInterfaces = patches_.size();
   locPosition_ = new label[numInterfaces + 1];
   destRank_ = new label[numInterfaces];
@@ -52,7 +63,7 @@ void UNAP::interfaces::initMatrixInterfaces(const scalarVector &psi) const
 
     label locSize = locPosition_[i + 1] - locPosition_[i];
 
-    if (MYID == destRank_[i])
+    if (myId == destRank_[i])
     {
       const label *const faceCells2Ptr = patchI.faceCells2().begin();
       forAll(faceI, locSize)
@@ -69,31 +80,41 @@ void UNAP::interfaces::initMatrixInterfaces(const scalarVector &psi) const
     }
 
     char ch[128];
-    sprintf(ch, "Send_%05d_Recv_%05d", MYID, destRank_[i]);
+
+    sprintf(
+        ch, "Send_%05d_Recv_%05d", this->commcator_->getMyId(), destRank_[i]);
     sendTaskName_[i] = ch;
-    sprintf(ch, "Send_%05d_Recv_%05d", destRank_[i], MYID);
+    sprintf(
+        ch, "Send_%05d_Recv_%05d", destRank_[i], this->commcator_->getMyId());
     recvTaskName_[i] = ch;
 
-    UNAP::unapMPI::unapCommunicator().send(sendTaskName_[i],
-                                           &(sendBuffer_[locPosition_[i]]),
-                                           sizeof(scalar) * locSize,
-                                           destRank_[i]);
-    UNAP::unapMPI::unapCommunicator().recv(recvTaskName_[i],
-                                           &(recvBuffer_[locPosition_[i]]),
-                                           sizeof(scalar) * locSize,
-                                           destRank_[i]);
+    commcator_->send(sendTaskName_[i],
+                     &(sendBuffer_[locPosition_[i]]),
+                     sizeof(scalar) * locSize,
+                     destRank_[i]);
+    commcator_->recv(recvTaskName_[i],
+                     &(recvBuffer_[locPosition_[i]]),
+                     sizeof(scalar) * locSize,
+                     destRank_[i]);
   }
 }
 
 void UNAP::interfaces::updateMatrixInterfaces(scalarVector &Apsi) const
 {
+  if (commcator_ != Apsi.getCommunicator())
+  {
+    commcator_->log()
+        << "Error" << __FILE__ << " " << __LINE__
+        << "The communicators between interfaces and Apsi are different\n";
+    ERROR_EXIT;
+  }
   scalar *ApsiPtr = Apsi.begin();
   label numInterfaces = patches_.size();
 
   forAll(i, numInterfaces)
   {
-    UNAP::unapMPI::unapCommunicator().finishTask(sendTaskName_[i]);
-    UNAP::unapMPI::unapCommunicator().finishTask(recvTaskName_[i]);
+    commcator_->finishTask(sendTaskName_[i]);
+    commcator_->finishTask(recvTaskName_[i]);
 
     patch &patchI = patches_[i];
     const label *const faceCellsPtr = patchI.faceCells().begin();

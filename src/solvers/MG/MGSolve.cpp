@@ -23,12 +23,12 @@ UNAP::matrix::solverPerformance UNAP::MGSolver::solve(
   const label nCells = x.size();
 
   //- calculate A.psi used to calculate the initial residual
-  scalarVector Apsi(nCells);
+  scalarVector Apsi(nCells, this->commcator_);
   A.spMV(Apsi, x);
 
   //- create the storage for the finestCorrection which may be used as a
   //  temporary in normFactor
-  scalarVector finestCorrection(nCells);
+  scalarVector finestCorrection(nCells, this->commcator_);
 
 #ifdef SW_SLAVE
   MVM_Arrays arrays1;
@@ -36,7 +36,7 @@ UNAP::matrix::solverPerformance UNAP::MGSolver::solve(
 
   //- calculate initial finest-grid residual field
   //- calculate normalised residual for convergence test
-  scalarVector finestResidual(nCells);
+  scalarVector finestResidual(nCells, this->commcator_);
   IFNOT_SWACC
   {
     finestResidual = b - Apsi;
@@ -66,17 +66,18 @@ UNAP::matrix::solverPerformance UNAP::MGSolver::solve(
 #ifdef DEBUG
   IFPRINT
   {
-    UNAPCOUT << "At cycle = ";
+    commcator_->log() << "At cycle = ";
     std::cout.width(5);
-    UNAPCOUT << solverPerf.nIterations();
-    UNAPCOUT << ",   ini res = ";
+    commcator_->log() << solverPerf.nIterations();
+    commcator_->log() << ",   ini res = ";
     std::cout.width(11);
     std::cout.setf(std::ios::scientific);
-    UNAPCOUT << solverPerf.initialResidual();
-    UNAPCOUT << ",   rel res = ";
-    UNAPCOUT << solverPerf.initialResidual() / normFactor;
-    UNAPCOUT << ",   rhs  norm = ";
-    UNAPCOUT << normFactor << ENDL;
+    commcator_->log() << solverPerf.initialResidual();
+    commcator_->log() << ",   rel res = ";
+    commcator_->log() << solverPerf.initialResidual() /
+                             solverPerf.initialResidual();
+    commcator_->log() << ",   rhs  norm = ";
+    commcator_->log() << normFactor << ENDL;
   }
 // swTimer::startTimer("MG Vcycle");
 #endif
@@ -173,17 +174,17 @@ UNAP::matrix::solverPerformance UNAP::MGSolver::solve(
       // swTimer::endTimer("MG Vcycle");
       IFPRINT
       {
-        UNAPCOUT << "At cycle = ";
+        commcator_->log() << "At cycle = ";
         std::cout.width(5);
-        UNAPCOUT << solverPerf.nIterations() + 1;
-        UNAPCOUT << ",   fin res = ";
+        commcator_->log() << solverPerf.nIterations() + 1;
+        commcator_->log() << ",   fin res = ";
         std::cout.width(11);
         std::cout.setf(std::ios::scientific);
-        UNAPCOUT << solverPerf.finalResidual();
-        UNAPCOUT << ",   rel res = ";
-        UNAPCOUT << solverPerf.finalResidual() / normFactor;
-        UNAPCOUT << ",   conv rate = ";
-        UNAPCOUT << convergenceRate << ENDL;
+        commcator_->log() << solverPerf.finalResidual();
+        commcator_->log() << ",   rel res = ";
+        commcator_->log() << solverPerf.finalResidual() / normFactor;
+        commcator_->log() << ",   conv rate = ";
+        commcator_->log() << convergenceRate << ENDL;
       }
 #endif
     } while ((++solverPerf.nIterations() < maxIter_ &&

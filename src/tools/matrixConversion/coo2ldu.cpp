@@ -5,21 +5,27 @@ UNAP::lduMatrix &UNAP::coo2ldu(const scalar *dataPtr,
                                const label *columnPtr,
                                const label nCells,
                                const label size,
-                               const bool symm)
+                               const bool symm,
+                               Communicator *other_comm)
 {
   //- input coo matrix must have been arranged in order of row
   //- in each row, data must have been arranged in order of column
   //- structure of matrix must be symmetric
   //- otherwise this part will not work and the results should be wrong
-
+  if (!other_comm)
+  {
+    std::cout << "Error: " << __FILE__ << " in " << __LINE__
+              << "The Communicator is NULL !" << ENDL;
+    ERROR_EXIT;
+  }
   //- number of no-zero in upper
   const label nZeros = (size - nCells) / 2;
 
-  scalarVector diag(nCells);
-  scalarVector upper(nZeros);
+  scalarVector diag(nCells, other_comm);
+  scalarVector upper(nZeros, other_comm);
 
-  labelVector upperAddr(nZeros);
-  labelVector lowerAddr(nZeros);
+  labelVector upperAddr(nZeros, other_comm);
+  labelVector lowerAddr(nZeros, other_comm);
 
   //- asymmetric case
   scalarVector *lowerPtr = NULL;
@@ -28,9 +34,9 @@ UNAP::lduMatrix &UNAP::coo2ldu(const scalar *dataPtr,
 
   if (!symm)
   {
-    lowerPtr = new scalarVector(nZeros);
-    lowerColPtr = new labelVector(nZeros);
-    upperNbrsPtr = new labelVector(nCells, 0);
+    lowerPtr = new scalarVector(nZeros, other_comm);
+    lowerColPtr = new labelVector(nZeros, other_comm);
+    upperNbrsPtr = new labelVector(nCells, 0, other_comm);
   }
   else
   {
@@ -76,21 +82,22 @@ UNAP::lduMatrix &UNAP::coo2ldu(const scalar *dataPtr,
   //- sort lower data
   if (!symm)
   {
-    sortData(lower, lowerCol, upperNbrs);
+    sortData(lower, lowerCol, upperNbrs, other_comm);
   }
 
 #ifdef DEBUG
   if (upperCount != nZeros)
   {
-    UNAPCOUT << "ERROR in " << __FILE__ << " " << __LINE__
-             << ": the input COO matrix is not a structural symmetric matrix!"
-             << ENDL;
+    other_comm->log()
+        << "ERROR in " << __FILE__ << " " << __LINE__
+        << ": the input COO matrix is not a structural symmetric matrix!"
+        << ENDL;
     ERROR_EXIT;
   }
 #endif
 
-  lduMatrix *lduAPtr =
-      new lduMatrix(nCells, lowerAddr, upperAddr, lower, diag, upper);
+  lduMatrix *lduAPtr = new lduMatrix(
+      nCells, lowerAddr, upperAddr, lower, diag, upper, other_comm);
 
   if (!symm)
   {
@@ -107,7 +114,8 @@ UNAP::lduMatrix &UNAP::csr2ldu(const scalar *dataPtr,
                                const label *columnPtr,
                                const label nCells,
                                const label size,
-                               const bool symm)
+                               const bool symm,
+                               Communicator *other_comm)
 {
   label *rowsPtr = new label[size];
 
@@ -117,7 +125,8 @@ UNAP::lduMatrix &UNAP::csr2ldu(const scalar *dataPtr,
     forAll(j, nnzInRow) { rowsPtr[compRowsPtr[i] + j] = i; }
   }
 
-  lduMatrix &lduA = coo2ldu(dataPtr, rowsPtr, columnPtr, nCells, size, symm);
+  lduMatrix &lduA =
+      coo2ldu(dataPtr, rowsPtr, columnPtr, nCells, size, symm, other_comm);
   delete[] rowsPtr;
   return lduA;
 }
