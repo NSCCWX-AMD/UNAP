@@ -1079,14 +1079,14 @@ void UNAP::createinterfaces__(label64 *APtrPtr,
 
     patch *patchIPtr = new patch(localSize, MYID, nbrID);
     label *localFaceCells = new label[localSize];
-    // label *localFaceCells2 = new label[localSize];
+    label *localFaceCells2 = new label[localSize];
 
     forAll(faceI, localSize)
     {
       localFaceCells[faceI] =
           (it->second)[faceI].second.first - partitionInfo[MYID];
-      // localFaceCells2[faceI] =
-      // (it->second)[faceI].second.second - partitionInfo[nbrID];
+      localFaceCells2[faceI] =
+          (it->second)[faceI].second.second - partitionInfo[nbrID];
 
       // postOrders[fid] = (it->second)[faceI].first;
       postOrders[(it->second)[faceI].first] = fid;
@@ -1099,11 +1099,11 @@ void UNAP::createinterfaces__(label64 *APtrPtr,
         new labelVector(localFaceCells, localSize, true);
     scalarVector *localDataPtr = new scalarVector(localSize);
 
-    // labelVector *locFaceCells2Ptr =
-    // new labelVector(localFaceCells2, localSize, true);
+    labelVector *locFaceCells2Ptr =
+        new labelVector(localFaceCells2, localSize, true);
 
     patchIPtr->faceCells(*locFaceCellsPtr);
-    // patchIPtr->faceCells2(*locFaceCells2Ptr);
+    patchIPtr->faceCells2(*locFaceCells2Ptr);
     patchIPtr->patchCoeffs(*localDataPtr);
 
     patchesPtr->setLevel(intI, *patchIPtr);

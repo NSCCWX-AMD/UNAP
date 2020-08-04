@@ -20,6 +20,8 @@ private:
   //- face-cell addressing
   mutable labelVector *faceCellsPtr_;
 
+  mutable labelVector *faceCells2Ptr_;
+
   //- coefficients
   mutable scalarVector *patchCoeffsPtr_;
 
@@ -48,10 +50,22 @@ public:
     return *faceCellsPtr_;
   }
 
+  inline labelVector &faceCells2() const
+  {
+    CHECK_POINTER(faceCells2Ptr_)
+    return *faceCells2Ptr_;
+  }
+
   inline void faceCells(labelVector &a) const
   {
     DELETE_OBJECT_POINTER(faceCellsPtr_)
     faceCellsPtr_ = &a;
+  }
+
+  inline void faceCells2(labelVector &a) const
+  {
+    DELETE_OBJECT_POINTER(faceCells2Ptr_)
+    faceCells2Ptr_ = &a;
   }
 
   //- return patch coefficients
