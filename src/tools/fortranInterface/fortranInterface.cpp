@@ -873,6 +873,9 @@ void UNAP::sw_solve_pbicgstab__(long int *solverPtrPtr,
 void UNAP::sw_matrix_destroy__(long int *APtrPtr)
 {
   PTR2OBJ(APtrPtr, lduMatrix, lduA)
+#ifdef SW_SLAVE
+  lduA.unatMapFree();
+#endif
   delete &lduA;
 }
 
