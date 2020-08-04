@@ -189,8 +189,8 @@ void UNAP::lduAgglomeration::agglomerateLduAddressing(
     PtrList<labelVector> localAddressingList(interfacesSize);
     PtrList<labelVector> neighbourAddressingList(interfacesSize);
 
-    string sendRecvTaskName[interfacesSize];
-
+    string sendTaskName[interfacesSize];
+    string recvTaskName[interfacesSize];
     //- initialize transfer of restrict addressing on the interface
     forAll(inti, interfacesSize)
     {
@@ -215,16 +215,17 @@ void UNAP::lduAgglomeration::agglomerateLduAddressing(
 
       const label neighbProcNo = finePatchI.neighbProcNo();
 
-      char ch[8];
-      sendRecvTaskName[inti] = "SendRecv_";
-      sprintf(ch, "%05d", inti);
-      sendRecvTaskName[inti] += ch;
+      char ch[128];
+      sprintf(ch, "Send_%05d_Recv_%05d", MYID,neighbProcNo);
+      sendTaskName[inti] = ch;
+      sprintf(ch, "Send_%05d_Recv_%05d",neighbProcNo, MYID);
+      recvTaskName[inti] = ch;
 
-      UNAP::unapMPI::unapCommunicator().send(sendRecvTaskName[inti],
+      UNAP::unapMPI::unapCommunicator().send(sendTaskName[inti],
                                              localAddressing.begin(),
                                              finePatchIFaceSize * sizeof(label),
                                              neighbProcNo);
-      UNAP::unapMPI::unapCommunicator().recv(sendRecvTaskName[inti],
+      UNAP::unapMPI::unapCommunicator().recv(recvTaskName[inti],
                                              neighbourAddressing.begin(),
                                              finePatchIFaceSize * sizeof(label),
                                              neighbProcNo);
@@ -232,7 +233,8 @@ void UNAP::lduAgglomeration::agglomerateLduAddressing(
 
     forAll(inti, interfacesSize)
     {
-      UNAP::unapMPI::unapCommunicator().finishTask(sendRecvTaskName[inti]);
+      UNAP::unapMPI::unapCommunicator().finishTask(sendTaskName[inti]);
+      UNAP::unapMPI::unapCommunicator().finishTask(recvTaskName[inti]);
       //- get coarse patch members: faceCells
       //- get patchFaceRestrictAddressing_
 

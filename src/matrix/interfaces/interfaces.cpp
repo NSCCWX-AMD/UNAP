@@ -4,7 +4,8 @@ UNAP::interfaces::interfaces(PtrList<patch> &patches)
     : patches_(patches),
       sendBuffer_(NULL),
       recvBuffer_(NULL),
-      sendRecvTaskName_(NULL),
+      sendTaskName_(NULL),
+      recvTaskName_(NULL),
       locPosition_(NULL),
       destRank_(NULL)
 {
@@ -15,7 +16,8 @@ UNAP::interfaces::~interfaces()
   delete &patches_;
   DELETE_POINTER(sendBuffer_);
   DELETE_POINTER(recvBuffer_);
-  DELETE_POINTER(sendRecvTaskName_);
+  DELETE_POINTER(sendTaskName_);
+  DELETE_POINTER(recvTaskName_);
   DELETE_POINTER(locPosition_);
   DELETE_POINTER(destRank_);
 }
@@ -25,8 +27,8 @@ void UNAP::interfaces::initMatrixInterfaces(const scalarVector &psi) const
   label numInterfaces = patches_.size();
   locPosition_ = new label[numInterfaces + 1];
   destRank_ = new label[numInterfaces];
-  sendRecvTaskName_ = new string[numInterfaces];
-
+  sendTaskName_ = new string[numInterfaces];
+  recvTaskName_ = new string[numInterfaces];
   locPosition_[0] = 0;
   forAll(i, numInterfaces)
   {
@@ -54,16 +56,17 @@ void UNAP::interfaces::initMatrixInterfaces(const scalarVector &psi) const
       sendBuffer_[faceI + locPosition_[i]] = psiPtr[faceCellsPtr[faceI]];
     }
 
-    char ch[8];
-    sendRecvTaskName_[i] = "sendRecv_";
-    sprintf(ch, "%05%d", i);
-    sendRecvTaskName_[i] += ch;
+    char ch[128];
+    sprintf(ch, "Send_%05d_Recv_%05d", MYID, destRank_[i]);
+    sendTaskName_[i] = ch;
+    sprintf(ch, "Send_%05d_Recv_%05d", destRank_[i], MYID);
+    recvTaskName_[i] = ch;
 
-    UNAP::unapMPI::unapCommunicator().send(sendRecvTaskName_[i],
+    UNAP::unapMPI::unapCommunicator().send(sendTaskName_[i],
                                            &(sendBuffer_[locPosition_[i]]),
                                            sizeof(scalar) * locSize,
                                            destRank_[i]);
-    UNAP::unapMPI::unapCommunicator().recv(sendRecvTaskName_[i],
+    UNAP::unapMPI::unapCommunicator().recv(recvTaskName_[i],
                                            &(recvBuffer_[locPosition_[i]]),
                                            sizeof(scalar) * locSize,
                                            destRank_[i]);
@@ -77,7 +80,8 @@ void UNAP::interfaces::updateMatrixInterfaces(scalarVector &Apsi) const
 
   forAll(i, numInterfaces)
   {
-    UNAP::unapMPI::unapCommunicator().finishTask(sendRecvTaskName_[i]);
+    UNAP::unapMPI::unapCommunicator().finishTask(sendTaskName_[i]);
+    UNAP::unapMPI::unapCommunicator().finishTask(recvTaskName_[i]);
 
     patch &patchI = patches_[i];
     const label *const faceCellsPtr = patchI.faceCells().begin();
@@ -92,7 +96,8 @@ void UNAP::interfaces::updateMatrixInterfaces(scalarVector &Apsi) const
 
   DELETE_POINTER(sendBuffer_)
   DELETE_POINTER(recvBuffer_)
-  DELETE_POINTER(sendRecvTaskName_)
+  DELETE_POINTER(sendTaskName_)
+  DELETE_POINTER(recvTaskName_)
   DELETE_POINTER(locPosition_)
   DELETE_POINTER(destRank_)
 }
