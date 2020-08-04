@@ -7,16 +7,16 @@ namespace UNAP
 {
 class PBiCGStab : public matrix::solver
 {
-private:
+ private:
   //- use if the CG solver needs to create a null preconditioner
   bool deletePrecondPtr_;
 
   //- the preconditioner
   matrix::preconditioner *precondPtr_;
 
-public:
+ public:
   //- constructors
-  PBiCGStab();
+  PBiCGStab(Communicator *other_comm);
 
   PBiCGStab(matrix::preconditioner &precond);
 

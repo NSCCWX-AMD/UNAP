@@ -52,7 +52,7 @@ int main()
     UNAP::unapMPI::unapCommunicator().barrier();
   }
 
-  UNAPCOUT << "Start reading data" << ENDL;
+  std::cout << "Start reading data" << ENDL;
 
   lduMatrix lduA;
   LOCATEFILE(fileName, "A_u", dir);

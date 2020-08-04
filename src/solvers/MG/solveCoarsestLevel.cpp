@@ -12,7 +12,7 @@ void UNAP::MGSolver::solveCoarsestLevel(
 {
 #ifdef DEBUG1
 
-  UNAPCOUT << "Solving in the coarsest level" << ENDL;
+  std::cout << "Solving in the coarsest level" << ENDL;
 
 #endif
   const label coarsestLevel = agglomeration_.size() - 1;

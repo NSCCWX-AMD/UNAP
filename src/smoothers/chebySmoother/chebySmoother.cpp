@@ -24,11 +24,7 @@ void UNAP::chebySmoother::smooth(scalarVector &x,
     eigFirstTimeComputed_ = false;
 
 #ifdef DEBUG
-    // if(!MYID)
-    // {
-    // 	std::cout.setf(std::ios::scientific);
-    // 	COUT << "Factor is " << maxEigPCG_ << ENDL;
-    // }
+
 #endif
   }
   else
@@ -40,10 +36,10 @@ void UNAP::chebySmoother::smooth(scalarVector &x,
     register const label nCells = x.size();
     scalar *xPtr = x.begin();
 
-    scalarVector p(nCells);
+    scalarVector p(nCells, this->commcator_);
     scalar *pPtr = p.begin();
 
-    scalarVector w(nCells);
+    scalarVector w(nCells, this->commcator_);
     scalar *wPtr = w.begin();
 
     const scalar *rDPtr = precond.rD().begin();

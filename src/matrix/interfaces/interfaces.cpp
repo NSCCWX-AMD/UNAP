@@ -1,12 +1,14 @@
 #include "interfaces.hpp"
 
-UNAP::interfaces::interfaces(PtrList<patch> &patches)
+UNAP::interfaces::interfaces(PtrList<patch> &patches, Communicator *other_comm)
     : patches_(patches),
       sendBuffer_(NULL),
       recvBuffer_(NULL),
-      sendRecvTaskName_(NULL),
+      sendTaskName_(NULL),
+      recvTaskName_(NULL),
       locPosition_(NULL),
-      destRank_(NULL)
+      destRank_(NULL),
+      commcator_(other_comm)
 {
 }
 
@@ -15,17 +17,29 @@ UNAP::interfaces::~interfaces()
   delete &patches_;
   DELETE_POINTER(sendBuffer_);
   DELETE_POINTER(recvBuffer_);
-  DELETE_POINTER(sendRecvTaskName_);
+  DELETE_POINTER(sendTaskName_);
+  DELETE_POINTER(recvTaskName_);
   DELETE_POINTER(locPosition_);
   DELETE_POINTER(destRank_);
 }
 
 void UNAP::interfaces::initMatrixInterfaces(const scalarVector &psi) const
 {
+  if (!commcator_)
+    commcator_ = psi.getCommunicator();
+  else if (commcator_ != psi.getCommunicator())
+  {
+    std::cout
+        << "Error" << __FILE__ << " " << __LINE__
+        << "The communicators between interfaces and Apsi are different\n";
+    ERROR_EXIT;
+  }
+
   label numInterfaces = patches_.size();
   locPosition_ = new label[numInterfaces + 1];
   destRank_ = new label[numInterfaces];
-  sendRecvTaskName_ = new string[numInterfaces];
+  sendTaskName_ = new string[numInterfaces];
+  recvTaskName_ = new string[numInterfaces];
 
   locPosition_[0] = 0;
   forAll(i, numInterfaces)
@@ -54,30 +68,42 @@ void UNAP::interfaces::initMatrixInterfaces(const scalarVector &psi) const
       sendBuffer_[faceI + locPosition_[i]] = psiPtr[faceCellsPtr[faceI]];
     }
 
-    char ch[8];
-    sendRecvTaskName_[i] = "sendRecv_";
-    sprintf(ch, "%05%d", i);
-    sendRecvTaskName_[i] += ch;
+    char ch[128];
 
-    UNAP::unapMPI::unapCommunicator().send(sendRecvTaskName_[i],
-                                           &(sendBuffer_[locPosition_[i]]),
-                                           sizeof(scalar) * locSize,
-                                           destRank_[i]);
-    UNAP::unapMPI::unapCommunicator().recv(sendRecvTaskName_[i],
-                                           &(recvBuffer_[locPosition_[i]]),
-                                           sizeof(scalar) * locSize,
-                                           destRank_[i]);
+    sprintf(
+        ch, "Send_%05d_Recv_%05d", this->commcator_->getMyId(), destRank_[i]);
+    sendTaskName_[i] = ch;
+    sprintf(
+        ch, "Send_%05d_Recv_%05d", destRank_[i], this->commcator_->getMyId());
+    recvTaskName_[i] = ch;
+
+    commcator_->send(sendTaskName_[i],
+                     &(sendBuffer_[locPosition_[i]]),
+                     sizeof(scalar) * locSize,
+                     destRank_[i]);
+    commcator_->recv(recvTaskName_[i],
+                     &(recvBuffer_[locPosition_[i]]),
+                     sizeof(scalar) * locSize,
+                     destRank_[i]);
   }
 }
 
 void UNAP::interfaces::updateMatrixInterfaces(scalarVector &Apsi) const
 {
+  if (commcator_ != Apsi.getCommunicator())
+  {
+    std::cout
+        << "Error" << __FILE__ << " " << __LINE__
+        << "The communicators between interfaces and Apsi are different\n";
+    ERROR_EXIT;
+  }
   scalar *ApsiPtr = Apsi.begin();
   label numInterfaces = patches_.size();
 
   forAll(i, numInterfaces)
   {
-    UNAP::unapMPI::unapCommunicator().finishTask(sendRecvTaskName_[i]);
+    commcator_->finishTask(sendTaskName_[i]);
+    commcator_->finishTask(recvTaskName_[i]);
 
     patch &patchI = patches_[i];
     const label *const faceCellsPtr = patchI.faceCells().begin();
@@ -92,7 +118,8 @@ void UNAP::interfaces::updateMatrixInterfaces(scalarVector &Apsi) const
 
   DELETE_POINTER(sendBuffer_)
   DELETE_POINTER(recvBuffer_)
-  DELETE_POINTER(sendRecvTaskName_)
+  DELETE_POINTER(sendTaskName_)
+  DELETE_POINTER(recvTaskName_)
   DELETE_POINTER(locPosition_)
   DELETE_POINTER(destRank_)
 }

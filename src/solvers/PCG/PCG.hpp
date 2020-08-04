@@ -7,16 +7,16 @@ namespace UNAP
 {
 class PCG : public matrix::solver
 {
-private:
+ private:
   //- use if the CG solver needs to create a null preconditioner
   bool deletePrecondPtr_;
 
   //- the preconditioner
   matrix::preconditioner *precondPtr_;
 
-public:
+ public:
   //- constructors
-  PCG();
+  PCG(Communicator *other_comm);
 
   PCG(matrix::preconditioner &precond);
 

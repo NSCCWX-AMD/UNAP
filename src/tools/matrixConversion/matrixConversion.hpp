@@ -7,7 +7,8 @@ namespace UNAP
 {
 void sortData(scalarVector &data,
               const labelVector &order,
-              const labelVector &cellFaces);
+              const labelVector &cellFaces,
+              Communicator *other_comm);
 
 //- reorder COO matrix, to make it ordered in columns in every row
 //- to use this, the input COO matrix must be ordered in rows
@@ -16,21 +17,27 @@ void reorderCOO(scalar *dataPtr,
                 label *rowsPtr,
                 label *columnPtr,
                 const label nCells,
-                const label size);
+                const label size,
+                Communicator *other_comm);
 
-void reorderValue(scalar *val, const label *newOrder, const label size);
+void reorderValue(scalar *val,
+                  const label *newOrder,
+                  const label size,
+                  Communicator *other_comm);
 
 void reorderUFace(label *rowsPtr,
                   label *columnPtr,
                   const label nCells,
                   const label size,
-                  label *newOrder);
+                  label *newOrder,
+                  Communicator *other_comm);
 
 void reorderLFace(label *rowsPtr,
                   label *columnPtr,
                   const label nCells,
                   const label size,
-                  label *newOrder);
+                  label *newOrder,
+                  Communicator *other_comm);
 
 //- only for diagonal part
 lduMatrix &coo2ldu(const scalar *dataPtr,
@@ -38,8 +45,8 @@ lduMatrix &coo2ldu(const scalar *dataPtr,
                    const label *columnPtr,
                    const label nCells,
                    const label size,
-                   const bool symm  //- symm refers to the data
-);
+                   const bool symm,  //- symm refers to the data
+                   Communicator *other_comm);
 
 //- only for diagonal part
 lduMatrix &csr2ldu(const scalar *dataPtr,
@@ -47,8 +54,8 @@ lduMatrix &csr2ldu(const scalar *dataPtr,
                    const label *columnPtr,
                    const label nCells,
                    const label size,
-                   const bool symm  //- symm refers to the data
-);
+                   const bool symm,  //- symm refers to the data
+                   Communicator *other_comm);
 
 }  // namespace UNAP
 

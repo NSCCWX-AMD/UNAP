@@ -4,7 +4,10 @@
 #include "SW_UNAPInterface.h"
 #endif
 
-UNAP::lduMatrix::lduMatrix()
+#define PARRUN (commcator_->getMySize() > 1)
+#define MYID (commcator_->getMyId())
+
+UNAP::lduMatrix::lduMatrix(Communicator *other_comm)
     : nCells_(-1),
       lowerAddrPtr_(NULL),
       upperAddrPtr_(NULL),
@@ -14,7 +17,8 @@ UNAP::lduMatrix::lduMatrix()
       interfacesPtr_(NULL),
       losortPtr_(NULL),
       ownerStartPtr_(NULL),
-      losortStartPtr_(NULL)
+      losortStartPtr_(NULL),
+      matrix(other_comm)
 {
 #ifdef SW_SLAVE
   mlbIter_ = NULL;
@@ -28,7 +32,8 @@ UNAP::lduMatrix::lduMatrix(const label &nCells,
                            const labelVector &upperAddr,
                            const scalarVector &lower,
                            const scalarVector &diag,
-                           const scalarVector &upper)
+                           const scalarVector &upper,
+                           Communicator *other_comm)
     : nCells_(nCells),
       lowerAddrPtr_(NULL),
       upperAddrPtr_(NULL),
@@ -38,7 +43,8 @@ UNAP::lduMatrix::lduMatrix(const label &nCells,
       interfacesPtr_(NULL),
       losortPtr_(NULL),
       ownerStartPtr_(NULL),
-      losortStartPtr_(NULL)
+      losortStartPtr_(NULL),
+      matrix(other_comm)
 {
   ALLOCATE_POINTER(lowerAddrPtr_, lowerAddr, labelVector)
   ALLOCATE_POINTER(upperAddrPtr_, upperAddr, labelVector)
@@ -67,7 +73,8 @@ UNAP::lduMatrix::lduMatrix(const label &nCells,
                            const scalarVector &lower,
                            const scalarVector &diag,
                            const scalarVector &upper,
-                           const bool reUse)
+                           const bool reUse,
+                           Communicator *other_comm)
     : nCells_(nCells),
       lowerAddrPtr_(NULL),
       upperAddrPtr_(NULL),
@@ -77,7 +84,8 @@ UNAP::lduMatrix::lduMatrix(const label &nCells,
       interfacesPtr_(NULL),
       losortPtr_(NULL),
       ownerStartPtr_(NULL),
-      losortStartPtr_(NULL)
+      losortStartPtr_(NULL),
+      matrix(other_comm)
 {
   if (reUse)
   {
@@ -113,7 +121,8 @@ UNAP::lduMatrix::lduMatrix(const label &nCells,
 
 UNAP::lduMatrix::lduMatrix(const label &nCells,
                            const labelVector &lowerAddr,
-                           const labelVector &upperAddr)
+                           const labelVector &upperAddr,
+                           Communicator *other_comm)
     : nCells_(nCells),
       lowerAddrPtr_(NULL),
       upperAddrPtr_(NULL),
@@ -123,7 +132,8 @@ UNAP::lduMatrix::lduMatrix(const label &nCells,
       interfacesPtr_(NULL),
       losortPtr_(NULL),
       ownerStartPtr_(NULL),
-      losortStartPtr_(NULL)
+      losortStartPtr_(NULL),
+      matrix(other_comm)
 {
   ALLOCATE_POINTER(lowerAddrPtr_, lowerAddr, labelVector)
   ALLOCATE_POINTER(upperAddrPtr_, upperAddr, labelVector)
@@ -138,7 +148,8 @@ UNAP::lduMatrix::lduMatrix(const label &nCells,
 UNAP::lduMatrix::lduMatrix(const label &nCells,
                            const labelVector &lowerAddr,
                            const labelVector &upperAddr,
-                           const bool reUse)
+                           const bool reUse,
+                           Communicator *other_comm)
     : nCells_(nCells),
       lowerAddrPtr_(NULL),
       upperAddrPtr_(NULL),
@@ -148,7 +159,8 @@ UNAP::lduMatrix::lduMatrix(const label &nCells,
       interfacesPtr_(NULL),
       losortPtr_(NULL),
       ownerStartPtr_(NULL),
-      losortStartPtr_(NULL)
+      losortStartPtr_(NULL),
+      matrix(other_comm)
 {
   if (reUse)
   {
@@ -245,7 +257,7 @@ void UNAP::lduMatrix::calcOwnerStart() const
 {
   const labelVector &own = lowerAddr();
 
-  ownerStartPtr_ = new labelVector(nCells() + 1, own.size());
+  ownerStartPtr_ = new labelVector(nCells() + 1, own.size(), this->commcator_);
 
   labelVector &ownStart = *ownerStartPtr_;
 
@@ -310,7 +322,7 @@ void UNAP::lduMatrix::calcLosort() const
   }
 
   //- gather the neighbors into the losort array
-  losortPtr_ = new labelVector(nbr.size(), -1);
+  losortPtr_ = new labelVector(nbr.size(), -1, this->commcator_);
 
   labelVector &lst = *losortPtr_;
 
@@ -348,7 +360,7 @@ const UNAP::labelVector &UNAP::lduMatrix::losortAddr() const
 
 void UNAP::lduMatrix::calcLosortStart() const
 {
-  losortStartPtr_ = new labelVector(nCells() + 1, 0);
+  losortStartPtr_ = new labelVector(nCells() + 1, 0, this->commcator_);
 
   labelVector &lsrtStart = *losortStartPtr_;
 
@@ -413,8 +425,8 @@ void UNAP::lduMatrix::createInterfacesTopology(const label nNeiProcs,
     }
 
     labelVector *locFaceCellsPtr =
-        new labelVector(localFaceCells, localSize, true);
-    scalarVector *localDataPtr = new scalarVector(localSize);
+        new labelVector(localFaceCells, localSize, true, this->commcator_);
+    scalarVector *localDataPtr = new scalarVector(localSize, this->commcator_);
 
     patchIPtr->faceCells(*locFaceCellsPtr);
     patchIPtr->patchCoeffs(*localDataPtr);
@@ -422,7 +434,8 @@ void UNAP::lduMatrix::createInterfacesTopology(const label nNeiProcs,
     patchesPtr->setLevel(intI, *patchIPtr);
   }
 
-  interfaces *interfacesLocalPtr = new interfaces(*patchesPtr);
+  interfaces *interfacesLocalPtr =
+      new interfaces(*patchesPtr, this->commcator_);
   matrixInterfaces(*interfacesLocalPtr);
 }
 

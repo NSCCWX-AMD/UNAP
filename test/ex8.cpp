@@ -74,34 +74,34 @@ int main()
   labelVector &lowerAddr = lduA.lowerAddr();
   labelVector &upperAddr = lduA.upperAddr();
 
-  UNAPCOUT << "upperAddr: " << ENDL;
+  std::cout << "upperAddr: " << ENDL;
   forAll(i, nUpperFaces)
   {
-    UNAPCOUT << "At i = " << i << ", upperAddr = " << upperAddr[i] << ENDL;
+    std::cout << "At i = " << i << ", upperAddr = " << upperAddr[i] << ENDL;
   }
 
-  UNAPCOUT << "lowerAddr: " << ENDL;
+  std::cout << "lowerAddr: " << ENDL;
   forAll(i, nUpperFaces)
   {
-    UNAPCOUT << "At i = " << i << ", lowerAddr = " << lowerAddr[i] << ENDL;
+    std::cout << "At i = " << i << ", lowerAddr = " << lowerAddr[i] << ENDL;
   }
 
-  UNAPCOUT << "diag: " << ENDL;
+  std::cout << "diag: " << ENDL;
   forAll(i, nCells)
   {
-    UNAPCOUT << "At i = " << i << ", diag = " << diag[i] << ENDL;
+    std::cout << "At i = " << i << ", diag = " << diag[i] << ENDL;
   }
 
-  UNAPCOUT << "upper: " << ENDL;
+  std::cout << "upper: " << ENDL;
   forAll(i, nUpperFaces)
   {
-    UNAPCOUT << "At i = " << i << ", upper = " << upper[i] << ENDL;
+    std::cout << "At i = " << i << ", upper = " << upper[i] << ENDL;
   }
 
-  UNAPCOUT << "lower: " << ENDL;
+  std::cout << "lower: " << ENDL;
   forAll(i, nUpperFaces)
   {
-    UNAPCOUT << "At i = " << i << ", lower = " << lower[i] << ENDL;
+    std::cout << "At i = " << i << ", lower = " << lower[i] << ENDL;
   }
 
   return 0;

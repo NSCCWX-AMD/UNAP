@@ -2,23 +2,27 @@
 
 #define IFPRINT if (!MYID && ifPrint_)
 
-UNAP::PCG::PCG() : deletePrecondPtr_(false), precondPtr_(NULL)
+UNAP::PCG::PCG(Communicator *other_comm)
+    : deletePrecondPtr_(false), precondPtr_(NULL), matrix::solver(other_comm)
 {
-  precondPtr_ = new matrix::preconditioner;
+  precondPtr_ = new matrix::preconditioner(other_comm);
   deletePrecondPtr_ = true;
 }
 
 UNAP::PCG::PCG(matrix::preconditioner &precond)
-    : deletePrecondPtr_(false), precondPtr_(NULL)
+    : deletePrecondPtr_(false), precondPtr_(NULL), matrix::solver(NULL)
 {
   if (&precond == NULL)
   {
-    precondPtr_ = new matrix::preconditioner;
-    deletePrecondPtr_ = true;
+    std::cout << "ERROR in " << __FILE__ << " " << __LINE__
+              << "The preconditioner does not exist! \n"
+              << ENDL;
+    ERROR_EXIT;
   }
   else
   {
     precondPtr_ = &precond;
+    this->setCommunicator(precond.getCommunicator());
   }
 }
 
@@ -32,13 +36,13 @@ UNAP::matrix::solverPerformance UNAP::PCG::solve(scalarVector &x,
   scalar *xPtr = x.values();
   const scalar *bPtr = b.values();
 
-  scalarVector pA(nCells);
+  scalarVector pA(nCells, this->commcator_);
   scalar *pAPtr = pA.values();
 
-  scalarVector wA(nCells);
+  scalarVector wA(nCells, this->commcator_);
   scalar *wAPtr = wA.values();
 
-  scalarVector rA(nCells);
+  scalarVector rA(nCells, this->commcator_);
   scalar *rAPtr = rA.values();
 
   scalar wArA = GREAT;
@@ -61,19 +65,19 @@ UNAP::matrix::solverPerformance UNAP::PCG::solve(scalarVector &x,
 #ifdef DEBUG
   IFPRINT
   {
-    UNAPCOUT << "At nIter = ";
+    std::cout << "At nIter = ";
     std::cout.width(5);
-    UNAPCOUT << solverPerf.nIterations();
-    UNAPCOUT << ",   ini res = ";
+    std::cout << solverPerf.nIterations();
+    std::cout << ",   ini res = ";
     std::cout.width(11);
-    UNAPCOUT << solverPerf.initialResidual();
-    UNAPCOUT << ",   rel res = ";
+    std::cout << solverPerf.initialResidual();
+    std::cout << ",   rel res = ";
     std::cout.width(11);
-    UNAPCOUT << solverPerf.initialResidual() / solverPerf.initialResidual();
-    UNAPCOUT << ",   b norm = ";
+    std::cout << solverPerf.initialResidual() / solverPerf.initialResidual();
+    std::cout << ",   b norm = ";
     std::cout.width(11);
     std::cout.setf(std::ios::scientific);
-    UNAPCOUT << normFactor << ENDL;
+    std::cout << normFactor << ENDL;
   }
 #endif
 
@@ -91,7 +95,7 @@ UNAP::matrix::solverPerformance UNAP::PCG::solve(scalarVector &x,
     if (solverPerf.checkSingularity(mag(wArA)))
     {
 #ifdef DEBUG
-      IFPRINT { UNAPCOUT << "singularity! wArA = " << wArA << ENDL; }
+      IFPRINT { std::cout << "singularity! wArA = " << wArA << ENDL; }
 #endif
       break;
     }
@@ -127,15 +131,15 @@ UNAP::matrix::solverPerformance UNAP::PCG::solve(scalarVector &x,
 #ifdef DEBUG
     IFPRINT
     {
-      UNAPCOUT << "At nIter = ";
+      std::cout << "At nIter = ";
       std::cout.width(5);
-      UNAPCOUT << solverPerf.nIterations() + 1;
-      UNAPCOUT << ",   fin res = ";
+      std::cout << solverPerf.nIterations() + 1;
+      std::cout << ",   fin res = ";
       std::cout.width(11);
-      UNAPCOUT << solverPerf.finalResidual();
-      UNAPCOUT << ",   rel res = ";
+      std::cout << solverPerf.finalResidual();
+      std::cout << ",   rel res = ";
       std::cout.width(11);
-      UNAPCOUT << solverPerf.finalResidual() / normFactor << ENDL;
+      std::cout << solverPerf.finalResidual() / normFactor << ENDL;
     }
 #endif
   } while ((++solverPerf.nIterations() < maxIter_ &&

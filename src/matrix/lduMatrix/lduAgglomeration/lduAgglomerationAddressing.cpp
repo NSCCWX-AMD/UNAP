@@ -21,11 +21,11 @@ void UNAP::lduAgglomeration::agglomerateLduAddressing(
 #ifdef DEBUG
   if (restrictMap.size() != fineA.nCells())
   {
-    UNAPCOUT << "Error in agglomerateLduAddressing: restrict map does not "
-                "correspond to fine level."
-             << ENDL;
-    UNAPCOUT << "Sizes: restrictMap: " << restrictMap.size()
-             << " nEqns: " << fineA.nCells() << ENDL;
+    std::cout << "Error in agglomerateLduAddressing: restrict map does not "
+                 "correspond to fine level."
+              << ENDL;
+    std::cout << "Sizes: restrictMap: " << restrictMap.size()
+              << " nEqns: " << fineA.nCells() << ENDL;
     ERROR_EXIT;
   }
 #endif
@@ -38,18 +38,19 @@ void UNAP::lduAgglomeration::agglomerateLduAddressing(
   label maxNnbrs = 10;
 
   //- number of faces for each coarse-cell
-  labelVector cCellnFaces(nCoarseCells, 0);
+  labelVector cCellnFaces(nCoarseCells, 0, this->commcator_);
 
   //- setup initial packed storage for coarse-cell faces
-  labelVector cCellFaces(maxNnbrs * nCoarseCells);
+  labelVector cCellFaces(maxNnbrs * nCoarseCells, this->commcator_);
 
   //- create face-restriction addressing
-  labelVector *faceRestrictAddrPtr = new labelVector(nFineFaces);
+  labelVector *faceRestrictAddrPtr =
+      new labelVector(nFineFaces, this->commcator_);
   labelVector &faceRestrictAddr = *faceRestrictAddrPtr;
   faceRestrictAddressing_.setLevel(fineLevelIndex, faceRestrictAddr);
 
   //- initial neighbor array (not in upper-triangle order)
-  labelVector initCoarseNeighb(nFineFaces);
+  labelVector initCoarseNeighb(nFineFaces, this->commcator_);
 
   //- counter for coarse faces
   label nCoarseFaces = 0;
@@ -133,9 +134,9 @@ void UNAP::lduAgglomeration::agglomerateLduAddressing(
   //- renumber into upper-triangular order
 
   //- all coarse owner-neighbor storage
-  labelVector coarseOwner(nCoarseFaces);
-  labelVector coarseNeighbour(nCoarseFaces);
-  labelVector coarseFaceMap(nCoarseFaces);
+  labelVector coarseOwner(nCoarseFaces, commcator_);
+  labelVector coarseNeighbour(nCoarseFaces, commcator_);
+  labelVector coarseFaceMap(nCoarseFaces, commcator_);
 
   label coarseFacei = 0;
 
@@ -168,7 +169,7 @@ void UNAP::lduAgglomeration::agglomerateLduAddressing(
   coarseFaceMap.SET_size(0);
 
   //- Set the coarse ldu addressing onto the list
-  lduMatrix *coarseAPtr = new lduMatrix;
+  lduMatrix *coarseAPtr = new lduMatrix(this->commcator_);
   lduMatrix &coarseA = *coarseAPtr;
   coarseMatrixLevels_.setLevel(fineLevelIndex, coarseA);
 
@@ -176,7 +177,7 @@ void UNAP::lduAgglomeration::agglomerateLduAddressing(
   coarseA.SET_upperAddr(coarseNeighbour);
   coarseA.SET_lowerAddr(coarseOwner);
 
-  if (PARRUN)
+  if (this->commcator_->getMySize() > 1)
   {
     //- create coarse-level interfaces
     //- get reference to fine-level interfaces
@@ -189,8 +190,8 @@ void UNAP::lduAgglomeration::agglomerateLduAddressing(
     PtrList<labelVector> localAddressingList(interfacesSize);
     PtrList<labelVector> neighbourAddressingList(interfacesSize);
 
-    string sendRecvTaskName[interfacesSize];
-
+    string sendTaskName[interfacesSize];
+    string recvTaskName[interfacesSize];
     //- initialize transfer of restrict addressing on the interface
     forAll(inti, interfacesSize)
     {
@@ -198,8 +199,10 @@ void UNAP::lduAgglomeration::agglomerateLduAddressing(
       const label finePatchIFaceSize = finePatchI.size();
 
       //- point to PtrList, do not need to delete manually
-      labelVector *localAddressingPtr = new labelVector(finePatchIFaceSize);
-      labelVector *neighbourAddressingPtr = new labelVector(finePatchIFaceSize);
+      labelVector *localAddressingPtr =
+          new labelVector(finePatchIFaceSize, this->commcator_);
+      labelVector *neighbourAddressingPtr =
+          new labelVector(finePatchIFaceSize, this->commcator_);
 
       labelVector &localAddressing = *localAddressingPtr;
       labelVector &neighbourAddressing = *neighbourAddressingPtr;
@@ -215,24 +218,28 @@ void UNAP::lduAgglomeration::agglomerateLduAddressing(
 
       const label neighbProcNo = finePatchI.neighbProcNo();
 
-      char ch[8];
-      sendRecvTaskName[inti] = "SendRecv_";
-      sprintf(ch, "%05d", inti);
-      sendRecvTaskName[inti] += ch;
+      char ch[128];
 
-      UNAP::unapMPI::unapCommunicator().send(sendRecvTaskName[inti],
-                                             localAddressing.begin(),
-                                             finePatchIFaceSize * sizeof(label),
-                                             neighbProcNo);
-      UNAP::unapMPI::unapCommunicator().recv(sendRecvTaskName[inti],
-                                             neighbourAddressing.begin(),
-                                             finePatchIFaceSize * sizeof(label),
-                                             neighbProcNo);
+      sprintf(
+          ch, "Send_%05d_Recv_%05d", this->commcator_->getMyId(), neighbProcNo);
+      sendTaskName[inti] = ch;
+      sprintf(
+          ch, "Send_%05d_Recv_%05d", neighbProcNo, this->commcator_->getMyId());
+      recvTaskName[inti] = ch;
+      this->commcator_->send(sendTaskName[inti],
+                             localAddressing.begin(),
+                             finePatchIFaceSize * sizeof(label),
+                             neighbProcNo);
+      this->commcator_->recv(recvTaskName[inti],
+                             neighbourAddressing.begin(),
+                             finePatchIFaceSize * sizeof(label),
+                             neighbProcNo);
     }
 
     forAll(inti, interfacesSize)
     {
-      UNAP::unapMPI::unapCommunicator().finishTask(sendRecvTaskName[inti]);
+      this->commcator_->finishTask(sendTaskName[inti]);
+      this->commcator_->finishTask(recvTaskName[inti]);
       //- get coarse patch members: faceCells
       //- get patchFaceRestrictAddressing_
 
@@ -289,7 +296,8 @@ void UNAP::lduAgglomeration::agglomerateLduAddressing(
           new patch(dynFaceCells.size(), myProcNo, neighbProcNo);
       patch &coarsePatchI = *coarsePatchIPtr;
 
-      labelVector *coarseFaceCellsPtr = new labelVector(dynFaceCells.size());
+      labelVector *coarseFaceCellsPtr =
+          new labelVector(dynFaceCells.size(), this->commcator_);
       labelVector &coarseFaceCells = *coarseFaceCellsPtr;
 
       forAll(i, (label)dynFaceCells.size())
@@ -298,7 +306,7 @@ void UNAP::lduAgglomeration::agglomerateLduAddressing(
       }
 
       labelVector *faceRestrictAddressingPtr =
-          new labelVector(dynFaceRestrictAddressing.size());
+          new labelVector(dynFaceRestrictAddressing.size(), this->commcator_);
       labelVector &faceRestrictAddressing = *faceRestrictAddressingPtr;
 
       forAll(i, (label)dynFaceRestrictAddressing.size())

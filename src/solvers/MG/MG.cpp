@@ -11,7 +11,8 @@ UNAP::MGSolver::MGSolver(const matrix &A,
       scaleCorrection_(A.symm()),
       // scaleCorrection_(false),
       agglomeration_(MGAgglomeration),
-      smoothers_(smoothers)
+      smoothers_(smoothers),
+      matrix::solver(A.getCommunicator())
 {
 }
 

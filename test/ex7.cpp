@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
 
   // forAll(i, size)
   // {
-  // 	UNAPCOUT << "At i = " << i << ", data is " << data[i] << ENDL;
+  // 	std::cout << "At i = " << i << ", data is " << data[i] << ENDL;
   // }
 
   bool symm = true;
@@ -192,8 +192,8 @@ int main(int argc, char *argv[])
 
   matrix::solverPerformance solverPerf = PBiCGStabSolver.solve(x, lduA, b);
 
-  UNAPCOUT << "After " << solverPerf.nIterations()
-           << " iterations, the solution is converged!" << ENDL;
+  std::cout << "After " << solverPerf.nIterations()
+            << " iterations, the solution is converged!" << ENDL;
 
   delete[] data;
   delete[] col;

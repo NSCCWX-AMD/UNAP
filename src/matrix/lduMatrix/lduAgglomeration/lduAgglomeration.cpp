@@ -1,18 +1,20 @@
 #include "lduAgglomeration.hpp"
 
-bool UNAP::lduAgglomeration::forward_(true);
+// bool UNAP::lduAgglomeration::forward_(true);
 
 UNAP::lduAgglomeration::lduAgglomeration(const lduMatrix &A)
     : maxLevels_(50),
       nCellsInCoarsestLevel_(50),
-      nCells_(maxLevels_),
+      forward_(true),
+      nCells_(maxLevels_, A.getCommunicator()),
       nCreatedLevels_(0),
       mergeLevels_(1),
       finestMatrix_(A),
       coarseMatrixLevels_(maxLevels_),
       restrictAddressing_(maxLevels_),
       faceRestrictAddressing_(maxLevels_),
-      patchFaceRestrictAddressing_(maxLevels_)
+      patchFaceRestrictAddressing_(maxLevels_),
+      matrix::agglomeration(A.getCommunicator())
 {
 }
 
@@ -30,9 +32,9 @@ bool UNAP::lduAgglomeration::continueAgglomerating(
   }
 
   bool contAggLocal = contAgg;
-  UNAP::unapMPI::unapCommunicator().allReduce(
+  commcator_->allReduce(
       "LOR", &contAggLocal, &contAgg, 1, COMM_CXX_BOOL, COMM_LOR);
-  UNAP::unapMPI::unapCommunicator().finishTask("LOR");
+  commcator_->finishTask("LOR");
 
   return contAgg;
 }

@@ -204,12 +204,12 @@ void UNAP::pcgsolversolve_(scalar *xValue,
 
   if (solverPerf.converged())
   {
-    UNAPCOUT << "After " << solverPerf.nIterations()
-             << " iterations, the solution is converged!" << ENDL;
+    std::cout << "After " << solverPerf.nIterations()
+              << " iterations, the solution is converged!" << ENDL;
   }
   else
   {
-    UNAPCOUT << "The PCG solver reaches the maximum iterations." << ENDL;
+    std::cout << "The PCG solver reaches the maximum iterations." << ENDL;
   }
 
 #endif
@@ -278,12 +278,12 @@ void UNAP::pbicgstabsolversolve_(scalar *xValue,
 
   if (solverPerf.converged())
   {
-    UNAPCOUT << "After " << solverPerf.nIterations()
-             << " iterations, the solution is converged!" << ENDL;
+    std::cout << "After " << solverPerf.nIterations()
+              << " iterations, the solution is converged!" << ENDL;
   }
   else
   {
-    UNAPCOUT << "The PBiCGStab solver reaches the maximum iterations." << ENDL;
+    std::cout << "The PBiCGStab solver reaches the maximum iterations." << ENDL;
   }
 
 #endif
@@ -389,12 +389,12 @@ void UNAP::mgsolversolve_(scalar *xValue,
 
   if (solverPerf.converged())
   {
-    UNAPCOUT << "After " << solverPerf.nIterations()
-             << " cycles, the solution is converged!" << ENDL;
+    std::cout << "After " << solverPerf.nIterations()
+              << " cycles, the solution is converged!" << ENDL;
   }
   else
   {
-    UNAPCOUT << "The Multigrid solver reaches the maximum cycles." << ENDL;
+    std::cout << "The Multigrid solver reaches the maximum cycles." << ENDL;
   }
 
 #endif
@@ -544,7 +544,7 @@ void UNAP::fill_sw_matrix_coefficients__(long int *APtrPtr,
   const label nCells = lduA.size();
   const label nFaces = lduA.upperAddr().size();
 
-  // UNAPCOUT << "In unap, nCells = " << nCells << ", nFaces = " << nFaces <<
+  // std::cout << "In unap, nCells = " << nCells << ", nFaces = " << nFaces <<
   // ENDL;
 
   scalar *upperData = lduA.upper().begin();
@@ -560,7 +560,7 @@ void UNAP::fill_sw_matrix_coefficients__(long int *APtrPtr,
 
   if (!symm)
   {
-    // UNAPCOUT << "symm = " << symm << ENDL;
+    // std::cout << "symm = " << symm << ENDL;
     scalarVector lower(lowerPtr, nFaces);
     lduA.SET_lower(lower);
   }
@@ -615,7 +615,7 @@ void UNAP::contruct_solver_mg__(long int *mgPtrPtr,
   scalarVector weights(weightsPtr, nFaces);
 
   // printVector(weights, "new_facearea");
-  // UNAPCOUT << "finish writing" << ENDL;
+  // std::cout << "finish writing" << ENDL;
   // return;
 
   lduAgglomeration *agglPtr = new lduAgglomeration(lduA);
@@ -634,7 +634,7 @@ void UNAP::contruct_solver_mg__(long int *mgPtrPtr,
 
   if (smootherType == 1)
   {
-    UNAPCOUT << "Gauss-Seidel smoother used in AMG." << ENDL;
+    std::cout << "Gauss-Seidel smoother used in AMG." << ENDL;
 
     forAll(i, coarseLevels)
     {
@@ -644,7 +644,7 @@ void UNAP::contruct_solver_mg__(long int *mgPtrPtr,
   }
   else if (smootherType == 2)
   {
-    UNAPCOUT << "Chebyshev smoother used in AMG." << ENDL;
+    std::cout << "Chebyshev smoother used in AMG." << ENDL;
 
     forAll(i, coarseLevels)
     {
@@ -654,8 +654,8 @@ void UNAP::contruct_solver_mg__(long int *mgPtrPtr,
   }
   else
   {
-    UNAPCOUT << "ERROR: smoother type is not recognized!" << ENDL;
-    UNAPCOUT << "Valid option is: 1--GaussSeidel, 2--Chebyshev" << ENDL;
+    std::cout << "ERROR: smoother type is not recognized!" << ENDL;
+    std::cout << "Valid option is: 1--GaussSeidel, 2--Chebyshev" << ENDL;
   }
 
   MGSolver *MGPtr = new MGSolver(lduA, *agglPtr, sm);
@@ -742,7 +742,7 @@ void UNAP::sw_solve_mg__(long int *mgPtrPtr,
   // printLDUMatrix(lduA, "new_A_p");
   // printInterfaces(lduA, "new_interfaces_p");
   // printVector(b, "new_b");
-  // UNAPCOUT << "finish writing" << ENDL;
+  // std::cout << "finish writing" << ENDL;
   // return;
 
 #ifdef SW_SLAVE
@@ -763,12 +763,12 @@ void UNAP::sw_solve_mg__(long int *mgPtrPtr,
 
   if (solverPerf.converged())
   {
-    UNAPCOUT << "After " << solverPerf.nIterations()
-             << " cycles, the solution is converged!" << ENDL;
+    std::cout << "After " << solverPerf.nIterations()
+              << " cycles, the solution is converged!" << ENDL;
   }
   else
   {
-    UNAPCOUT << "The Multigrid solver reaches the maximum cycles." << ENDL;
+    std::cout << "The Multigrid solver reaches the maximum cycles." << ENDL;
   }
 
 #endif
@@ -840,8 +840,8 @@ void UNAP::sw_solver_pbicgstab_set_precond__(long int *solverPtrPtr,
   }
   else
   {
-    UNAPCOUT << "ERROR: preconditioner type is not recognized!" << ENDL;
-    UNAPCOUT << "Valid option is: 1--diagonal, 2--DIC, 3--DILU" << ENDL;
+    std::cout << "ERROR: preconditioner type is not recognized!" << ENDL;
+    std::cout << "Valid option is: 1--diagonal, 2--DIC, 3--DILU" << ENDL;
   }
 }
 
@@ -879,12 +879,12 @@ void UNAP::sw_solve_pbicgstab__(long int *solverPtrPtr,
 
   if (solverPerf.converged())
   {
-    UNAPCOUT << "After " << solverPerf.nIterations()
-             << " iterations, the solution is converged!" << ENDL;
+    std::cout << "After " << solverPerf.nIterations()
+              << " iterations, the solution is converged!" << ENDL;
   }
   else
   {
-    UNAPCOUT << "The PBiCGStab solver reaches the maximum iterations." << ENDL;
+    std::cout << "The PBiCGStab solver reaches the maximum iterations." << ENDL;
   }
 
 #endif

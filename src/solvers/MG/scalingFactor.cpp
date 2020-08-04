@@ -57,6 +57,6 @@ scalar UNAP::MGSolver::scalingFactor(scalarVector &Acf,
   swTimer::endTimer("scalingFactor");
 #endif
 
-  reduceSum(&sfVal[0], 2);
+  reduceSum(&sfVal[0], this->commcator_, 2);
   return sfVal[0] / (sfVal[1] + SMALL);
 }

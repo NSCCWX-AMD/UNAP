@@ -4,11 +4,19 @@
 
 void UNAP::sortData(scalarVector &data,
                     const labelVector &order,
-                    const labelVector &cellFaces)
+                    const labelVector &cellFaces,
+                    Communicator *other_comm)
 {
+  if (data.getCommunicator() != order.getCommunicator() &&
+      cellFaces.getCommunicator() != data.getCommunicator())
+  {
+    std::cout << "Error: " << __FILE__ << " in " << __LINE__
+              << "The Communicator between data , order and cellFaces are "
+                 "different!\n";
+  }
   const label nCells = cellFaces.size();
 
-  labelVector cellFaceOffsets(nCells + 1);
+  labelVector cellFaceOffsets(nCells + 1, other_comm);
 
   cellFaceOffsets[0] = 0;
   forAll(celli, nCells)
@@ -22,7 +30,7 @@ void UNAP::sortData(scalarVector &data,
   scalarVector dataOld(data);
 
   //- count the data input
-  labelVector count(nCells, 0);
+  labelVector count(nCells, 0, other_comm);
 
   forAll(facei, nFaces)
   {
@@ -36,20 +44,21 @@ void UNAP::reorderCOO(scalar *dataPtr,
                       label *rowsPtr,
                       label *colsPtr,
                       const label nCells,
-                      const label size)
+                      const label size,
+                      Communicator *other_comm)
 {
-  labelVector countsInRow(nCells);
+  labelVector countsInRow(nCells, other_comm);
 
   forAll(i, size) { countsInRow[rowsPtr[i]]++; }
 
-  labelVector countsInRowOffsets(nCells + 1);
+  labelVector countsInRowOffsets(nCells + 1, other_comm);
 
   forAll(i, nCells)
   {
     countsInRowOffsets[i + 1] = countsInRowOffsets[i] + countsInRow[i];
   }
 
-  labelVector posInRow(size);
+  labelVector posInRow(size, other_comm);
   forAll(i, size)
   {
     label rowLocal = rowsPtr[i];
@@ -66,9 +75,9 @@ void UNAP::reorderCOO(scalar *dataPtr,
     }
   }
 
-  labelVector rowTemp(size);
-  labelVector colTemp(size);
-  scalarVector valTemp(size);
+  labelVector rowTemp(size, other_comm);
+  labelVector colTemp(size, other_comm);
+  scalarVector valTemp(size, other_comm);
 
   forAll(i, size)
   {
@@ -89,9 +98,12 @@ void UNAP::reorderCOO(scalar *dataPtr,
   }
 }
 
-void UNAP::reorderValue(scalar *val, const label *newOrder, const label size)
+void UNAP::reorderValue(scalar *val,
+                        const label *newOrder,
+                        const label size,
+                        Communicator *other_comm)
 {
-  scalarVector valTemp(val, size, false);
+  scalarVector valTemp(val, size, false, other_comm);
 
   forAll(i, size) { val[newOrder[i]] = valTemp[i]; }
 }
@@ -100,20 +112,21 @@ void UNAP::reorderUFace(label *rowsPtr,
                         label *colsPtr,
                         const label nCells,
                         const label size,
-                        label *newOrder)
+                        label *newOrder,
+                        Communicator *other_comm)
 {
-  labelVector countsInRow(nCells);
+  labelVector countsInRow(nCells, other_comm);
 
   forAll(i, size) { countsInRow[rowsPtr[i]]++; }
 
-  labelVector countsInRowOffsets(nCells + 1);
+  labelVector countsInRowOffsets(nCells + 1, other_comm);
 
   forAll(i, nCells)
   {
     countsInRowOffsets[i + 1] = countsInRowOffsets[i] + countsInRow[i];
   }
 
-  labelVector posInRow(size);
+  labelVector posInRow(size, other_comm);
   forAll(i, size)
   {
     label rowLocal = rowsPtr[i];
@@ -130,8 +143,8 @@ void UNAP::reorderUFace(label *rowsPtr,
     }
   }
 
-  labelVector rowTemp(size);
-  labelVector colTemp(size);
+  labelVector rowTemp(size, other_comm);
+  labelVector colTemp(size, other_comm);
 
   forAll(i, size)
   {
@@ -155,13 +168,14 @@ void UNAP::reorderLFace(label *rowsPtr,
                         label *colsPtr,
                         const label nCells,
                         const label size,
-                        label *newOrder)
+                        label *newOrder,
+                        Communicator *other_comm)
 {
-  labelVector countsInCol(nCells);
+  labelVector countsInCol(nCells, other_comm);
 
   forAll(i, size) { countsInCol[colsPtr[i]]++; }
 
-  labelVector countsInColOffsets(nCells + 1);
+  labelVector countsInColOffsets(nCells + 1, other_comm);
 
   forAll(i, nCells)
   {
@@ -169,8 +183,8 @@ void UNAP::reorderLFace(label *rowsPtr,
     countsInCol[i] = 0;
   }
 
-  labelVector rowTemp(size);
-  labelVector colTemp(size);
+  labelVector rowTemp(size, other_comm);
+  labelVector colTemp(size, other_comm);
 
   forAll(i, size)
   {

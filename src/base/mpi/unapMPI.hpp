@@ -18,30 +18,32 @@ namespace UNAP
 {
 class unapMPI
 {
-private:
-  static int myProcNo_;
-  static int nProcs_;
-  static bool parRun_;
+ private:
+  int myProcNo_;
+  int nProcs_;
+  bool parRun_;
   static CommData unapLabel_;
   static CommData unapScalar_;
-  static Communicator unapCommunicator_;
+  Communicator *unapCommunicator_;
 
-public:
-  static void initMPI();
-  static void initMPI(Communicator &otherCommunicator);
+ public:
+  unapMPI();
 
-  static void exitMPI();
+  void initMPI();
+  void initMPI(Communicator *other_comm);
+
+  void exitMPI();
 
   //- is this a parallel run?
-  static bool &parRun() { return parRun_; }
+  bool &parRun() { return parRun_; }
 
   //- number of processes in parallel run
-  static label nProcs() { return nProcs_; }
+  label nProcs() { return nProcs_; }
 
   //- number of this process
-  static label myProcNo() { return myProcNo_; }
+  label myProcNo() { return myProcNo_; }
 
-  static Communicator &unapCommunicator() { return unapCommunicator_; }
+  Communicator *unapCommunicator() { return unapCommunicator_; }
 
   //- int type
   static MPI_Datatype &unapLabel() { return unapLabel_; }
@@ -50,19 +52,13 @@ public:
   static MPI_Datatype &unapScalar() { return unapScalar_; }
 };
 
-#define MYID unapMPI::myProcNo()
-#define PARRUN unapMPI::parRun()
 #define UNAPMPI_LABEL unapMPI::unapLabel()
 #define UNAPMPI_SCALAR unapMPI::unapScalar()
-#define NPROCS unapMPI::nProcs()
-
-#define UNAPCOUT \
-  if (!MYID) std::cout
 
 template <typename T>
-void reduceSum(T *v, label n = 1)
+void reduceSum(T *v, Communicator *commcator, label n = 1)
 {
-  if (PARRUN)
+  if (commcator->getMySize() > 1)
   {
     T vLocal[n];
     forAll(i, n) { vLocal[i] = v[i]; }
@@ -76,9 +72,8 @@ void reduceSum(T *v, label n = 1)
     {
       myType = UNAPMPI_SCALAR;
     }
-    UNAP::unapMPI::unapCommunicator().allReduce(
-        "sum", &vLocal[0], v, n, myType, COMM_SUM);
-    UNAP::unapMPI::unapCommunicator().finishTask("sum");
+    commcator->allReduce("sum", &vLocal[0], v, n, myType, COMM_SUM);
+    commcator->finishTask("sum");
   }
 }
 

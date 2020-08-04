@@ -1,11 +1,12 @@
 #include "unapMatrix.hpp"
 
-UNAP::matrix::solver::solver()
+UNAP::matrix::solver::solver(Communicator *other_comm)
     : maxIter_(1000),
       minIter_(0),
       relTol_(1e-6),
       tolerance_(0.0),
-      ifPrint_(false)
+      ifPrint_(false),
+      commcator_(other_comm)
 {
 }
 

@@ -7,15 +7,12 @@ namespace UNAP
 {
 class lduGaussSeidelSmoother : public matrix::smoother
 {
-private:
-public:
+ private:
+ public:
   //- constructors
-  lduGaussSeidelSmoother()
+  lduGaussSeidelSmoother(Communicator *other_comm)
+      : matrix::smoother(other_comm)
   {
-    // if(!MYID)
-    //       {
-    //           COUT << "Gauss-Seidel smoother used!" << ENDL;
-    //       }
   }
 
   //- destructor

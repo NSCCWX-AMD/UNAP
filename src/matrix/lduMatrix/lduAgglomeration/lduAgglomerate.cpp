@@ -37,7 +37,8 @@ void UNAP::lduAgglomeration::agglomerate(const scalarVector &faceWeights)
       label nCoarseFaces =
           coarseMatrixLevels_[nCreatedLevels].upperAddr().size();
 
-      scalarVector *aggFaceWeightsPtr = new scalarVector(nCoarseFaces, 0.0);
+      scalarVector *aggFaceWeightsPtr =
+          new scalarVector(nCoarseFaces, 0.0, this->commcator_);
 
       restrictFaceField(*aggFaceWeightsPtr, *faceWeightsPtr, nCreatedLevels);
 
@@ -73,7 +74,7 @@ void UNAP::lduAgglomeration::agglomerate(const scalarVector &faceWeights)
 
 #ifdef DEBUG
 
-  UNAPCOUT << nCreatedLevels << " coarse levels created!" << ENDL;
+  std::cout << nCreatedLevels << " coarse levels created!" << ENDL;
 
 #endif
 }
@@ -89,8 +90,8 @@ UNAP::labelVector &UNAP::lduAgglomeration::agglomerate(
   const labelVector &lowerAddr = fineA.lowerAddr();
 
   //- for each cell calculate faces
-  labelVector cellFaces(upperAddr.size() + lowerAddr.size());
-  labelVector cellFaceOffsets(nFineCells + 1);
+  labelVector cellFaces(upperAddr.size() + lowerAddr.size(), this->commcator_);
+  labelVector cellFaceOffsets(nFineCells + 1, this->commcator_);
 
   //- memory management
   {
@@ -130,7 +131,8 @@ UNAP::labelVector &UNAP::lduAgglomeration::agglomerate(
   }
 
   //- go through the faces and create clusters
-  labelVector *coarseCellMapPtr = new labelVector(nFineCells, -1);
+  labelVector *coarseCellMapPtr =
+      new labelVector(nFineCells, -1, this->commcator_);
   labelVector &coarseCellMap = *coarseCellMapPtr;
 
   nCoarseCells = 0;

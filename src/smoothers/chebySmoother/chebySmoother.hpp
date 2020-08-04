@@ -7,7 +7,7 @@ namespace UNAP
 {
 class chebySmoother : public matrix::smoother
 {
-private:
+ private:
   //- Number of PCGs to get alphas and betas, used to calculate eigenvalue
   label nDiagPCGs_;
 
@@ -34,20 +34,17 @@ private:
   //-if using, first Amul operation can be ignored
   label preSmoothUsing_;
 
-public:
-  chebySmoother()
+ public:
+  chebySmoother(Communicator *other_comm)
       : nDiagPCGs_(10),
         maxEigPCG_(0.0),
         eigFirstTimeComputed_(true),
         eigRatioCheby_(1.5),     // 30
         boostFactorCheby_(1.1),  // 1.05
         eigRatioCoarest_(1.0),
-        preSmoothUsing_(0)
+        preSmoothUsing_(0),
+        matrix::smoother(other_comm)
   {
-    // if(!MYID)
-    // {
-    //     COUT << "Chebyshev smoother used!" << ENDL;
-    // }
   }
 
   //- smooth the solution for a given number of sweeps

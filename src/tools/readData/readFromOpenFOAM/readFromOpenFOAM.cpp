@@ -9,6 +9,7 @@ using namespace std;
 
 void UNAP::constructLDUMatrixFromOpenFOAM(lduMatrix &lduA, const char *fileName)
 {
+  Communicator *other_comm = lduA.getCommunicator();
   ifstream dataFile;
   dataFile.open(fileName);
   vector<string> vec;
@@ -61,18 +62,18 @@ void UNAP::constructLDUMatrixFromOpenFOAM(lduMatrix &lduA, const char *fileName)
 
   if (vec.size() != (nCells + nFaces + 1))
   {
-    UNAPCOUT << "Error in reading " << fileName << ": reading "
-             << vec.size() - 1 << " lines, while nCells = " << nCells
-             << ", nFaces = " << nFaces << ENDL;
+    std::cout << "Error in reading " << fileName << ": reading "
+              << vec.size() - 1 << " lines, while nCells = " << nCells
+              << ", nFaces = " << nFaces << ENDL;
 
     ERROR_EXIT;
   }
 
-  labelVector upperAddr(nFaces);
-  labelVector lowerAddr(nFaces);
-  scalarVector upper(nFaces);
-  scalarVector lower(nFaces);
-  scalarVector diag(nCells);
+  labelVector upperAddr(nFaces, other_comm);
+  labelVector lowerAddr(nFaces, other_comm);
+  scalarVector upper(nFaces, other_comm);
+  scalarVector lower(nFaces, other_comm);
+  scalarVector diag(nCells, other_comm);
 
   std::vector<std::string>::iterator it;
 
@@ -172,15 +173,15 @@ void UNAP::constructVectorFromOpenFOAM(scalarVector &b, const char *fileName)
 
   if ((nCells + 1) != vec.size())
   {
-    UNAPCOUT << "Error in reading " << fileName << ": reading "
-             << vec.size() - 1 << " lines, while nCells = " << nCells << ENDL;
+    std::cout << "Error in reading " << fileName << ": reading "
+              << vec.size() - 1 << " lines, while nCells = " << nCells << ENDL;
     ERROR_EXIT;
   }
 
   if (nCells != b.size())
   {
-    UNAPCOUT << "Error in " << fileName << ": fill size = " << nCells
-             << ", while allocated size = " << b.size() << ENDL;
+    std::cout << "Error in " << fileName << ": fill size = " << nCells
+              << ", while allocated size = " << b.size() << ENDL;
     ERROR_EXIT;
   }
 
@@ -205,6 +206,7 @@ void UNAP::constructVectorFromOpenFOAM(scalarVector &b, const char *fileName)
 void UNAP::constructLDUInterfacesFromOpenFOAM(lduMatrix &lduA,
                                               const char *fileName)
 {
+  Communicator *other_comm = lduA.getCommunicator();
   ifstream dataFile;
   dataFile.open(fileName);
   vector<string> vec;
@@ -241,9 +243,9 @@ void UNAP::constructLDUInterfacesFromOpenFOAM(lduMatrix &lduA,
 
   if (vec.size() != (nFaces + nNeiProcs + 1))
   {
-    UNAPCOUT << "Error in reading " << fileName << ":, reading "
-             << vec.size() - 1 << " lines, while nNeiProcs = " << nNeiProcs
-             << ", nFaces = " << nFaces << ENDL;
+    std::cout << "Error in reading " << fileName << ":, reading "
+              << vec.size() - 1 << " lines, while nNeiProcs = " << nNeiProcs
+              << ", nFaces = " << nFaces << ENDL;
 
     ERROR_EXIT;
   }
@@ -274,7 +276,7 @@ void UNAP::constructLDUInterfacesFromOpenFOAM(lduMatrix &lduA,
       }
     }
 
-    patch *patchIPtr = new patch(localSize, MYID, neighborID);
+    patch *patchIPtr = new patch(localSize, other_comm->getMyId(), neighborID);
     scalar *localData = new scalar[localSize];
     label *localFaceCells = new label[localSize];
 
@@ -300,8 +302,10 @@ void UNAP::constructLDUInterfacesFromOpenFOAM(lduMatrix &lduA,
       }
     }
 
-    scalarVector *patchCoeffsPtr = new scalarVector(localData, localSize);
-    labelVector *locFaceCellsPtr = new labelVector(localFaceCells, localSize);
+    scalarVector *patchCoeffsPtr =
+        new scalarVector(localData, localSize, other_comm);
+    labelVector *locFaceCellsPtr =
+        new labelVector(localFaceCells, localSize, other_comm);
 
     delete[] localData;
     delete[] localFaceCells;
@@ -312,7 +316,7 @@ void UNAP::constructLDUInterfacesFromOpenFOAM(lduMatrix &lduA,
     patchesPtr->setLevel(i, *patchIPtr);
   }
 
-  interfaces *interfacesLocalPtr = new interfaces(*patchesPtr);
+  interfaces *interfacesLocalPtr = new interfaces(*patchesPtr, other_comm);
   lduA.matrixInterfaces(*interfacesLocalPtr);
 
   dataFile.close();

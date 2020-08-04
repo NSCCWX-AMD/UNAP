@@ -38,77 +38,77 @@ using namespace UNAP;
 #define LOCATEFILE(newName, fileName, dir)                           \
   {                                                                  \
     std::ostringstream os;                                           \
-    os << dir << NPROCS << "/" << fileName << "_" << MYID << ".txt"; \
+    os << dir << nProcs << "/" << fileName << "_" << myId << ".txt"; \
     strcpy(newName, os.str().c_str());                               \
   }
 
 int main()
 {
   /* Initialize MPI */
-  unapMPI::initMPI();
+  unapMPI init;
 #ifdef SW_SLAVE
   swacc_init();
 #endif
-
-  const char *dir =
-      "/home/export/online3/amd_dev1/guhf/UNAP_test_data/exData/openfoam/"
-      "cavity/2.5w/p";
+  Communicator *other_comm = init.unapCommunicator();
+  label nProcs = other_comm->getMySize();
+  label myId = other_comm->getMyId();
+  const char *dir = "./../../../exData/openfoam/cavity/2.5w/p";
   char fileName[200];
 
-  if (PARRUN)
+  if (nProcs > 1)
   {
-    UNAP::unapMPI::unapCommunicator().barrier();
+    other_comm->barrier();
   }
 
-  UNAPCOUT << "Start reading diagonal of A" << ENDL;
+  if (!myId) std::cout << "Start reading diagonal of A" << ENDL;
 
-  lduMatrix lduA;
+  lduMatrix lduA(other_comm);
   LOCATEFILE(fileName, "A_p", dir);
   constructLDUMatrixFromOpenFOAM(lduA, fileName);
 
-  UNAPCOUT << "End reading diagonal of A" << ENDL;
+  if (!myId) std::cout << "End reading diagonal of A" << ENDL;
 
-  if (PARRUN)
+  if (nProcs > 1)
   {
-    UNAPCOUT << "Start reading interfaces" << ENDL;
+    if (!myId) std::cout << "Start reading interfaces" << ENDL;
 
     LOCATEFILE(fileName, "interfaces_p", dir);
     constructLDUInterfacesFromOpenFOAM(lduA, fileName);
 
-    UNAPCOUT << "End reading interfaces" << ENDL;
+    if (!myId) std::cout << "End reading interfaces" << ENDL;
   }
 
   label nCells = lduA.size();
   label nFaces = lduA.upper().size();
-  scalarVector b(nCells);
+  scalarVector b(nCells, other_comm);
 
-  UNAPCOUT << "Start reading b" << ENDL;
+  if (!myId) std::cout << "Start reading b" << ENDL;
 
   LOCATEFILE(fileName, "b_p", dir);
   constructVectorFromOpenFOAM(b, fileName);
 
-  UNAPCOUT << "End reading b" << ENDL;
+  if (!myId) std::cout << "End reading b" << ENDL;
 
-  if (PARRUN)
+  if (nProcs > 1)
   {
-    UNAP::unapMPI::unapCommunicator().barrier();
+    other_comm->barrier();
   }
 
-  UNAPCOUT << "Finish reading data" << ENDL;
+  if (!myId) std::cout << "Finish reading data" << ENDL;
 
   scalar tol = 0.0;
   scalar relTol = 1e-6;
 
-  const bool useMG = false;
+  const bool useMG = true;
   const bool usePBiCGStab = false;
-  scalarVector x(nCells, 0.0);
+  scalarVector x(nCells, 0.0, other_comm);
 
 #ifdef SW_SLAVE
   swlu_prof_init();
 #endif
 
-  labelVector postV(nCells);
-  labelVector postE(nFaces);
+  labelVector postV(nCells, other_comm);
+  labelVector postE(nFaces, other_comm);
   rcmLDU_nowrite(nFaces,
                  nCells,
                  lduA.lowerAddr().begin(),
@@ -118,32 +118,39 @@ int main()
 
   if (useMG)
   {
-    UNAPCOUT << " *************************************************************"
-                " \n\n ";
-    UNAPCOUT << "                        use  MG   solver                      "
-                " \n\n ";
-    UNAPCOUT << " *************************************************************"
-                " \n\n ";
+    if (!myId)
+    {
+      std::cout
+          << " *************************************************************"
+             " \n\n ";
+      std::cout
+          << "                        use  MG   solver                      "
+             " \n\n ";
+      std::cout
+          << " *************************************************************"
+             " \n\n ";
+    }
 
-    scalarVector weights(nFaces);
+    scalarVector weights(nFaces, other_comm);
     forAll(i, nFaces) { weights[i] = mag(lduA.upper()[i]); }
 
     lduAgglomeration aggl(lduA);
     aggl.SET_maxLevels(50);
     aggl.agglomerate(weights);
-    PtrList<matrix::smoother> sm(aggl.size());
 
+    PtrList<matrix::smoother> sm(aggl.size());
+    if (myId) std::cout.rdbuf(nullptr);
     forAll(i, aggl.size())
     {
-      UNAPCOUT << "At coarse level " << i << ":" << ENDL;
+      std::cout << "At coarse level " << i << ":" << ENDL;
       lduMatrix &cm = aggl.coarseMatrix(i);
       label cnCells = cm.size();
       label cnFaces = cm.upperAddr().size();
 
-      UNAPCOUT << "nCells = " << cnCells << ", nFaces = " << cnFaces << ENDL;
+      std::cout << "nCells = " << cnCells << ", nFaces = " << cnFaces << ENDL;
 
-      labelVector cpostV(cnCells);
-      labelVector cpostE(cnFaces);
+      labelVector cpostV(cnCells, other_comm);
+      labelVector cpostE(cnFaces, other_comm);
 
       labelVector clowerAddrOld(cm.lowerAddr());
       labelVector cupperAddrOld(cm.upperAddr());
@@ -164,7 +171,7 @@ int main()
 
     forAll(i, aggl.size())
     {
-      chebySmoother *smLocPtr = new chebySmoother;
+      chebySmoother *smLocPtr = new chebySmoother(other_comm);
       sm.setLevel(i, *smLocPtr);
     }
     MGSolver MG(lduA, aggl, sm);
@@ -225,19 +232,25 @@ int main()
 #ifdef SWTIMER
     swTimer::endTimer("MG Solve");
 #endif
-
-    UNAPCOUT << "After " << solverPerf.nIterations()
-             << " iterations, the solution is converged!" << ENDL;
-    UNAPCOUT << "finalResidual " << solverPerf.finalResidual() << ENDL;
+    if (!myId)
+      std::cout << "After " << solverPerf.nIterations()
+                << " iterations, the solution is converged!" << ENDL
+                << "finalResidual " << solverPerf.finalResidual() << ENDL;
   }
   else if (usePBiCGStab)
   {
-    UNAPCOUT << " *************************************************************"
-                " \n\n ";
-    UNAPCOUT << "                        use  PBiCGStab  solver                "
-                " \n\n ";
-    UNAPCOUT << " *************************************************************"
-                " \n\n ";
+    if (!myId)
+    {
+      std::cout
+          << " *************************************************************"
+             " \n\n ";
+      std::cout
+          << "                        use  PBiCGStab  solver                "
+             " \n\n ";
+      std::cout
+          << " *************************************************************"
+             " \n\n ";
+    }
 
 #ifdef UNAT_MLB
     lduA.constructMLBIterator();
@@ -282,19 +295,25 @@ int main()
     swTimer::endTimer("MLB restore");
 #endif
 #endif
-
-    UNAPCOUT << "After " << solverPerf.nIterations()
-             << " iterations, the solution is converged!" << ENDL;
-    UNAPCOUT << "finalResidual " << solverPerf.finalResidual() << ENDL;
+    if (!myId)
+      std::cout << "After " << solverPerf.nIterations()
+                << " iterations, the solution is converged!" << ENDL
+                << "finalResidual " << solverPerf.finalResidual() << ENDL;
   }
   else
   {
-    UNAPCOUT << " *************************************************************"
-                " \n\n ";
-    UNAPCOUT << "                          use  PCG  solver                    "
-                " \n\n ";
-    UNAPCOUT << " *************************************************************"
-                " \n\n ";
+    if (!myId)
+    {
+      std::cout
+          << " *************************************************************"
+             " \n\n ";
+      std::cout
+          << "                          use  PCG  solver                    "
+             " \n\n ";
+      std::cout
+          << " *************************************************************"
+             " \n\n ";
+    }
 
     // lduDiagPrecond precond(lduA);
 
@@ -309,16 +328,18 @@ int main()
 
     matrix::solverPerformance solverPerf = PCGSolver.solve(x, lduA, b);
 
-    UNAPCOUT << "After " << solverPerf.nIterations()
-             << " iterations, the solution is converged!" << ENDL;
-    UNAPCOUT << "finalResidual " << solverPerf.finalResidual() << ENDL;
+    if (!myId)
+      std::cout << "After " << solverPerf.nIterations()
+                << " iterations, the solution is converged!" << ENDL
+                << "finalResidual " << solverPerf.finalResidual() << ENDL;
   }
 
   // test scalar byte and label byte
 
-  UNAPCOUT << "test byte: \n";
-  UNAPCOUT << "label " << sizeof(label) << " ,scalar " << sizeof(scalar)
-           << std::endl;
+  if (!myId)
+    std::cout << "test byte: \n"
+              << "label " << sizeof(label) << " ,scalar " << sizeof(scalar)
+              << std::endl;
 
 #ifdef SW_SLAVE
   swlu_prof_print();
@@ -332,7 +353,7 @@ int main()
 #ifdef SWTIMER
   swTimer::printTimer();
 #endif
-  UNAP::unapMPI::unapCommunicator().barrier();
+  other_comm->barrier();
   // UNAP::unapMPI::exitMPI();
   // MPI_Finalize();
 }

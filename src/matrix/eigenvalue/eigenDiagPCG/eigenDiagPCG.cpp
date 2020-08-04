@@ -15,8 +15,16 @@ UNAP::eigenDiagPCG::eigenDiagPCG(const matrix &A,
                                  const label nDiagPCGs)
     : maxEigenValue_(0.0)
 {
-  scalarVector alphas(nDiagPCGs, 0.0);
-  scalarVector betas(nDiagPCGs, 0.0);
+  if (A.getCommunicator() != b.getCommunicator() &&
+      b.getCommunicator() != x.getCommunicator())
+  {
+    std::cout << "Error" << __FILE__ << " " << __LINE__
+              << "The communicators between A, b and c are different\n";
+    ERROR_EXIT;
+  }
+  Communicator *comm = x.getCommunicator();
+  scalarVector alphas(nDiagPCGs, 0.0, comm);
+  scalarVector betas(nDiagPCGs, 0.0, comm);
 
   //- do some PCG loops to recode alphas and betas
   //- x is renewed during this process
@@ -33,18 +41,28 @@ void UNAP::eigenDiagPCG::diagPCGLoops(const matrix &A,
                                       scalarVector &alphas,
                                       scalarVector &betas) const
 {
+  if (A.getCommunicator() != b.getCommunicator() &&
+      b.getCommunicator() != x.getCommunicator())
+  {
+    std::cout << "Error" << __FILE__ << " " << __LINE__
+              << "The communicators between A, b and c are different\n";
+    ERROR_EXIT;
+  }
+
+  Communicator *comm = x.getCommunicator();
+
   label nCells = x.size();
   scalar *xPtr = x.begin();
 
-  scalarVector pA(nCells);
+  scalarVector pA(nCells, comm);
   scalar *pAPtr = pA.begin();
 
-  scalarVector wA(nCells);
+  scalarVector wA(nCells, comm);
   scalar *wAPtr = wA.begin();
 
   const scalar *rDPtr = precond.rD().begin();
 
-  scalarVector rA(nCells);
+  scalarVector rA(nCells, comm);
   scalar *rAPtr = rA.begin();
 
   const scalar *bPtr = b.begin();
@@ -99,16 +117,16 @@ void UNAP::eigenDiagPCG::diagPCGLoops(const matrix &A,
       gSum_host(&arrays1, &slave_userFunc_digPrecondSum);
     };
 #endif
-    reduceSum(&wArA);
+    reduceSum(&wArA, comm);
 
     if ((mag(wArA)) < VSMALL)
     {
 #ifdef DEBUG
 
-      UNAPCOUT << "In " << __FILE__ << " " << __LINE__ << ENDL;
-      UNAPCOUT << "Warning: singularity in calculating eigenvalue! " << ENDL;
-      UNAPCOUT << "The value of search directions is too small:  wArA = "
-               << wArA << ENDL;
+      std::cout << "In " << __FILE__ << " " << __LINE__ << ENDL;
+      std::cout << "Warning: singularity in calculating eigenvalue! " << ENDL;
+      std::cout << "The value of search directions is too small:  wArA = "
+                << wArA << ENDL;
 
 #endif
       break;
@@ -172,7 +190,7 @@ void UNAP::eigenDiagPCG::diagPCGLoops(const matrix &A,
       gSum_host(&arrays1, &slave_userFunc_sumProd);
     }
 #endif
-    reduceSum(&wApA);
+    reduceSum(&wApA, comm);
 
     //- update solution and residual
     scalar alpha = wArA / wApA;

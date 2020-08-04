@@ -10,7 +10,9 @@
 #include "swTimer.hpp"
 #endif
 
-UNAP::lduDiagPrecond::lduDiagPrecond(const lduMatrix &A) : rD_(A.nCells())
+UNAP::lduDiagPrecond::lduDiagPrecond(const lduMatrix &A)
+    : rD_(A.nCells(), A.getCommunicator()),
+      matrix::preconditioner(A.getCommunicator())
 {
   const label nCells = A.nCells();
   const scalar *DPtr = A.diag().begin();
