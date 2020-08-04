@@ -15,6 +15,10 @@
 
 // using namespace UNAP;
 
+#if defined(SW_SLAVE)
+  extern UNAT::MultiLevelBlockIterator* mlbIter;
+#endif
+
 #define RETURN_VALUE(xnew, xold, nCells) \
   memcpy(xnew, xold, nCells * sizeof(scalar));
 
@@ -528,7 +532,7 @@ void UNAP::contruct_sw_matrix_interfaces__(long int *APtrPtr,
 void UNAP::construct_mlb_iterator__(long int *APtrPtr)
 {
   PTR2OBJ(APtrPtr, lduMatrix, lduA)
-  lduA.constructMLBIterator();
+  lduA.setMlbIter(mlbIter);
 }
 #endif
 
@@ -552,10 +556,6 @@ void UNAP::fill_sw_matrix_coefficients__(long int *APtrPtr,
 
   memcpy(diagData, diagPtr, nCells * sizeof(scalar));
 
-  // #ifdef SW_SLAVE
-  // 	lduA.reorderVector(lduA.diag());
-  // #endif
-
   memcpy(upperData, upperPtr, nFaces * sizeof(scalar));
 
   if (!symm)
@@ -568,10 +568,6 @@ void UNAP::fill_sw_matrix_coefficients__(long int *APtrPtr,
   {
     lduA.freeLower();
   }
-
-#ifdef SW_SLAVE
-  lduA.reorderLDUValues();
-#endif
 }
 
 void UNAP::fill_sw_matrix_interfaces_coefficients__(
@@ -745,17 +741,8 @@ void UNAP::sw_solve_mg__(long int *mgPtrPtr,
   // UNAPCOUT << "finish writing" << ENDL;
   // return;
 
-#ifdef SW_SLAVE
-  lduA.reorderVector(b);
-  lduA.reorderVector(x);
-#endif
-
   printMessage("Start solving in AMG solver");
   matrix::solverPerformance solverPerf = MG.solve(x, lduA, b);
-
-#ifdef SW_SLAVE
-  lduA.restoreVector(x);
-#endif
 
   RETURN_VALUE(xPtr, x.begin(), nCells);
 
@@ -861,17 +848,8 @@ void UNAP::sw_solve_pbicgstab__(long int *solverPtrPtr,
 
   solver.SET_ifPrint(true);
 
-#ifdef SW_SLAVE
-  lduA.reorderVector(b);
-  lduA.reorderVector(x);
-#endif
-
   printMessage("Start solving in PBiCGStab solver");
   matrix::solverPerformance solverPerf = solver.solve(x, lduA, b);
-
-#ifdef SW_SLAVE
-  lduA.restoreVector(x);
-#endif
 
   RETURN_VALUE(xPtr, x.begin(), nCells);
 
@@ -1105,7 +1083,7 @@ void UNAP::createinterfaces__(label64 *APtrPtr,
       localFaceCells[faceI] =
           (it->second)[faceI].second.first - partitionInfo[MYID];
       // localFaceCells2[faceI] =
-          // (it->second)[faceI].second.second - partitionInfo[nbrID];
+      // (it->second)[faceI].second.second - partitionInfo[nbrID];
 
       // postOrders[fid] = (it->second)[faceI].first;
       postOrders[(it->second)[faceI].first] = fid;
@@ -1119,7 +1097,7 @@ void UNAP::createinterfaces__(label64 *APtrPtr,
     scalarVector *localDataPtr = new scalarVector(localSize);
 
     // labelVector *locFaceCells2Ptr =
-        // new labelVector(localFaceCells2, localSize, true);
+    // new labelVector(localFaceCells2, localSize, true);
 
     patchIPtr->faceCells(*locFaceCellsPtr);
     // patchIPtr->faceCells2(*locFaceCells2Ptr);

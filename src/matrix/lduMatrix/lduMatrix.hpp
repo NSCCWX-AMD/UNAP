@@ -271,6 +271,14 @@ public:
 
   const label *unatCellMap() const { return unatCellMap_; }
 
+  void setMlbIter(UNAT::MultiLevelBlockIterator *mlbIter);
+  // TODO:temperary
+  void unatMapFree()
+  {
+    DELETE_POINTER(unatEdgeMap_);
+    DELETE_POINTER(unatCellMap_);
+  }
+
   void constructRSSIterator();
 
 #endif

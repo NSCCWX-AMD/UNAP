@@ -653,4 +653,15 @@ void UNAP::lduMatrix::constructRSSIterator()
   unatIter_ = rssIter_;
 }
 
+void UNAP::lduMatrix::setMlbIter(UNAT::MultiLevelBlockIterator *mlbIter)
+{
+  mlbIter_ = mlbIter;
+  label fsize = lowerAddrPtr_->size();
+  unatEdgeMap_ = new label[fsize];
+  forAll(ii, fsize) { unatEdgeMap_[ii] = ii + 1; }
+
+  unatCellMap_ = new label[nCells_];
+  forAll(ii, nCells_) { unatCellMap_[ii] = ii; }
+}
+
 #endif
