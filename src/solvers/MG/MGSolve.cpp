@@ -98,6 +98,28 @@ UNAP::matrix::solverPerformance UNAP::MGSolver::solve(
 
     forAll(levelI, coarseLevels) { agglomeration_.agglomerateMatrix(levelI); }
 
+#ifdef DEBUG
+    if (0)
+    {
+      forAll(ii, coarseLevels)
+      {
+        std::ostringstream os;
+        char filename[200];
+        os << "cMatrix_level" << ii;
+        strcpy(filename, os.str().c_str());
+        const lduMatrix &coarseMatrix =
+            (const lduMatrix &)agglomeration_.coarseMatrixLevels(ii);
+        printLDUMatrix(coarseMatrix, filename);
+        std::ostringstream os2;
+        os2 << "cMatrix_interfaces_level" << ii;
+        strcpy(filename, os2.str().c_str());
+        printInterfaces(coarseMatrix, filename);
+        printLDUMatrix((const lduMatrix &)A, "fMatrix");
+        printInterfaces((const lduMatrix &)A, "fMatrix_interfaces");
+      }
+    }
+#endif
+
 #ifdef BEST_RESULT
     scalar bestResidual = solverPerf.initialResidual();
     scalarVector bestSolve(x);
