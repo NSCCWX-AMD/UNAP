@@ -98,6 +98,11 @@ UNAP::matrix::solverPerformance UNAP::MGSolver::solve(
 
     forAll(levelI, coarseLevels) { agglomeration_.agglomerateMatrix(levelI); }
 
+#ifdef BEST_RESULT
+    scalar bestResidual = solverPerf.initialResidual();
+    scalarVector bestSolve(x);
+#endif
+
     do
     {
       Vcycle(x,
@@ -131,6 +136,14 @@ UNAP::matrix::solverPerformance UNAP::MGSolver::solve(
       }
 #endif
 
+#ifdef BEST_RESULT
+      if (bestResidual > solverPerf.finalResidual())
+      {
+        bestSolve = x;
+        bestResidual = solverPerf.finalResidual();
+      }
+#endif
+
 #ifdef DEBUG
       scalar convergenceRate =
           solverPerf.finalResidual() / solverPerf.previousResidual();
@@ -154,6 +167,21 @@ UNAP::matrix::solverPerformance UNAP::MGSolver::solve(
     } while ((++solverPerf.nIterations() < maxIter_ &&
               !(solverPerf.checkConvergence(
                   tolerance_, relTol_, solverPerf.nIterations(), minIter_))));
+#ifdef BEST_RESULT
+    x = bestSolve;
+#ifdef DEBUG
+    IFPRINT
+    {
+      UNAPCOUT << "At last  = ";
+      UNAPCOUT << ",   fin res = ";
+      std::cout.width(11);
+      std::cout.setf(std::ios::scientific);
+      UNAPCOUT << bestResidual;
+      UNAPCOUT << ",   rel res = ";
+      UNAPCOUT << bestResidual / normFactor << ENDL;
+    }
+#endif
+#endif
   }
 
   return solverPerf;
