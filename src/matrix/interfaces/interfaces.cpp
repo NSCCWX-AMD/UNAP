@@ -34,13 +34,12 @@ void UNAP::interfaces::initMatrixInterfaces(const scalarVector &psi) const
         << "The communicators between interfaces and Apsi are different\n";
     ERROR_EXIT;
   }
-
+  label myId = commcator_->getMyId();
   label numInterfaces = patches_.size();
   locPosition_ = new label[numInterfaces + 1];
   destRank_ = new label[numInterfaces];
   sendTaskName_ = new string[numInterfaces];
   recvTaskName_ = new string[numInterfaces];
-
   locPosition_[0] = 0;
   forAll(i, numInterfaces)
   {
@@ -63,9 +62,21 @@ void UNAP::interfaces::initMatrixInterfaces(const scalarVector &psi) const
     const label *const faceCellsPtr = patchI.faceCells().begin();
 
     label locSize = locPosition_[i + 1] - locPosition_[i];
-    forAll(faceI, locSize)
+
+    if (myId == destRank_[i])
     {
-      sendBuffer_[faceI + locPosition_[i]] = psiPtr[faceCellsPtr[faceI]];
+      const label *const faceCells2Ptr = patchI.faceCells2().begin();
+      forAll(faceI, locSize)
+      {
+        sendBuffer_[faceI + locPosition_[i]] = psiPtr[faceCells2Ptr[faceI]];
+      }
+    }
+    else
+    {
+      forAll(faceI, locSize)
+      {
+        sendBuffer_[faceI + locPosition_[i]] = psiPtr[faceCellsPtr[faceI]];
+      }
     }
 
     char ch[128];

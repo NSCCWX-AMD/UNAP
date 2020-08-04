@@ -25,7 +25,7 @@ extern "C"
                        scalar *upper,
                        long int *commPtr);
 
-  void coo2ldumatrixcreat_(long int *APtrPtr,
+  void coo2ldumatrixcreat_(label64 *APtrPtr,
                            const scalar *dataPtr,
                            const label *rowsPtr,
                            const label *columnPtr,
@@ -34,7 +34,7 @@ extern "C"
                            const label *symm,
                            long int *commPtr);
 
-  void csr2ldumatrixcreat_(long int *APtrPtr,
+  void csr2ldumatrixcreat_(label64 *APtrPtr,
                            const scalar *dataPtr,
                            const label *compRowsPtr,
                            const label *columnPtr,
@@ -43,7 +43,7 @@ extern "C"
                            const label *symm,
                            long int *commPtr);
 
-  void matrixinterfacescreat_(long int *APtrPtr,
+  void matrixinterfacescreat_(label64 *APtrPtr,
                               const label *nNeiProcs,
                               const label *destRank,
                               const label *locPosition,
@@ -51,7 +51,7 @@ extern "C"
                               const scalar *data);
 
   void pcgsolversolve_(scalar *x,
-                       long int *APtrPtr,
+                       label64 *APtrPtr,
                        scalar *b,
                        label *nCells,
                        label *precond,
@@ -63,7 +63,7 @@ extern "C"
                        scalar *final_res_norm);
 
   void pbicgstabsolversolve_(scalar *x,
-                             long int *APtrPtr,
+                             label64 *APtrPtr,
                              scalar *b,
                              label *nCells,
                              label *precond,
@@ -75,7 +75,7 @@ extern "C"
                              scalar *final_res_norm);
 
   void mgsolversolve_(scalar *x,
-                      long int *APtrPtr,
+                      label64 *APtrPtr,
                       scalar *b,
                       label *nCells,
                       label *aggl,
@@ -114,67 +114,66 @@ extern "C"
                       label *sizePtr,
                       long int *commPtr);
 
-  void contruct_sw_matrix__(long int *APtrPtr,
+  void contruct_sw_matrix__(label64 *APtrPtr,
                             const label *nCellsPtr,
                             const label *rowsPtr,
                             const label *colsPtr,
                             const label *sizePtr,
                             long int *commPtr);
 
-  void contruct_sw_matrix_interfaces__(long int *APtrPtr,
+  void contruct_sw_matrix_interfaces__(label64 *APtrPtr,
                                        const label *nNeiProcsPtr,
                                        const label *destRankPtr,
                                        const label *offDiagRowsPtr,
                                        const label *offDiagStartsPtr);
 
 #ifdef SW_SLAVE
-  void construct_mlb_iterator__(long int *APtrPtr);
+  void construct_mlb_iterator__(label64 *APtrPtr);
 #endif
 
-  void fill_sw_matrix_coefficients__(long int *APtrPtr,
+  void fill_sw_matrix_coefficients__(label64 *APtrPtr,
                                      const scalar *diagPtr,
                                      const scalar *upperPtr,
                                      const scalar *lowerPtr);
 
-  void fill_sw_matrix_interfaces_coefficients__(long int *APtrPtr,
-                                                const label *offDiagStartsPtr,
+  void fill_sw_matrix_interfaces_coefficients__(label64 *APtrPtr,
                                                 const scalar *offDiagCoeffs);
 
   //- mg
-  void contruct_solver_mg__(long int *mgPtrPtr,
-                            long int *APtrPtr,
-                            long int *AgglPtr,
+  void contruct_solver_mg__(label64 *mgPtrPtr,
+                            label64 *APtrPtr,
+                            label64 *AgglPtr,
                             const scalar *faceAreaPtr,
                             const label *smTypePtr,
                             const label *maxLevelsPtr,
                             const label *nCellsCoarsestPtr);
 
 #ifdef SW_SLAVE
-  void mg_coarse_mlb__(long int *agglPtr);
+  void mg_coarse_mlb__(label64 *agglPtr);
 #endif
 
-  void sw_solver_mg_set_maxiter__(long int *solverPtrPtr,
+  void sw_solver_mg_set_maxiter__(label64 *solverPtrPtr,
                                   const label *maxIterPtr);
 
-  void sw_solver_mg_set_miniter__(long int *solverPtrPtr,
+  void sw_solver_mg_set_miniter__(label64 *solverPtrPtr,
                                   const label *minIterPtr);
 
-  void sw_solver_mg_set_tol__(long int *solverPtrPtr, const scalar *tolPtr);
+  void sw_solver_mg_set_tol__(label64 *solverPtrPtr, const scalar *tolPtr);
 
-  void sw_solver_mg_set_reltol__(long int *solverPtrPtr,
+  void sw_solver_mg_set_reltol__(label64 *solverPtrPtr,
                                  const scalar *reltolPtr);
 
-  void sw_solver_mg_set_npresweeps__(long int *solverPtrPtr,
+  void sw_solver_mg_set_npresweeps__(label64 *solverPtrPtr,
                                      const label *numPtr);
 
-  void sw_solver_mg_set_npostsweeps__(long int *solverPtrPtr,
+  void sw_solver_mg_set_npostsweeps__(label64 *solverPtrPtr,
                                       const label *numPtr);
 
-  void sw_solver_mg_set_nfinestsweeps__(long int *solverPtrPtr,
+  void sw_solver_mg_set_nfinestsweeps__(label64 *solverPtrPtr,
                                         const label *numPtr);
 
-  void sw_solve_mg__(long int *mgPtrPtr,
-                     long int *APtrPtr,
+  void sw_solve_mg__(label64 *mgPtrPtr,
+                     label64 *APtrPtr,
                      scalar *xPtr,
                      scalar *bPtr,
                      scalar *res_normPtr);
@@ -183,33 +182,43 @@ extern "C"
 
   void contruct_solver_pbicgstab__(long int *solverPtrPtr, long int *commPtr);
 
-  void sw_solver_pbicgstab_set_maxiter__(long int *solverPtrPtr,
+  void sw_solver_pbicgstab_set_maxiter__(label64 *solverPtrPtr,
                                          const label *maxIterPtr);
 
-  void sw_solver_pbicgstab_set_miniter__(long int *solverPtrPtr,
+  void sw_solver_pbicgstab_set_miniter__(label64 *solverPtrPtr,
                                          const label *minIterPtr);
 
-  void sw_solver_pbicgstab_set_tol__(long int *solverPtrPtr,
+  void sw_solver_pbicgstab_set_tol__(label64 *solverPtrPtr,
                                      const scalar *tolPtr);
 
-  void sw_solver_pbicgstab_set_reltol__(long int *solverPtrPtr,
+  void sw_solver_pbicgstab_set_reltol__(label64 *solverPtrPtr,
                                         const scalar *reltolPtr);
 
-  void sw_solver_pbicgstab_set_precond__(long int *solverPtrPtr,
-                                         long int *APtrPtr,
+  void sw_solver_pbicgstab_set_precond__(label64 *solverPtrPtr,
+                                         label64 *APtrPtr,
                                          const label *precondTypePtr);
 
-  void sw_solve_pbicgstab__(long int *solverPtrPtr,
-                            long int *APtrPtr,
+  void sw_solve_pbicgstab__(label64 *solverPtrPtr,
+                            label64 *APtrPtr,
                             scalar *xPtr,
                             scalar *bPtr,
                             scalar *res_normPtr);
 
-  void sw_matrix_destroy__(long int *APtrPtr);
+  void sw_matrix_destroy__(label64 *APtrPtr);
 
-  void sw_solver_destroy_mg__(long int *solverPtrPtr);
+  void sw_solver_destroy_mg__(label64 *solverPtrPtr);
 
-  void sw_solver_destroy_pbicgstab__(long int *solverPtrPtr);
+  void sw_solver_destroy_pbicgstab__(label64 *solverPtrPtr);
+
+  void createinterfaces__(label64 *APtrPtr,
+                          label64 *offDiagRows,
+                          label64 *offDiagCols,
+                          label *offDiagPids,
+                          label *cellNumPtr,
+                          label *faceNumPtr,
+                          label *postOrders);
+
+  void printvector__(scalar *data, label *size, char *name, long int *commPtr);
 
 #ifdef __cplusplus
 }

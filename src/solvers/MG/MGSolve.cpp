@@ -60,9 +60,10 @@ UNAP::matrix::solverPerformance UNAP::MGSolver::solve(
   solverPerf.finalResidual() = solverPerf.initialResidual();
   solverPerf.previousResidual() = solverPerf.finalResidual();
 
-#ifdef DEBUG
   //- calculate normalization factor
   scalar normFactor = this->normFactor(b);
+
+#ifdef DEBUG
   IFPRINT
   {
     commcator_->log() << "At cycle = ";
@@ -81,6 +82,8 @@ UNAP::matrix::solverPerformance UNAP::MGSolver::solve(
 // swTimer::startTimer("MG Vcycle");
 #endif
 
+  solverPerf.initialResidual() = normFactor;
+
   if (!solverPerf.checkConvergence(
           tolerance_, relTol_, solverPerf.nIterations(), minIter_))
   {
@@ -95,6 +98,33 @@ UNAP::matrix::solverPerformance UNAP::MGSolver::solve(
     initVcycle(coarseCorrFields, coarseSources);
 
     forAll(levelI, coarseLevels) { agglomeration_.agglomerateMatrix(levelI); }
+
+#ifdef DEBUG
+    if (0)
+    {
+      forAll(ii, coarseLevels)
+      {
+        std::ostringstream os;
+        char filename[200];
+        os << "cMatrix_level" << ii;
+        strcpy(filename, os.str().c_str());
+        const lduMatrix &coarseMatrix =
+            (const lduMatrix &)agglomeration_.coarseMatrixLevels(ii);
+        printLDUMatrix(coarseMatrix, filename);
+        std::ostringstream os2;
+        os2 << "cMatrix_interfaces_level" << ii;
+        strcpy(filename, os2.str().c_str());
+        printInterfaces(coarseMatrix, filename);
+        printLDUMatrix((const lduMatrix &)A, "fMatrix");
+        printInterfaces((const lduMatrix &)A, "fMatrix_interfaces");
+      }
+    }
+#endif
+
+#ifdef BEST_RESULT
+    scalar bestResidual = solverPerf.initialResidual();
+    scalarVector bestSolve(x);
+#endif
 
     do
     {
@@ -129,6 +159,14 @@ UNAP::matrix::solverPerformance UNAP::MGSolver::solve(
       }
 #endif
 
+#ifdef BEST_RESULT
+      if (bestResidual > solverPerf.finalResidual())
+      {
+        bestSolve = x;
+        bestResidual = solverPerf.finalResidual();
+      }
+#endif
+
 #ifdef DEBUG
       scalar convergenceRate =
           solverPerf.finalResidual() / solverPerf.previousResidual();
@@ -152,6 +190,21 @@ UNAP::matrix::solverPerformance UNAP::MGSolver::solve(
     } while ((++solverPerf.nIterations() < maxIter_ &&
               !(solverPerf.checkConvergence(
                   tolerance_, relTol_, solverPerf.nIterations(), minIter_))));
+#ifdef BEST_RESULT
+    x = bestSolve;
+#ifdef DEBUG
+    IFPRINT
+    {
+      UNAPCOUT << "At last  = ";
+      UNAPCOUT << ",   fin res = ";
+      std::cout.width(11);
+      std::cout.setf(std::ios::scientific);
+      UNAPCOUT << bestResidual;
+      UNAPCOUT << ",   rel res = ";
+      UNAPCOUT << bestResidual / normFactor << ENDL;
+    }
+#endif
+#endif
   }
 
   return solverPerf;

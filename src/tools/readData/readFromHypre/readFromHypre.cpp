@@ -221,7 +221,7 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix &lduA, const char *fileName)
                              0,
                              other_comm);
 
-  printLDUMatrix(diagA, "A_diag");
+  // printLDUMatrix(diagA, "A_diag");
 
   labelVector faceStart(nNeiProcs + 1, other_comm);
   forAll(i, nNeiProcs) { faceStart[i + 1] = faceStart[i] + nFacesInProc[i]; }
@@ -254,7 +254,7 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix &lduA, const char *fileName)
 
     other_comm->log() << "start print interfaces" << ENDL;
 
-    printInterfaces(lduA, "interfaces");
+    // printInterfaces(lduA, "interfaces");
   }
 }
 

@@ -115,9 +115,10 @@ UNAP::matrix::solverPerformance UNAP::PBiCGStab::solve(
   solverPerf.finalResidual() = solverPerf.initialResidual();
   solverPerf.previousResidual() = solverPerf.finalResidual();
 
-#ifdef DEBUG
   //- calculate normalisation factor
   scalar normFactor = this->normFactor(b);
+
+#ifdef DEBUG
   IFPRINT
   {
     commcator_->log() << "At nIter = ";
@@ -179,7 +180,7 @@ UNAP::matrix::solverPerformance UNAP::PBiCGStab::solve(
 #endif
 
     // --- Test for singularity
-    if (solverPerf.checkSingularity(mag(rA0rA)))
+    if (solverPerf.checkSingularity(mag(rA0rA) / normFactor))
     {
 #ifdef DEBUG
       IFPRINT { commcator_->log() << "singularity! rA0rA = " << rA0rA << ENDL; }

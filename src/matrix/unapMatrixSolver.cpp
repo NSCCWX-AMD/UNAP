@@ -13,7 +13,7 @@ UNAP::matrix::solver::solver(Communicator *other_comm)
 scalar UNAP::matrix::solver::normFactor(const scalarVector &source) const
 {
   // return source.SumMag() + SMALL;
-  return source.SumSqrt() + SMALL;
+  return source.SumSqrt() + VSMALL;
 }
 
 void UNAP::matrix::solver::SET_maxIter(label maxIter) { maxIter_ = maxIter; }
