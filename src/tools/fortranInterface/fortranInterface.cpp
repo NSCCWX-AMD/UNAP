@@ -27,7 +27,7 @@ extern UNAT::MultiLevelBlockIterator *mlbIter;
   CHECK_POINTER(ptr##_tmp)      \
   cls &obj = *ptr##_tmp;
 
-void UNAP::ldumatrixcreat_(long int *APtrPtr,
+void UNAP::ldumatrixcreat_(label64 *APtrPtr,
                            label *nCellsPtr,
                            label *upperSizePtr,
                            label *lowerAddrValue,
@@ -59,7 +59,7 @@ void UNAP::ldumatrixcreat_(long int *APtrPtr,
   DELETE_OBJECT_POINTER(lowerPtr)
 }
 
-void UNAP::coo2ldumatrixcreat_(long int *APtrPtr,
+void UNAP::coo2ldumatrixcreat_(label64 *APtrPtr,
                                const scalar *dataPtr,
                                const label *fRowsPtr,
                                const label *fColsPtr,
@@ -97,7 +97,7 @@ void UNAP::coo2ldumatrixcreat_(long int *APtrPtr,
   DELETE_POINTER(cValsPtr)
 }
 
-void UNAP::csr2ldumatrixcreat_(long int *APtrPtr,
+void UNAP::csr2ldumatrixcreat_(label64 *APtrPtr,
                                const scalar *dataPtr,
                                const label *fRowsPtr,
                                const label *fColsPtr,
@@ -112,7 +112,7 @@ void UNAP::csr2ldumatrixcreat_(long int *APtrPtr,
   *(lduMatrix **)APtrPtr = &lduA;
 }
 
-void UNAP::matrixinterfacescreat_(long int *APtrPtr,
+void UNAP::matrixinterfacescreat_(label64 *APtrPtr,
                                   const label *nNeiProcsPtr,
                                   const label *destRankPtr,
                                   const label *locPositionPtr,
@@ -160,7 +160,7 @@ void UNAP::matrixinterfacescreat_(long int *APtrPtr,
 }
 
 void UNAP::pcgsolversolve_(scalar *xValue,
-                           long int *APtrPtr,
+                           label64 *APtrPtr,
                            scalar *bValue,
                            label *nCellsPtr,
                            label *precondTypePtr,
@@ -227,7 +227,7 @@ void UNAP::pcgsolversolve_(scalar *xValue,
 }
 
 void UNAP::pbicgstabsolversolve_(scalar *xValue,
-                                 long int *APtrPtr,
+                                 label64 *APtrPtr,
                                  scalar *bValue,
                                  label *nCellsPtr,
                                  label *precondTypePtr,
@@ -301,7 +301,7 @@ void UNAP::pbicgstabsolversolve_(scalar *xValue,
 }
 
 void UNAP::mgsolversolve_(scalar *xValue,
-                          long int *APtrPtr,
+                          label64 *APtrPtr,
                           scalar *bValue,
                           label *nCellsPtr,
                           label *agglTypePtr,
@@ -454,7 +454,7 @@ void UNAP::reordervalue__(scalar *val, label *newOrder, label *sizePtr)
   reorderValue(val, newOrder, *sizePtr);
 }
 
-void UNAP::contruct_sw_matrix__(long int *APtrPtr,
+void UNAP::contruct_sw_matrix__(label64 *APtrPtr,
                                 const label *nCellsPtr,
                                 const label *rowsPtr,
                                 const label *colsPtr,
@@ -488,7 +488,7 @@ void UNAP::contruct_sw_matrix__(long int *APtrPtr,
   *(lduMatrix **)APtrPtr = lduAPtr;
 }
 
-void UNAP::contruct_sw_matrix_interfaces__(long int *APtrPtr,
+void UNAP::contruct_sw_matrix_interfaces__(label64 *APtrPtr,
                                            const label *nNeiProcsPtr,
                                            const label *destRankPtr,
                                            const label *offDiagRowsPtr,
@@ -529,14 +529,14 @@ void UNAP::contruct_sw_matrix_interfaces__(long int *APtrPtr,
 }
 
 #ifdef SW_SLAVE
-void UNAP::construct_mlb_iterator__(long int *APtrPtr)
+void UNAP::construct_mlb_iterator__(label64 *APtrPtr)
 {
   PTR2OBJ(APtrPtr, lduMatrix, lduA)
   lduA.setMlbIter(mlbIter);
 }
 #endif
 
-void UNAP::fill_sw_matrix_coefficients__(long int *APtrPtr,
+void UNAP::fill_sw_matrix_coefficients__(label64 *APtrPtr,
                                          const scalar *diagPtr,
                                          const scalar *upperPtr,
                                          const scalar *lowerPtr)
@@ -570,7 +570,7 @@ void UNAP::fill_sw_matrix_coefficients__(long int *APtrPtr,
   }
 }
 
-void UNAP::fill_sw_matrix_interfaces_coefficients__(long int *APtrPtr,
+void UNAP::fill_sw_matrix_interfaces_coefficients__(label64 *APtrPtr,
                                                     const scalar *offDiagCoeffs)
 {
   PTR2OBJ(APtrPtr, lduMatrix, lduA)
@@ -596,9 +596,9 @@ void UNAP::fill_sw_matrix_interfaces_coefficients__(long int *APtrPtr,
 }
 
 //- MultiGrid solver solve and controls
-void UNAP::contruct_solver_mg__(long int *mgPtrPtr,
-                                long int *APtrPtr,
-                                long int *AgglPtr,
+void UNAP::contruct_solver_mg__(label64 *mgPtrPtr,
+                                label64 *APtrPtr,
+                                label64 *AgglPtr,
                                 const scalar *weightsPtr,
                                 const label *smootherTypePtr,
                                 const label *maxLevelsPtr,
@@ -662,63 +662,63 @@ void UNAP::contruct_solver_mg__(long int *mgPtrPtr,
 }
 
 #ifdef SW_SLAVE
-void UNAP::mg_coarse_mlb__(long int *agglPtr)
+void UNAP::mg_coarse_mlb__(label64 *agglPtr)
 {
   PTR2OBJ(agglPtr, lduAgglomeration, aggl);
   aggl.agglomerationReorderTopo();
 }
 #endif
 
-void UNAP::sw_solver_mg_set_maxiter__(long int *solverPtrPtr,
+void UNAP::sw_solver_mg_set_maxiter__(label64 *solverPtrPtr,
                                       const label *maxIterPtr)
 {
   PTR2OBJ(solverPtrPtr, MGSolver, solver);
   solver.SET_maxIter(*maxIterPtr);
 }
 
-void UNAP::sw_solver_mg_set_miniter__(long int *solverPtrPtr,
+void UNAP::sw_solver_mg_set_miniter__(label64 *solverPtrPtr,
                                       const label *minIterPtr)
 {
   PTR2OBJ(solverPtrPtr, MGSolver, solver)
   solver.SET_minIter(*minIterPtr);
 }
 
-void UNAP::sw_solver_mg_set_tol__(long int *solverPtrPtr, const scalar *tolPtr)
+void UNAP::sw_solver_mg_set_tol__(label64 *solverPtrPtr, const scalar *tolPtr)
 {
   PTR2OBJ(solverPtrPtr, MGSolver, solver)
   solver.SET_tolerance(*tolPtr);
 }
 
-void UNAP::sw_solver_mg_set_reltol__(long int *solverPtrPtr,
+void UNAP::sw_solver_mg_set_reltol__(label64 *solverPtrPtr,
                                      const scalar *reltolPtr)
 {
   PTR2OBJ(solverPtrPtr, MGSolver, solver)
   solver.SET_relTol(*reltolPtr);
 }
 
-void UNAP::sw_solver_mg_set_npresweeps__(long int *solverPtrPtr,
+void UNAP::sw_solver_mg_set_npresweeps__(label64 *solverPtrPtr,
                                          const label *numPtr)
 {
   PTR2OBJ(solverPtrPtr, MGSolver, solver);
   solver.SET_nPreSweeps(*numPtr);
 }
 
-void UNAP::sw_solver_mg_set_npostsweeps__(long int *solverPtrPtr,
+void UNAP::sw_solver_mg_set_npostsweeps__(label64 *solverPtrPtr,
                                           const label *numPtr)
 {
   PTR2OBJ(solverPtrPtr, MGSolver, solver)
   solver.SET_nPostSweeps(*numPtr);
 }
 
-void UNAP::sw_solver_mg_set_nfinestsweeps__(long int *solverPtrPtr,
+void UNAP::sw_solver_mg_set_nfinestsweeps__(label64 *solverPtrPtr,
                                             const label *numPtr)
 {
   PTR2OBJ(solverPtrPtr, MGSolver, solver);
   solver.SET_nFinestSweeps(*numPtr);
 }
 
-void UNAP::sw_solve_mg__(long int *mgPtrPtr,
-                         long int *APtrPtr,
+void UNAP::sw_solve_mg__(label64 *mgPtrPtr,
+                         label64 *APtrPtr,
                          scalar *xPtr,
                          scalar *bPtr,
                          scalar *res_normPtr)
@@ -764,43 +764,43 @@ void UNAP::sw_solve_mg__(long int *mgPtrPtr,
 }
 
 //- PBiCGStab solver solve and controls
-void UNAP::contruct_solver_pbicgstab__(long int *solverPtrPtr)
+void UNAP::contruct_solver_pbicgstab__(label64 *solverPtrPtr)
 {
   PBiCGStab *solverPtr = new PBiCGStab();
 
   *(PBiCGStab **)solverPtrPtr = solverPtr;
 }
 
-void UNAP::sw_solver_pbicgstab_set_maxiter__(long int *solverPtrPtr,
+void UNAP::sw_solver_pbicgstab_set_maxiter__(label64 *solverPtrPtr,
                                              const label *maxIterPtr)
 {
   PTR2OBJ(solverPtrPtr, PBiCGStab, solver);
   solver.SET_maxIter(*maxIterPtr);
 }
 
-void UNAP::sw_solver_pbicgstab_set_miniter__(long int *solverPtrPtr,
+void UNAP::sw_solver_pbicgstab_set_miniter__(label64 *solverPtrPtr,
                                              const label *minIterPtr)
 {
   PTR2OBJ(solverPtrPtr, PBiCGStab, solver)
   solver.SET_minIter(*minIterPtr);
 }
 
-void UNAP::sw_solver_pbicgstab_set_tol__(long int *solverPtrPtr,
+void UNAP::sw_solver_pbicgstab_set_tol__(label64 *solverPtrPtr,
                                          const scalar *tolPtr)
 {
   PTR2OBJ(solverPtrPtr, PBiCGStab, solver);
   solver.SET_tolerance(*tolPtr);
 }
 
-void UNAP::sw_solver_pbicgstab_set_reltol__(long int *solverPtrPtr,
+void UNAP::sw_solver_pbicgstab_set_reltol__(label64 *solverPtrPtr,
                                             const scalar *reltolPtr)
 {
   PTR2OBJ(solverPtrPtr, PBiCGStab, solver);
   solver.SET_relTol(*reltolPtr);
 }
 
-void UNAP::sw_solver_pbicgstab_set_precond__(long int *solverPtrPtr,
-                                             long int *APtrPtr,
+void UNAP::sw_solver_pbicgstab_set_precond__(label64 *solverPtrPtr,
+                                             label64 *APtrPtr,
                                              const label *precondTypePtr)
 {
   PTR2OBJ(solverPtrPtr, PBiCGStab, solver)
@@ -832,8 +832,8 @@ void UNAP::sw_solver_pbicgstab_set_precond__(long int *solverPtrPtr,
   }
 }
 
-void UNAP::sw_solve_pbicgstab__(long int *solverPtrPtr,
-                                long int *APtrPtr,
+void UNAP::sw_solve_pbicgstab__(label64 *solverPtrPtr,
+                                label64 *APtrPtr,
                                 scalar *xPtr,
                                 scalar *bPtr,
                                 scalar *res_normPtr)
@@ -870,7 +870,7 @@ void UNAP::sw_solve_pbicgstab__(long int *solverPtrPtr,
   *res_normPtr = solverPerf.finalResidual();
 }
 
-void UNAP::sw_matrix_destroy__(long int *APtrPtr)
+void UNAP::sw_matrix_destroy__(label64 *APtrPtr)
 {
   PTR2OBJ(APtrPtr, lduMatrix, lduA)
 #ifdef SW_SLAVE
@@ -879,13 +879,13 @@ void UNAP::sw_matrix_destroy__(long int *APtrPtr)
   delete &lduA;
 }
 
-void UNAP::sw_solver_destroy_mg__(long int *solverPtrPtr)
+void UNAP::sw_solver_destroy_mg__(label64 *solverPtrPtr)
 {
   PTR2OBJ(solverPtrPtr, MGSolver, solver)
   delete &solver;
 }
 
-void UNAP::sw_solver_destroy_pbicgstab__(long int *solverPtrPtr)
+void UNAP::sw_solver_destroy_pbicgstab__(label64 *solverPtrPtr)
 {
   PTR2OBJ(solverPtrPtr, PBiCGStab, solver)
   delete &solver;
