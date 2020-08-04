@@ -214,7 +214,7 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix &lduA, const char *fileName)
                              nnzDiagPart,
                              0);
 
-  printLDUMatrix(diagA, "A_diag");
+  // printLDUMatrix(diagA, "A_diag");
 
   labelVector faceStart(nNeiProcs + 1);
   forAll(i, nNeiProcs) { faceStart[i + 1] = faceStart[i] + nFacesInProc[i]; }
@@ -243,11 +243,11 @@ void UNAP::constructLDUMatrixFromHypre(lduMatrix &lduA, const char *fileName)
   {
     constructLDUInterfacesFromHypre(
         lduA, nNeiProcs, neiProcNo, faceStart, faceCells, valOffDiag);
-    UNAP::unapMPI::unapCommunicator().barrier();
+    // UNAP::unapMPI::unapCommunicator().barrier();
 
-    UNAPCOUT << "start print interfaces" << ENDL;
+    // UNAPCOUT << "start print interfaces" << ENDL;
 
-    printInterfaces(lduA, "interfaces");
+    // printInterfaces(lduA, "interfaces");
   }
 }
 
