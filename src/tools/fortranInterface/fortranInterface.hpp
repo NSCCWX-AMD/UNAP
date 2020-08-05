@@ -11,11 +11,11 @@ extern "C"
 #endif
 
   // 初始化MPI环境 返回communicator
-  void comminit_(long int *CommPtr);
+  void comminit_(label64 *CommPtr);
 
-  void commgetmyidsize_(long int *CommPtr, int *rank, int *size);
+  void commgetmyidsize_(label64 *CommPtr, label *rank, label *size);
 
-  void ldumatrixcreat_(long int *APtrPtr,
+  void ldumatrixcreat_(label64 *APtrPtr,
                        label *nCells,
                        label *upperSize,
                        label *lowerAddr,
@@ -23,7 +23,7 @@ extern "C"
                        scalar *lower,
                        scalar *diag,
                        scalar *upper,
-                       long int *commPtr);
+                       label64 *commPtr);
 
   void coo2ldumatrixcreat_(label64 *APtrPtr,
                            const scalar *dataPtr,
@@ -32,7 +32,7 @@ extern "C"
                            const label *nCells,
                            const label *size,
                            const label *symm,
-                           long int *commPtr);
+                           label64 *commPtr);
 
   void csr2ldumatrixcreat_(label64 *APtrPtr,
                            const scalar *dataPtr,
@@ -41,7 +41,7 @@ extern "C"
                            const label *nCells,
                            const label *size,
                            const label *symm,
-                           long int *commPtr);
+                           label64 *commPtr);
 
   void matrixinterfacescreat_(label64 *APtrPtr,
                               const label *nNeiProcs,
@@ -93,33 +93,33 @@ extern "C"
                    label *col,
                    label *nCellsPtr,
                    label *sizePtr,
-                   long int *commPtr);
+                   label64 *commPtr);
 
   void reorderuface__(label *row,
                       label *col,
                       label *nCellsPtr,
                       label *sizePtr,
                       label *newOrder,
-                      long int *commPtr);
+                      label64 *commPtr);
 
   void reorderlface__(label *row,
                       label *col,
                       label *nCellsPtr,
                       label *sizePtr,
                       label *newOrder,
-                      long int *commPtr);
+                      label64 *commPtr);
 
   void reordervalue__(scalar *val,
                       label *newOrder,
                       label *sizePtr,
-                      long int *commPtr);
+                      label64 *commPtr);
 
   void contruct_sw_matrix__(label64 *APtrPtr,
                             const label *nCellsPtr,
                             const label *rowsPtr,
                             const label *colsPtr,
                             const label *sizePtr,
-                            long int *commPtr);
+                            label64 *commPtr);
 
   void contruct_sw_matrix_interfaces__(label64 *APtrPtr,
                                        const label *nNeiProcsPtr,
@@ -180,7 +180,7 @@ extern "C"
 
   //- pbicgstab
 
-  void contruct_solver_pbicgstab__(long int *solverPtrPtr, long int *commPtr);
+  void contruct_solver_pbicgstab__(label64 *solverPtrPtr, label64 *commPtr);
 
   void sw_solver_pbicgstab_set_maxiter__(label64 *solverPtrPtr,
                                          const label *maxIterPtr);
@@ -218,7 +218,7 @@ extern "C"
                           label *faceNumPtr,
                           label *postOrders);
 
-  void printvector__(scalar *data, label *size, char *name, long int *commPtr);
+  void printvector__(scalar *data, label *size, char *name, label64 *commPtr);
 
 #ifdef __cplusplus
 }

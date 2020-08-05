@@ -27,20 +27,20 @@ extern UNAT::MultiLevelBlockIterator *mlbIter;
   CHECK_POINTER(ptr##_tmp)      \
   cls &obj = *ptr##_tmp;
 
-void UNAP::comminit_(long int *commPtr)
+void UNAP::comminit_(label64 *commPtr)
 {
   COMM::init(NULL, NULL);
   *(Communicator **)commPtr = &COMM::getGlobalComm();
 }
 
-void UNAP::commgetmyidsize_(long int *commPtr, int *rank, int *size)
+void UNAP::commgetmyidsize_(label64 *commPtr, label *rank, label *size)
 {
   Communicator *commcator = (Communicator *)*commPtr;
   *rank = commcator->getMyId();
   *size = commcator->getMySize();
 }
 
-void UNAP::ldumatrixcreat_(long int *APtrPtr,
+void UNAP::ldumatrixcreat_(label64 *APtrPtr,
                            label *nCellsPtr,
                            label *upperSizePtr,
                            label *lowerAddrValue,
@@ -48,7 +48,7 @@ void UNAP::ldumatrixcreat_(long int *APtrPtr,
                            scalar *lowerValue,
                            scalar *diagValue,
                            scalar *upperValue,
-                           long int *commPtr)
+                           label64 *commPtr)
 {
   Communicator *commcator = (Communicator *)*commPtr;
   label nCells = *nCellsPtr;
@@ -81,7 +81,7 @@ void UNAP::coo2ldumatrixcreat_(label64 *APtrPtr,
                                const label *nCellsPtr,
                                const label *sizePtr,
                                const label *symmPtr,
-                               long int *commPtr)
+                               label64 *commPtr)
 {
   Communicator *commcator = (Communicator *)*commPtr;
   label *cRowsPtr = new label[*sizePtr];
@@ -120,7 +120,7 @@ void UNAP::csr2ldumatrixcreat_(label64 *APtrPtr,
                                const label *nCellsPtr,
                                const label *sizePtr,
                                const label *symmPtr,
-                               long int *commPtr)
+                               label64 *commPtr)
 {
   Communicator *commcator = (Communicator *)*commPtr;
   lduMatrix &lduA = csr2ldu(
@@ -440,7 +440,7 @@ void UNAP::reordercoo_(scalar *val,
                        label *col,
                        label *nCellsPtr,
                        label *sizePtr,
-                       long int *commPtr)
+                       label64 *commPtr)
 {
   Communicator *commcator = (Communicator *)*commPtr;
   if (row[0] != 0)
@@ -459,7 +459,7 @@ void UNAP::reorderuface__(label *row,
                           label *nCellsPtr,
                           label *sizePtr,
                           label *newOrder,
-                          long int *commPtr)
+                          label64 *commPtr)
 {
   Communicator *commcator = (Communicator *)*commPtr;
   forAll(i, *sizePtr)
@@ -476,7 +476,7 @@ void UNAP::reorderlface__(label *row,
                           label *nCellsPtr,
                           label *sizePtr,
                           label *newOrder,
-                          long int *commPtr)
+                          label64 *commPtr)
 {
   Communicator *commcator = (Communicator *)*commPtr;
   forAll(i, *sizePtr)
@@ -491,7 +491,7 @@ void UNAP::reorderlface__(label *row,
 void UNAP::reordervalue__(scalar *val,
                           label *newOrder,
                           label *sizePtr,
-                          long int *commPtr)
+                          label64 *commPtr)
 {
   Communicator *commcator = (Communicator *)*commPtr;
   reorderValue(val, newOrder, *sizePtr, commcator);
@@ -502,7 +502,7 @@ void UNAP::contruct_sw_matrix__(label64 *APtrPtr,
                                 const label *rowsPtr,
                                 const label *colsPtr,
                                 const label *sizePtr,
-                                long int *commPtr)
+                                label64 *commPtr)
 {
   Communicator *commcator = (Communicator *)*commPtr;
   const label nCells = *nCellsPtr;
@@ -810,8 +810,7 @@ void UNAP::sw_solve_mg__(label64 *mgPtrPtr,
 }
 
 //- PBiCGStab solver solve and controls
-void UNAP::contruct_solver_pbicgstab__(long int *solverPtrPtr,
-                                       long int *commPtr)
+void UNAP::contruct_solver_pbicgstab__(label64 *solverPtrPtr, label64 *commPtr)
 {
   Communicator *commcator = (Communicator *)*commPtr;
   PBiCGStab *solverPtr = new PBiCGStab(commcator);
@@ -1174,7 +1173,7 @@ void UNAP::createinterfaces__(label64 *APtrPtr,
 void UNAP::printvector__(scalar *data,
                          label *size,
                          char *fname,
-                         long int *commPtr)
+                         label64 *commPtr)
 {
   Communicator *commcator = (Communicator *)*commPtr;
   scalarVector pp(data, *size, commcator);
