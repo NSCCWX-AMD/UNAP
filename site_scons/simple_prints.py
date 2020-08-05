@@ -9,7 +9,7 @@ import sys
 import os
 
 
-def color_prints(env):
+def simple_prints(env):
     colors = {}
     colors['cyan'] = '\033[96m'
     colors['purple'] = '\033[95m'

@@ -4,7 +4,7 @@ import os
 import utils
 from variables import program_vars, init_dependent_vars
 from compiler import update_compiler_settings
-from scons_color import color_prints
+from simple_prints import simple_prints
 
 ### Initialize toolsets based on operating system
 ostype = Environment(variables = program_vars)['PLATFORM']
@@ -22,7 +22,7 @@ update_compiler_settings(env)
 
 ### simpler compiling message
 ### if you want detailed information, comment next line
-color_prints(env)
+simple_prints(env)
 
 ### Isolate build environments based on build options
 build_dir = os.path.join(
