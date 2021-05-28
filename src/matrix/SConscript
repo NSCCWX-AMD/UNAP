@@ -1,21 +1,17 @@
-import GLOVAR as gl
+from build import add_source_files, cxx_source_files
 
-cxxfile = ['unapMatrixAgglomeration.cpp',
-		   'unapMatrixPrecond.cpp',
-		   'unapMatrixSolver.cpp',
-		   'unapMatrixTest.cpp',
-		   'eigenvalue/eigenDiagPCG/eigenDiagPCG.cpp',
-		   'interfaces/interfaces.cpp',
-		   'interfaces/labelPair/labelPair.cpp',
-		   'interfaces/patch/patch.cpp',
-		   'lduMatrix/lduMatrix.cpp',
-		   'lduMatrix/lduMatrixSpMV.cpp',
-		   'lduMatrix/lduAgglomeration/lduAgglomerate.cpp',
-		   'lduMatrix/lduAgglomeration/lduAgglomerateMatrix.cpp',
-		   'lduMatrix/lduAgglomeration/lduAgglomeration.cpp',
-		   'lduMatrix/lduAgglomeration/lduAgglomerationAddressing.cpp',
-		   'lduMatrix/lduAgglomeration/lduAgglomerationCombineLevels.cpp',
-		   'lduMatrix/lduAgglomeration/lduAgglomerationReorder.cpp'
-		  ]
+cxxfiles = [
+    'unapMatrixAgglomeration.cpp', 'unapMatrixPrecond.cpp',
+    'unapMatrixSolver.cpp', 'unapMatrixTest.cpp',
+    'eigenvalue/eigenDiagPCG/eigenDiagPCG.cpp', 'interfaces/interfaces.cpp',
+    'interfaces/labelPair/labelPair.cpp', 'interfaces/patch/patch.cpp',
+    'lduMatrix/lduMatrix.cpp', 'lduMatrix/lduMatrixSpMV.cpp',
+    'lduMatrix/lduAgglomeration/lduAgglomerate.cpp',
+    'lduMatrix/lduAgglomeration/lduAgglomerateMatrix.cpp',
+    'lduMatrix/lduAgglomeration/lduAgglomeration.cpp',
+    'lduMatrix/lduAgglomeration/lduAgglomerationAddressing.cpp',
+    'lduMatrix/lduAgglomeration/lduAgglomerationCombineLevels.cpp',
+    'lduMatrix/lduAgglomeration/lduAgglomerationReorder.cpp'
+]
 
-gl.add_files(cxxfile)
+add_source_files(cxxfiles, cxx_source_files)

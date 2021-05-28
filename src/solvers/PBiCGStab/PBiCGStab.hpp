@@ -5,56 +5,43 @@
 
 namespace UNAP
 {
-class PBiCGStab
-:
-	public matrix::solver
+class PBiCGStab : public matrix::solver
 {
-private:
+ private:
+  //- use if the CG solver needs to create a null preconditioner
+  bool deletePrecondPtr_;
 
-	//- use if the CG solver needs to create a null preconditioner
-	bool deletePrecondPtr_;
+  //- the preconditioner
+  matrix::preconditioner *precondPtr_;
 
-	//- the preconditioner
-	matrix::preconditioner* precondPtr_;
+ public:
+  //- constructors
+  PBiCGStab(Communicator *other_comm);
 
-public:
+  PBiCGStab(matrix::preconditioner &precond);
 
-	//- constructors
-	PBiCGStab();
+  //- destructor
+  virtual ~PBiCGStab()
+  {
+    if (deletePrecondPtr_)
+    {
+      delete precondPtr_;
+      precondPtr_ = NULL;
+      deletePrecondPtr_ = false;
+    }
+  }
 
-	PBiCGStab
-	(
-		matrix::preconditioner& precond
-	);
+  //- solve the matrix with this solver
+  virtual matrix::solverPerformance solve(scalarVector &x,
+                                          const matrix &A,
+                                          const scalarVector &b) const;
 
-	//- destructor
-	virtual ~PBiCGStab()
-	{
-		if(deletePrecondPtr_)
-		{
-			delete precondPtr_;
-			precondPtr_ = NULL;
-			deletePrecondPtr_ = false;
-		}
-	}
-
-	//- solve the matrix with this solver
-	virtual matrix::solverPerformance solve
-	(
-		scalarField& x,
-		const matrix& A,
-		const scalarField& b
-	) const;
-
-	void SET_preconditioner(matrix::preconditioner& precond)
-	{
-		DELETE_OBJECT_POINTER(precondPtr_);
-		precondPtr_ = &precond;
-	}
-
+  void SET_preconditioner(matrix::preconditioner &precond)
+  {
+    DELETE_OBJECT_POINTER(precondPtr_);
+    precondPtr_ = &precond;
+  }
 };
-} //- namespace UNAP
+}  // namespace UNAP
 
-
-
-#endif //- PBICGSTAB_HPP
+#endif  //- PBICGSTAB_HPP

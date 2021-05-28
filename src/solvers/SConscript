@@ -1,12 +1,12 @@
-import GLOVAR as gl
+from build import add_source_files, cxx_source_files
 
-cxxfile = ['MG/MG.cpp',
-		   'MG/MGSolve.cpp',
-		   'MG/scalingFactor.cpp',
-		   'MG/solveCoarsestLevel.cpp',
-		   'MG/Vcycle.cpp',
-		   'PBiCGStab/PBiCGStab.cpp',
-		   'PCG/PCG.cpp'
-		  ]
+cxxfiles = ['MG/MG.cpp',
+		    'MG/MGSolve.cpp',
+		    'MG/scalingFactor.cpp',
+		    'MG/solveCoarsestLevel.cpp',
+		    'MG/Vcycle.cpp',
+		    'PBiCGStab/PBiCGStab.cpp',
+		    'PCG/PCG.cpp'
+		   ]
 
-gl.add_files(cxxfile)
+add_source_files(cxxfiles, cxx_source_files)

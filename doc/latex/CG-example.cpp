@@ -19,5 +19,5 @@ PBiCGStabSolver.SET_ifPrint(true); //- print information when calculating
 //- solve phase
 matrix::solverPerformance solverPerf = PBiCGStabSolver.solve(x, lduA, b);
 
-if(!MYID)
-	COUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
+
+UNAPCOUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;

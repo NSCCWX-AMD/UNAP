@@ -10,19 +10,19 @@ scalar* upperVal = ?; ///< upper non-zeros values
 scalar* lowerVal = ?; ///< lower non-zeros values
 scalar* diagVal  = ?; ///< diagonal non-zeros values
 
-labelField rowMap(rows, upperSize);
-labelField colMap(cols, upperSize);
+labelVector rowMap(rows, upperSize);
+labelVector colMap(cols, upperSize);
 
-scalarField upper(upperVal, upperSize);
-scalarField diag (diagVal, rowsSize);
+scalarVector upper(upperVal, upperSize);
+scalarVector diag (diagVal, rowsSize);
 
 /// if matrix is value-symmetric, lowerVal == upperVal
-scalarField& lower = upper;
-scalarField* lowerPtr = NULL;
+scalarVector& lower = upper;
+scalarVector* lowerPtr = NULL;
 ///- else create space for lower
 if(lowerVal != upperVal)
 {
-    lowerPtr = new scalarField(lowerVal, upperSize);
+    lowerPtr = new scalarVector(lowerVal, upperSize);
     lower = *lowerPtr;
 }
 
@@ -45,5 +45,5 @@ lduMatrix lduA = *lduAPtr;
 scalar* bVal = ?;
 scalar* xVal = ?;
 
-scalarField b (bVal, rowsSize);
-scalarField x (xVal, rowsSize);
+scalarVector b (bVal, rowsSize);
+scalarVector x (xVal, rowsSize);

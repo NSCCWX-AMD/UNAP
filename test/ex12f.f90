@@ -9,6 +9,7 @@ integer, parameter :: real_size = 8
 integer, parameter :: int_size = 8
 
 integer (kind = 8) :: APtr
+integer (kind = 8) :: commPtr
 
 integer :: precond = 3
 integer :: aggl = 2
@@ -29,15 +30,16 @@ integer :: i, j, f, mype, ranks, iter
 character(len = 200) :: filename
 character(len = 5) :: str1
 logical :: prun
-character(len = 38):: fileDir =  "../test/exData/compass/cavityp4/step3/"
+character(len =41):: fileDir =  "./../../../exData/compass/cavityp4/step3/"
 
 integer :: Nneigh, offdiag_size, locSize, locStart
 integer, allocatable :: neighidx(:), interfaceidx(:), offdiag_row(:)
 real (kind = real_size), allocatable :: offdiag_coeffs(:)
 
-call mpi_init(ierr)
-call mpi_comm_rank(MPI_COMM_WORLD, mype, ierr)
-call mpi_comm_size(MPI_COMM_WORLD, ranks, ierr)
+call commInit(commPtr)
+call commGetMyidSize(commPtr,mype,ranks)
+
+write(*,*) "rank ",mype ," size :",ranks
 
 if(ranks > 1) then
 	prun = .true.
@@ -53,6 +55,7 @@ write(str1,"(i5.5)") mype
 
 f = 1
 filename = fileDir//"A_p"//"_"//str1//".txt"
+write(*,*) filename
 open(unit = f, file = filename, status='old')
 read(f, *) Ncel, NNZ, symm
 close(f)
@@ -155,7 +158,7 @@ do iter=1, 5
 
 	call swtimerstart("mg solve")
 
-	call coo2ldumatrixcreat(APtr, Acoo, Arow, Acol, Ncel, NNZ, symm)
+	call coo2ldumatrixcreat(APtr, Acoo, Arow, Acol, Ncel, NNZ, symm,commPtr)
 
 	if(prun) then
 		call matrixinterfacescreat(APtr, Nneigh, neighidx, interfaceidx, offdiag_row, offdiag_coeffs)

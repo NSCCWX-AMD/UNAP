@@ -1,73 +1,68 @@
 #ifndef INTERFACES_HPP
 #define INTERFACES_HPP
 
-#include "patch.hpp"
 #include "PtrList.hpp"
+#include "patch.hpp"
 
 namespace UNAP
 {
-
 class patch;
 
 class interfaces
 {
-private:
+ private:
+  PtrList<patch> &patches_;
 
-	PtrList<patch>& patches_;
+  //- send buffer for initializing and updating matrix interfaces
+  mutable scalar *sendBuffer_;
 
-	//- send buffer for initializing and updating matrix interfaces
-    mutable scalar* sendBuffer_;
+  //- receive buffer for initializing and updating matrix interfaces
+  mutable scalar *recvBuffer_;
 
-    //- receive buffer for initializing and updating matrix interfaces
-    mutable scalar* recvBuffer_;
+  //- mpi requests of sends and receives for updating interfaces
+  mutable MPI_Request *sendRecvRequests_;
 
-    //- mpi requests of sends and receives for updating interfaces
-    mutable MPI_Request* sendRecvRequests_;
+  mutable string *sendTaskName_;
 
-    //- locPosition
-    mutable label* locPosition_;
+  mutable string *recvTaskName_;
 
-    //- destRank
-    mutable label* destRank_;
+  //- locPosition
+  mutable label *locPosition_;
 
-public:
+  //- destRank
+  mutable label *destRank_;
 
-    interfaces(const label size);
+  //- communicator
+  mutable Communicator *commcator_;
 
-	interfaces(PtrList<patch>& patches);
+ public:
+  interfaces(const label size, Communicator *other_comm);
 
-	virtual ~interfaces();
+  interfaces(PtrList<patch> &patches, Communicator *other_comm);
 
-	//- Initialize the update of interfaced interfaces
-    //  for matrix operations
-    virtual void initMatrixInterfaces
-    (
-        const scalarField& psi
-    ) const;
+  virtual ~interfaces();
 
-    //- update interfaced interfaces for matrix operations
-    virtual void updateMatrixInterfaces
-    (
-        scalarField& result
-    ) const;
+  //- Initialize the update of interfaced interfaces
+  //  for matrix operations
+  virtual void initMatrixInterfaces(const scalarVector &psi) const;
 
-    virtual patch& patchList(const label i) const
-    {
-        return patches_[i];
-    }
+  //- update interfaced interfaces for matrix operations
+  virtual void updateMatrixInterfaces(scalarVector &result) const;
 
-    PtrList<patch>& patchList()
-    {
-        return patches_;
-    }
+  virtual patch &patchList(const label i) const { return patches_[i]; }
 
-    virtual label size() const
-    {
-        return patches_.size();
-    }
+  PtrList<patch> &patchList() { return patches_; }
 
-    void reorderIntFaceCells(const label* cellMap);
+  virtual label size() const { return patches_.size(); }
+
+  void reorderIntFaceCells(const label *cellMap);
+
+  // - set communicator
+  void setCommunicator(Communicator *other_comm) { commcator_ = other_comm; }
+
+  // - get communicator
+  Communicator *getCommunicator() const { return commcator_; }
 };
 
-} //- end namespace UNAP
-#endif //- INTERFACES_HPP
+}  // namespace UNAP
+#endif  //- INTERFACES_HPP

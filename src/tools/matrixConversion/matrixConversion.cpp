@@ -1,223 +1,207 @@
 #include "matrixConversion.hpp"
+
 #include "printUNAP.hpp"
 
-void UNAP::sortData
-(
-	scalarField& data,
-	const labelField&  order,
-	const labelField&  cellFaces
-)
+void UNAP::sortData(scalarVector &data,
+                    const labelVector &order,
+                    const labelVector &cellFaces,
+                    Communicator *other_comm)
 {
-	const label nCells = cellFaces.size();
+  if (data.getCommunicator() != order.getCommunicator() &&
+      cellFaces.getCommunicator() != data.getCommunicator())
+  {
+    data.getCommunicator()->log()
+        << "Error: " << __FILE__ << " in " << __LINE__
+        << "The Communicator between data , order and cellFaces are "
+           "different!\n";
+  }
+  const label nCells = cellFaces.size();
 
-	labelField cellFaceOffsets(nCells + 1);
+  labelVector cellFaceOffsets(nCells + 1, other_comm);
 
-	cellFaceOffsets[0] = 0;
-	forAll(celli, nCells)
-	{
-		cellFaceOffsets[celli+1] = cellFaceOffsets[celli] + cellFaces[celli];
-	}
+  cellFaceOffsets[0] = 0;
+  forAll(celli, nCells)
+  {
+    cellFaceOffsets[celli + 1] = cellFaceOffsets[celli] + cellFaces[celli];
+  }
 
-	//- size of faces in upper
-	const label nFaces = data.size();
+  //- size of faces in upper
+  const label nFaces = data.size();
 
-	scalarField dataOld(data);
+  scalarVector dataOld(data);
 
-	//- count the data input
-	labelField count(nCells, 0);
+  //- count the data input
+  labelVector count(nCells, 0, other_comm);
 
-	forAll(facei, nFaces)
-	{
-		label cellLoc = order[facei];
-		data[cellFaceOffsets[cellLoc]+count[cellLoc]] = dataOld[facei];
-		count[cellLoc]++;
-	}
+  forAll(facei, nFaces)
+  {
+    label cellLoc = order[facei];
+    data[cellFaceOffsets[cellLoc] + count[cellLoc]] = dataOld[facei];
+    count[cellLoc]++;
+  }
 }
 
-
-void UNAP::reorderCOO
-(
-	scalar* dataPtr,
-	label*  rowsPtr,
-	label*  colsPtr,
-	const label nCells,
-	const label size
-)
+void UNAP::reorderCOO(scalar *dataPtr,
+                      label *rowsPtr,
+                      label *colsPtr,
+                      const label nCells,
+                      const label size,
+                      Communicator *other_comm)
 {
-	labelField countsInRow(nCells);
+  labelVector countsInRow(nCells, other_comm);
 
-	forAll(i, size)
-	{
-		countsInRow[rowsPtr[i]]++;
-	}
+  forAll(i, size) { countsInRow[rowsPtr[i]]++; }
 
-	labelField countsInRowOffsets(nCells+1);
+  labelVector countsInRowOffsets(nCells + 1, other_comm);
 
-	forAll(i, nCells)
-	{
-		countsInRowOffsets[i+1] = countsInRowOffsets[i] + countsInRow[i];
-	}
+  forAll(i, nCells)
+  {
+    countsInRowOffsets[i + 1] = countsInRowOffsets[i] + countsInRow[i];
+  }
 
-	labelField posInRow(size);
-	forAll(i, size)
-	{
-		label rowLocal = rowsPtr[i];
-		label rowStartPos = countsInRowOffsets[rowLocal];
-		label localRowSize = countsInRowOffsets[rowLocal+1] - countsInRowOffsets[rowLocal];
+  labelVector posInRow(size, other_comm);
+  forAll(i, size)
+  {
+    label rowLocal = rowsPtr[i];
+    label rowStartPos = countsInRowOffsets[rowLocal];
+    label localRowSize =
+        countsInRowOffsets[rowLocal + 1] - countsInRowOffsets[rowLocal];
 
-		forAll(k, localRowSize)
-		{
-			if(colsPtr[i] > colsPtr[rowStartPos+k])
-			{
-				posInRow[i]++;
-			}
-		}
-	}
+    forAll(k, localRowSize)
+    {
+      if (colsPtr[i] > colsPtr[rowStartPos + k])
+      {
+        posInRow[i]++;
+      }
+    }
+  }
 
-	labelField rowTemp(size);
-	labelField colTemp(size);
-	scalarField valTemp(size);
+  labelVector rowTemp(size, other_comm);
+  labelVector colTemp(size, other_comm);
+  scalarVector valTemp(size, other_comm);
 
-	forAll(i, size)
-	{
-		label rowLocal = rowsPtr[i];
-		label rowStartPos = countsInRowOffsets[rowLocal];
-		label pos = rowStartPos + posInRow[i];
+  forAll(i, size)
+  {
+    label rowLocal = rowsPtr[i];
+    label rowStartPos = countsInRowOffsets[rowLocal];
+    label pos = rowStartPos + posInRow[i];
 
-		valTemp[pos] = dataPtr[i];
-		rowTemp[pos] = rowsPtr[i];
-		colTemp[pos] = colsPtr[i];
-	}
+    valTemp[pos] = dataPtr[i];
+    rowTemp[pos] = rowsPtr[i];
+    colTemp[pos] = colsPtr[i];
+  }
 
-	forAll(i, size)
-	{
-		dataPtr[i] = valTemp[i];
-		rowsPtr[i] = rowTemp[i];
-		colsPtr[i] = colTemp[i];
-	}
+  forAll(i, size)
+  {
+    dataPtr[i] = valTemp[i];
+    rowsPtr[i] = rowTemp[i];
+    colsPtr[i] = colTemp[i];
+  }
 }
 
-
-void UNAP::reorderValue
-(
-	scalar* val,
-	const label* newOrder,
-	const label  size
-)
+void UNAP::reorderValue(scalar *val,
+                        const label *newOrder,
+                        const label size,
+                        Communicator *other_comm)
 {
-	scalarField valTemp(val, size, false);
+  scalarVector valTemp(val, size, false, other_comm);
 
-	forAll(i, size)
-	{
-		val[newOrder[i]] = valTemp[i];
-	}
+  forAll(i, size) { val[newOrder[i]] = valTemp[i]; }
 }
 
-
-void UNAP::reorderUFace
-(
-	label*  rowsPtr,
-	label*  colsPtr,
-	const label   nCells,
-	const label   size,
-	label*  newOrder
-)
+void UNAP::reorderUFace(label *rowsPtr,
+                        label *colsPtr,
+                        const label nCells,
+                        const label size,
+                        label *newOrder,
+                        Communicator *other_comm)
 {
-	labelField countsInRow(nCells);
+  labelVector countsInRow(nCells, other_comm);
 
-	forAll(i, size)
-	{
-		countsInRow[rowsPtr[i]]++;
-	}
+  forAll(i, size) { countsInRow[rowsPtr[i]]++; }
 
-	labelField countsInRowOffsets(nCells+1);
+  labelVector countsInRowOffsets(nCells + 1, other_comm);
 
-	forAll(i, nCells)
-	{
-		countsInRowOffsets[i+1] = countsInRowOffsets[i] + countsInRow[i];
-	}
+  forAll(i, nCells)
+  {
+    countsInRowOffsets[i + 1] = countsInRowOffsets[i] + countsInRow[i];
+  }
 
-	labelField posInRow(size);
-	forAll(i, size)
-	{
-		label rowLocal = rowsPtr[i];
-		label rowStartPos = countsInRowOffsets[rowLocal];
-		label localRowSize = countsInRowOffsets[rowLocal+1] - countsInRowOffsets[rowLocal];
+  labelVector posInRow(size, other_comm);
+  forAll(i, size)
+  {
+    label rowLocal = rowsPtr[i];
+    label rowStartPos = countsInRowOffsets[rowLocal];
+    label localRowSize =
+        countsInRowOffsets[rowLocal + 1] - countsInRowOffsets[rowLocal];
 
-		forAll(k, localRowSize)
-		{
-			if(colsPtr[i] > colsPtr[rowStartPos+k])
-			{
-				posInRow[i]++;
-			}
-		}
-	}
+    forAll(k, localRowSize)
+    {
+      if (colsPtr[i] > colsPtr[rowStartPos + k])
+      {
+        posInRow[i]++;
+      }
+    }
+  }
 
-	labelField rowTemp(size);
-	labelField colTemp(size);
+  labelVector rowTemp(size, other_comm);
+  labelVector colTemp(size, other_comm);
 
-	forAll(i, size)
-	{
-		label rowLocal = rowsPtr[i];
-		label rowStartPos = countsInRowOffsets[rowLocal];
-		label pos = rowStartPos + posInRow[i];
+  forAll(i, size)
+  {
+    label rowLocal = rowsPtr[i];
+    label rowStartPos = countsInRowOffsets[rowLocal];
+    label pos = rowStartPos + posInRow[i];
 
-		newOrder[i] = pos;
-		rowTemp[pos] = rowsPtr[i];
-		colTemp[pos] = colsPtr[i];
-	}
+    newOrder[i] = pos;
+    rowTemp[pos] = rowsPtr[i];
+    colTemp[pos] = colsPtr[i];
+  }
 
-	forAll(i, size)
-	{
-		rowsPtr[i] = rowTemp[i];
-		colsPtr[i] = colTemp[i];
-	}
+  forAll(i, size)
+  {
+    rowsPtr[i] = rowTemp[i];
+    colsPtr[i] = colTemp[i];
+  }
 }
 
-
-void UNAP::reorderLFace
-(
-	label*  rowsPtr,
-	label*  colsPtr,
-	const label   nCells,
-	const label   size,
-	label*  newOrder
-)
+void UNAP::reorderLFace(label *rowsPtr,
+                        label *colsPtr,
+                        const label nCells,
+                        const label size,
+                        label *newOrder,
+                        Communicator *other_comm)
 {
-	labelField countsInCol(nCells);
+  labelVector countsInCol(nCells, other_comm);
 
-	forAll(i, size)
-	{
-		countsInCol[colsPtr[i]]++;
-	}
+  forAll(i, size) { countsInCol[colsPtr[i]]++; }
 
-	labelField countsInColOffsets(nCells+1);
+  labelVector countsInColOffsets(nCells + 1, other_comm);
 
-	forAll(i, nCells)
-	{
-		countsInColOffsets[i+1] = countsInColOffsets[i] + countsInCol[i];
-		countsInCol[i] = 0;
-	}
+  forAll(i, nCells)
+  {
+    countsInColOffsets[i + 1] = countsInColOffsets[i] + countsInCol[i];
+    countsInCol[i] = 0;
+  }
 
-	labelField rowTemp(size);
-	labelField colTemp(size);
+  labelVector rowTemp(size, other_comm);
+  labelVector colTemp(size, other_comm);
 
-	forAll(i, size)
-	{
-		label colLocal = colsPtr[i];
-		label colStartPos = countsInColOffsets[colLocal];
-		label pos = colStartPos + countsInCol[colLocal];
+  forAll(i, size)
+  {
+    label colLocal = colsPtr[i];
+    label colStartPos = countsInColOffsets[colLocal];
+    label pos = colStartPos + countsInCol[colLocal];
 
-		newOrder[i]  = pos;
-		rowTemp[pos] = rowsPtr[i];
-		colTemp[pos] = colsPtr[i];
-		countsInCol[colLocal]++;
-	}
+    newOrder[i] = pos;
+    rowTemp[pos] = rowsPtr[i];
+    colTemp[pos] = colsPtr[i];
+    countsInCol[colLocal]++;
+  }
 
-	forAll(i, size)
-	{
-		rowsPtr[i] = rowTemp[i];
-		colsPtr[i] = colTemp[i];
-	}
+  forAll(i, size)
+  {
+    rowsPtr[i] = rowTemp[i];
+    colsPtr[i] = colTemp[i];
+  }
 }
-

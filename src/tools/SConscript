@@ -1,13 +1,41 @@
-import GLOVAR as gl
+from build import add_source_files, cxx_source_files, chost_source_files, cslave_source_files, cxxhost_source_files
 
-cxxfile = ['fortranInterface/fortranInterface.cpp',
-		   'matrixConversion/coo2ldu.cpp',
-		   'matrixConversion/matrixConversion.cpp',
-		   'printData/printUNAP/printUNAP.cpp',
-		   'rcm/cooRCM.cpp',
-		   'readData/readFromOpenFOAM/readFromOpenFOAM.cpp',
-		   'readData/readFromHypre/readFromHypre.cpp',
-		   'timers/swTimer.cpp'
-		  ]
+cxxfiles = [
+    'fortranInterface/fortranInterface.cpp', 'matrixConversion/coo2ldu.cpp',
+    'matrixConversion/matrixConversion.cpp',
+    'printData/printUNAP/printUNAP.cpp', 'rcm/cooRCM.cpp',
+    'readData/readFromOpenFOAM/readFromOpenFOAM.cpp',
+    'readData/readFromHypre/readFromHypre.cpp', 'timers/swTimer.cpp'
+]
 
-gl.add_files(cxxfile)
+cxxhostfiles = ['swArrays/restrictInterpolation/swAgglomeration.cpp']
+
+chostfiles = [
+    'swArrays/gSum_host.c',
+    'swArrays/residualNormFactor_host.c',
+    'swArrays/vectorOps_host.c',
+    'swArrays/vectorCopy_host.c',
+    'swArrays/scalingFactor_host.c',
+    'swAthread/swAthread.c',
+    'swArrays/restrictInterpolation/interpolateData_host.c',
+    'swArrays/restrictInterpolation/restrictData_host.c',
+]
+
+cslavefiles = [
+    'swArrays/gSum_slave.c',
+    'swArrays/residualNormFactor_slave.c',
+    'swArrays/vectorOps_slave.c',
+    'swArrays/vectorCopy_slave.c',
+    'swArrays/userFunc_SAXPY.c',
+    'swArrays/scalingFactor_slave.c',
+    'swArrays/restrictInterpolation/interpolateData_slave.c',
+    'swArrays/restrictInterpolation/restrictData_slave.c',
+]
+
+add_source_files(cxxfiles, cxx_source_files)
+
+add_source_files(cxxhostfiles, cxxhost_source_files)
+
+add_source_files(chostfiles, chost_source_files)
+
+add_source_files(cslavefiles, cslave_source_files)

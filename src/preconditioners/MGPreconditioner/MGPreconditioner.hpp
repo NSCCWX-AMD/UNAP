@@ -8,46 +8,31 @@ namespace UNAP
 class lduMatrix;
 class MGSolver;
 
-class MGPrecond
-:
-	matrix::preconditioner
+class MGPrecond : matrix::preconditioner
 {
 private:
-	//- number of V-cycles to perform
-	label nVcycles_;
+  //- number of V-cycles to perform
+  label nVcycles_;
 
-	//- matrix pointer
-	const lduMarix* APtr_;
+  //- matrix pointer
+  const lduMarix *APtr_;
 
-	//- MG solver pointer
-	const MGSolver* MGSolverPtr_;
+  //- MG solver pointer
+  const MGSolver *MGSolverPtr_;
 
 public:
+  //- constructor
+  MGPrecond(const lduMatrix &A);
 
-	//- constructor
-	MGPrecond
-	(
-		const lduMatrix& A
-	);
+  //- destructor
+  virtual ~MGPrecond() {}
 
-	//- destructor
-	virtual ~MGPrecond()
-	{}
+  //- return wA the preconditioned form of residual rA
+  virtual void precondition(scalarVector &wA, const scalarVector &rA) const;
 
-	//- return wA the preconditioned form of residual rA
-	virtual void precondition
-	(
-		scalarField& wA,
-		const scalarField& rA
-	)const;
-
-	void set_nVcycles(const label n)
-	{
-		nVcycles_ = n;
-	}
-
+  void set_nVcycles(const label n) { nVcycles_ = n; }
 };
 
-} //- end namespace
+}  // namespace UNAP
 
-#endif //- MGPRECONDITIONER_HPP
+#endif  //- MGPRECONDITIONER_HPP

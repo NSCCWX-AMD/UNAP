@@ -1,0 +1,11 @@
+.sconsign.dblite
+build/*
+src/utilities/*
+*pyc
+exData
+.vscode/*
+*mod
+*.o
+install
+doc/*
+.tune_err

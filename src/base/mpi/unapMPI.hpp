@@ -10,114 +10,73 @@
 #ifndef UNAPMPI_HPP
 #define UNAPMPI_HPP
 
-#include "unap.hpp"
 #include <mpi.h>
+
+#include "unap.hpp"
 
 namespace UNAP
 {
-
 class unapMPI
 {
-private:
-	static int myProcNo_;
-	static int nProcs_;
-	static bool parRun_;
-	static MPI_Datatype unapLabel_;
-	static MPI_Datatype unapScalar_;
+ private:
+  int myProcNo_;
+  int nProcs_;
+  bool parRun_;
+  static CommData unapLabel_;
+  static CommData unapScalar_;
+  Communicator *commcator_;
 
-public:
+ public:
+  unapMPI();
 
-	static void initMPI();
+  void initMPI();
+  void initMPI(Communicator *other_comm);
 
-    static void exitMPI();
+  void exitMPI();
 
-	//- is this a parallel run?
-    static bool& parRun()
-    {
-        return parRun_;
-    }
+  //- is this a parallel run?
+  bool &parRun() { return parRun_; }
 
-	//- number of processes in parallel run
-    static label nProcs()
-    {
-        return nProcs_;
-    }
+  //- number of processes in parallel run
+  label nProcs() { return nProcs_; }
 
-    //- number of this process
-    static label myProcNo()
-    {
-        return myProcNo_;
-    }
+  //- number of this process
+  label myProcNo() { return myProcNo_; }
 
-    //- int type
-    static MPI_Datatype& unapLabel()
-    {
-    	return unapLabel_;
-    }
+  Communicator *unapCommunicator() { return commcator_; }
 
-    //- double type
-    static MPI_Datatype& unapScalar()
-    {
-    	return unapScalar_;
-    }
+  //- int type
+  static MPI_Datatype &unapLabel() { return unapLabel_; }
+
+  //- double type
+  static MPI_Datatype &unapScalar() { return unapScalar_; }
 };
 
+#define UNAPMPI_LABEL unapMPI::unapLabel()
+#define UNAPMPI_SCALAR unapMPI::unapScalar()
 
-#define MYID       unapMPI::myProcNo()
-#define PARRUN     unapMPI::parRun()
-#define MPI_LABEL  unapMPI::unapLabel()
-#define MPI_SCALAR unapMPI::unapScalar()
-#define NPROCS     unapMPI::nProcs()
-
-
-template<typename T>
-void reduceSum(T& v)
+template <typename T>
+void reduceSum(T *v, Communicator *commcator, label n = 1)
 {
-	if(PARRUN)
-	{
-		T vLocal = v;
-		MPI_Datatype myType;
-		if(typeid(T) == typeid(label))
-		{
-			myType = MPI_LABEL;
-		}
-		else if(typeid(T) == typeid(scalar))
-		{
-			myType = MPI_SCALAR;
-		}
+  if (commcator->getMySize() > 1)
+  {
+    T vLocal[n];
+    forAll(i, n) { vLocal[i] = v[i]; }
 
-        // MPI_Barrier(MPI_COMM_WORLD);
-		MPI_Allreduce(&vLocal, &v, 1, myType, MPI_SUM, MPI_COMM_WORLD);
-	}
-}
-
-
-template<typename T>
-void reduceSum(T* v, label n)
-{
-    if(PARRUN)
+    CommData myType;
+    if (typeid(T) == typeid(label))
     {
-        T vLocal[n];
-        forAll(i, n)
-        {
-            vLocal[i] = v[i];
-        }
-
-        MPI_Datatype myType;
-        if(typeid(T) == typeid(label))
-        {
-            myType = MPI_LABEL;
-        }
-        else if(typeid(T) == typeid(scalar))
-        {
-            myType = MPI_SCALAR;
-        }
-
-        // MPI_Barrier(MPI_COMM_WORLD);
-        MPI_Allreduce(&vLocal[0], v, n, myType, MPI_SUM, MPI_COMM_WORLD);
+      myType = UNAPMPI_LABEL;
     }
+    else if (typeid(T) == typeid(scalar))
+    {
+      myType = UNAPMPI_SCALAR;
+    }
+    commcator->allReduce("sum", &vLocal[0], v, n, myType, COMM_SUM);
+    commcator->finishTask("sum");
+  }
 }
 
-} //- end namespace UNAP
+}  // namespace UNAP
 
-#endif //- UNAPMPI_HPP
+#endif  //- UNAPMPI_HPP

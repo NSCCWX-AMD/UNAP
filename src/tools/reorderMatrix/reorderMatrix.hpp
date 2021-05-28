@@ -5,15 +5,11 @@
 
 namespace UNAP
 {
+void reorderLDUMatrix(lduMatrix &lduA);
 
-void reorderLDUMatrix(lduMatrix& lduA);
-
-void reorderLDUFaces(lduMatrix& lduA);
+void reorderLDUFaces(lduMatrix &lduA);
 
 void reorderLDUCells()
 
-
-
-
-} //- namespace UNAP
-#endif //- REORDERMATRIX_HPP
+}  // namespace UNAP
+#endif  //- REORDERMATRIX_HPP

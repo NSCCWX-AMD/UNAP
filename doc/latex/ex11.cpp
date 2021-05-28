@@ -48,14 +48,12 @@ int main()
 
    	if(PARRUN)
    	{
-   		MPI_Barrier(MPI_COMM_WORLD);
+   		UNAP::unapMPI::unapCommunicator().barrier() ;
    	}
 
-   	if(!MYID)
+   
+	UNAPCOUT << "Start reading data" << ENDL;
 
-	{
-		COUT << "Start reading data" << ENDL;
-	}
 
    	lduMatrix lduA;
    	LOCATEFILE(fileName, "A_p", dir);
@@ -68,20 +66,19 @@ int main()
    	}
 
    	label nCells = lduA.size();
-   	scalarField b(nCells);
+   	scalarVector b(nCells);
 
    	LOCATEFILE(fileName, "b_p", dir);
    	constructVectorFromOpenFOAM(b, fileName);
 
    	if(PARRUN)
    	{
-   		MPI_Barrier(MPI_COMM_WORLD);
+   		UNAP::unapMPI::unapCommunicator().barrier() ;
    	}
 
-   	if(!MYID)
-	{
-		COUT << "Finish reading data" << ENDL;
-	}
+ 
+	UNAPCOUT << "Finish reading data" << ENDL;
+	
 
    	scalar tol = 0.0;
 	scalar relTol = 1e-6;
@@ -90,11 +87,11 @@ int main()
 
 	const bool useMG = true;
 	const bool usePBiCGStab = false;
-	scalarField x(nCells, 0.0);
+	scalarVector x(nCells, 0.0);
 
 	if(useMG)
 	{
-		scalarField weights(nFaces);
+		scalarVector weights(nFaces);
 		forAll(i, nFaces)
 		{
 			weights[i] = mag(lduA.upper()[i]);
@@ -165,8 +162,8 @@ int main()
     	swTimer::endTimer("MG Solve");
 #endif
 
-		if(!MYID)
-			COUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
+		
+		UNAPCOUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
 	}
 	else if(usePBiCGStab)
 	{
@@ -185,8 +182,8 @@ int main()
 
 		matrix::solverPerformance solverPerf = PBiCGStabSolver.solve(x, lduA, b);
 
-		if(!MYID)
-			COUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
+
+		UNAPCOUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
 	}
 	else
 	{
@@ -204,8 +201,7 @@ int main()
 
 		matrix::solverPerformance solverPerf = PCGSolver.solve(x, lduA, b);
 
-		if(!MYID)
-			COUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
+		UNAPCOUT << "After " << solverPerf.nIterations() << " iterations, the solution is converged!" << ENDL;
 	}
 
 	// printVector(x, "xEnd");
@@ -218,5 +214,5 @@ int main()
 	swTimer::printTimer();
 #endif
 
-	MPI_Finalize();
+	// MPI_Finalize();
 }

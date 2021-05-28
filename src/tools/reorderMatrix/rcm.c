@@ -157,13 +157,10 @@
  *
  */
 
-
 #ifndef RCM__DRIVER
 #define RCM__DRIVER 1
 
-
 #define SELF "rcm.c"
-
 
 #define RCM_FORTRAN_INDICES 1
 #define RCM_C_INDICES 2
@@ -172,80 +169,71 @@
 #define RCM_NO_REVERSE 16
 #define RCM_USE_MASK 32
 
-
 /**
  * @def restrict
  * @brief Support for `restrict'
  */
 #ifdef __GNUC__
-#  define restrict __restrict__
+#define restrict __restrict__
 #elif defined(__cplusplus)
-#  define restrict
+#define restrict
 #elif (!defined(__STDC_VERSION__)) || (__STDC_VERSION__ < 199901L)
-#  define restrict
+#define restrict
 #endif
 
 /* Support for `inline' */
 #ifndef __cplusplus
-# ifdef __GNUC__
-#  define inline __inline__
-# else
-#  define inline
-# endif
+#ifdef __GNUC__
+#define inline __inline__
+#else
+#define inline
+#endif
 #endif
 
-
-
 #if defined(DEBUG) || !defined(NDEBUG)
-# ifdef NO_HEADERS
-#  define assert(expr) (void)0
-# else
-#  include <assert.h>
-# endif
+#ifdef NO_HEADERS
+#define assert(expr) (void)0
+#else
+#include <assert.h>
+#endif
 #endif
 
 #define ASSERT assert
 
 #ifdef DEBUG
-#  define CHECK assert
+#define CHECK assert
 #else
-#  define CHECK(expr) (void)0
+#define CHECK(expr) (void)0
 #endif
-
 
 #ifndef NO_HEADERS
-# include <stdlib.h>
-# include <string.h>
+#include <stdlib.h>
+#include <string.h>
 #endif
-
 
 #undef LONG_EQUALS_INT
-#if !( defined(NO_LIMITS_H) || defined(NO_HEADERS) )
-# include <limits.h>
-# if INT_MAX == LONG_MAX
-#  define LONG_EQUALS_INT 1
-# endif
+#if !(defined(NO_LIMITS_H) || defined(NO_HEADERS))
+#include <limits.h>
+#if INT_MAX == LONG_MAX
+#define LONG_EQUALS_INT 1
+#endif
 #endif
 
-
-
 #ifndef CAT_2
-# define DIRECT_CAT_3(a,b,c) a ## b ## c
-# define CAT_3(a,b,c) DIRECT_CAT_3(a,b,c)
-# define DIRECT_CAT_2(a,b) a ## b
-# define CAT_2(a,b) DIRECT_CAT_2(a,b)
+#define DIRECT_CAT_3(a, b, c) a##b##c
+#define CAT_3(a, b, c) DIRECT_CAT_3(a, b, c)
+#define DIRECT_CAT_2(a, b) a##b
+#define CAT_2(a, b) DIRECT_CAT_2(a, b)
 #endif
 
 #ifndef RCM_PREFIX
-# define RCM_FUNC2(name,suffix) CAT_2(name,suffix)
+#define RCM_FUNC2(name, suffix) CAT_2(name, suffix)
 #else
-# define RCM_FUNC2(name,suffix) CAT_3(RCM_PREFIX,name,suffix)
+#define RCM_FUNC2(name, suffix) CAT_3(RCM_PREFIX, name, suffix)
 #endif
-#define RCM_FUNC(name) RCM_FUNC2(name,SUFFIX)
-
+#define RCM_FUNC(name) RCM_FUNC2(name, SUFFIX)
 
 #undef SUFFIX
-
 
 /*
  * int versions
@@ -254,11 +242,9 @@
 #undef INT
 #define INT int
 
-
 #define SUFFIX i
 #include SELF
 #undef SUFFIX
-
 
 /*
  * long version
@@ -266,41 +252,65 @@
 
 #if LONG_EQUALS_INT
 
-void RCM_FUNC2 (genrcm, l) (const long n, const int flags,
-			    const long *xadj, const long *adj,
-			    long *perm, signed char *mask, long *deg)
+void RCM_FUNC2(genrcm, l)(const long n,
+                          const int flags,
+                          const long *xadj,
+                          const long *adj,
+                          long *perm,
+                          signed char *mask,
+                          long *deg)
 {
-  CHECK (sizeof (int) == sizeof (long));
-  RCM_FUNC2 (genrcm, i) ((int) n, flags, (int *) xadj, (int *) adj,
-			 (int *) perm, mask, (int *) deg);
+  CHECK(sizeof(int) == sizeof(long));
+  RCM_FUNC2(genrcm, i)
+  ((int)n, flags, (int *)xadj, (int *)adj, (int *)perm, mask, (int *)deg);
 }
 
-void RCM_FUNC2 (fnroot, l) (long *root, const int flags,
-			    const long *xadj, const long *adj,
-			    const long *deg,
-			    long *ccsize, signed char *mask, long *ls)
+void RCM_FUNC2(fnroot, l)(long *root,
+                          const int flags,
+                          const long *xadj,
+                          const long *adj,
+                          const long *deg,
+                          long *ccsize,
+                          signed char *mask,
+                          long *ls)
 {
-  CHECK (sizeof (int) == sizeof (long));
-  RCM_FUNC2 (fnroot, i) ((int *) root, flags, (int *) xadj, (int *) adj,
-			 (int *) deg, (int *) ccsize, mask, (int *) ls);
+  CHECK(sizeof(int) == sizeof(long));
+  RCM_FUNC2(fnroot, i)
+  ((int *)root,
+   flags,
+   (int *)xadj,
+   (int *)adj,
+   (int *)deg,
+   (int *)ccsize,
+   mask,
+   (int *)ls);
 }
 
-void RCM_FUNC2 (rcm, l) (const long root, const int flags,
-			 const long *xadj, const long *adj,
-			 const long *deg,
-			 signed char *mask, long *perm, long *ccsize)
+void RCM_FUNC2(rcm, l)(const long root,
+                       const int flags,
+                       const long *xadj,
+                       const long *adj,
+                       const long *deg,
+                       signed char *mask,
+                       long *perm,
+                       long *ccsize)
 {
-  CHECK (sizeof (int) == sizeof (long));
-  RCM_FUNC2 (rcm, i) ((int) root, flags, (int *) xadj, (int *) adj,
-		      (int *) deg, mask, (int *) perm, (int *) ccsize);
+  CHECK(sizeof(int) == sizeof(long));
+  RCM_FUNC2(rcm, i)
+  ((int)root,
+   flags,
+   (int *)xadj,
+   (int *)adj,
+   (int *)deg,
+   mask,
+   (int *)perm,
+   (int *)ccsize);
 }
-
 
 #else /* LONG_EQUALS_INT */
 
 #undef INT
 #define INT long
-
 
 #define SUFFIX l
 #include SELF
@@ -308,34 +318,39 @@ void RCM_FUNC2 (rcm, l) (const long root, const int flags,
 
 #endif /* else part of LONG_EQUALS_INT */
 
-
 #else /* RCM__DRIVER */
 
 /** @cond no-doxygen */
 
 /* function names and forward declarations */
 
-#define GENRCM  RCM_FUNC(genrcm)
-#define DEGREE  RCM_FUNC(degree)
-#define FNROOT  RCM_FUNC(fnroot)
-#define ROOTLS  RCM_FUNC(rootls)
-#define RCM     RCM_FUNC(rcm)
-#define HEAPSORT        RCM_FUNC(heapsort)
-#define INSERTION_SORT  RCM_FUNC(insertion_sort)
-#define SIFT    RCM_FUNC(sift)
+#define GENRCM RCM_FUNC(genrcm)
+#define DEGREE RCM_FUNC(degree)
+#define FNROOT RCM_FUNC(fnroot)
+#define ROOTLS RCM_FUNC(rootls)
+#define RCM RCM_FUNC(rcm)
+#define HEAPSORT RCM_FUNC(heapsort)
+#define INSERTION_SORT RCM_FUNC(insertion_sort)
+#define SIFT RCM_FUNC(sift)
 
+void FNROOT(INT *root,
+            const int flags,
+            const INT *xadj,
+            const INT *adj,
+            const INT *deg,
+            INT *ccsize,
+            signed char *mask,
+            INT *ls);
 
-void FNROOT (INT * root, const int flags,
-	     const INT * xadj, const INT * adj,
-	     const INT * deg, INT * ccsize, signed char *mask, INT * ls);
-
-void RCM (const INT root, const int flags,
-	  const INT * xadj, const INT * adj,
-	  const INT * deg, signed char *mask, INT * perm, INT * ccsize);
+void RCM(const INT root,
+         const int flags,
+         const INT *xadj,
+         const INT *adj,
+         const INT *deg,
+         signed char *mask,
+         INT *perm,
+         INT *ccsize);
 /*** @endcond */
-
-
-
 
 /**
  * @brief Calculates the degree for all nodes in the graph.
@@ -357,10 +372,12 @@ void RCM (const INT root, const int flags,
  *     if <code>RCM_USE_MASK</code> is not set, all degrees are calculated,
  *     regardless of entries in the mask array.
  */
-inline static void
-DEGREE (const INT n, const int flags,
-	const INT * restrict xadj, const INT * restrict adj,
-	signed char *restrict mask, INT * restrict deg)
+inline static void DEGREE(const INT n,
+                          const int flags,
+                          const INT *restrict xadj,
+                          const INT *restrict adj,
+                          signed char *restrict mask,
+                          INT *restrict deg)
 {
   INT i, k;
   INT nbr;
@@ -370,45 +387,44 @@ DEGREE (const INT n, const int flags,
   int fast_deg = !(flags & RCM_USE_MASK);
 
   if (fast_deg)
+  {
+    for (i = 0; i < n; ++i)
     {
-      for (i = 0; i < n; ++i)
-	{
-	  deg[i] = xadj[i + 1] - xadj[i];
-	}
+      deg[i] = xadj[i + 1] - xadj[i];
     }
+  }
   else
+  {
+    if (flags & RCM_FORTRAN_INDICES)
     {
-      if (flags & RCM_FORTRAN_INDICES)
-	{
-	  --xadj;
-	  --adj;
-	  --mask;
-	  --deg;
-	}
-      for (i = base; i < n + base; ++i)
-	{
-	  if (!mask[i])
-	    {
-	      CHECK (!fast_deg);
-	      ndeg = 0;
-	      for (k = xadj[i]; k < xadj[i + 1]; ++k)
-		{
-		  nbr = adj[k];
-		  if (!mask[nbr] && nbr != i)
-		    {
-		      ++ndeg;
-		    }
-		}
-		  #ifdef DEBUG
-			ASSERT (ndeg == xadj[i + 1] - xadj[i]);
-		  #endif
-
-	      deg[i] = ndeg;
-	    }
-	}
+      --xadj;
+      --adj;
+      --mask;
+      --deg;
     }
-}
+    for (i = base; i < n + base; ++i)
+    {
+      if (!mask[i])
+      {
+        CHECK(!fast_deg);
+        ndeg = 0;
+        for (k = xadj[i]; k < xadj[i + 1]; ++k)
+        {
+          nbr = adj[k];
+          if (!mask[nbr] && nbr != i)
+          {
+            ++ndeg;
+          }
+        }
+#ifdef DEBUG
+        ASSERT(ndeg == xadj[i + 1] - xadj[i]);
+#endif
 
+        deg[i] = ndeg;
+      }
+    }
+  }
+}
 
 /**
  * @brief Generic @c genrcmX() code (see @c genrcmi()).
@@ -419,10 +435,13 @@ DEGREE (const INT n, const int flags,
  *
  * @copydoc genrcmi()
  */
-void
-GENRCM (const INT n, const int flags,
-	const INT * xadj, const INT * adj,
-	INT * perm, signed char *mask, INT * deg)
+void GENRCM(const INT n,
+            const int flags,
+            const INT *xadj,
+            const INT *adj,
+            INT *perm,
+            signed char *mask,
+            INT *deg)
 {
   INT i, root, ccsize;
   INT num = 0;
@@ -430,43 +449,39 @@ GENRCM (const INT n, const int flags,
   int base = (flags & RCM_FORTRAN_INDICES) ? 1 : 0;
 
   if (!(xflags & RCM_USE_MASK))
+  {
+    for (i = 0; i < n; ++i)
     {
-      for (i = 0; i < n; ++i)
-	{
-	  mask[i] = 0;
-	}
-      xflags &= (~RCM_USE_MASK);
+      mask[i] = 0;
     }
-  DEGREE (n, xflags, xadj, adj, mask, deg);
+    xflags &= (~RCM_USE_MASK);
+  }
+  DEGREE(n, xflags, xadj, adj, mask, deg);
 
   for (i = 0; i < n; ++i)
+  {
+    if (mask[i])
     {
-      if (mask[i])
-	{
-	  continue;
-	}
-      root = i + base;
-
-      /*
-       * Find a pseudo-peripheral node and calculate RCM.
-       * Note that we reuse perm to also store the level
-       * structure (perm+num is parameter ls of FNROOT()).
-       */
-      FNROOT (&root, xflags, xadj, adj, deg, &ccsize, mask, perm + num);
-      RCM (root, xflags, xadj, adj, deg, mask, perm + num, &ccsize);
-
-      num += ccsize;
-      CHECK (num <= n);
-      if (num >= n)
-	{
-	  break;
-	}
-
+      continue;
     }
+    root = i + base;
 
+    /*
+     * Find a pseudo-peripheral node and calculate RCM.
+     * Note that we reuse perm to also store the level
+     * structure (perm+num is parameter ls of FNROOT()).
+     */
+    FNROOT(&root, xflags, xadj, adj, deg, &ccsize, mask, perm + num);
+    RCM(root, xflags, xadj, adj, deg, mask, perm + num, &ccsize);
+
+    num += ccsize;
+    CHECK(num <= n);
+    if (num >= n)
+    {
+      break;
+    }
+  }
 }
-
-
 
 /**
  * @brief Generates rooted level structure.
@@ -503,29 +518,32 @@ GENRCM (const INT n, const int flags,
  *
  */
 
-inline static void
-ROOTLS (const INT root, const int flags,
-	const INT * restrict xadj, const INT * restrict adj,
-	signed char *restrict mask,
-	INT * restrict ccsize, INT * restrict nlvl,
-	INT * restrict last_lvl, INT * restrict ls)
+inline static void ROOTLS(const INT root,
+                          const int flags,
+                          const INT *restrict xadj,
+                          const INT *restrict adj,
+                          signed char *restrict mask,
+                          INT *restrict ccsize,
+                          INT *restrict nlvl,
+                          INT *restrict last_lvl,
+                          INT *restrict ls)
 {
   INT i, j;
   INT nbr, node;
 
-  INT lvl_begin, lvl_end;	/* C style indices */
+  INT lvl_begin, lvl_end; /* C style indices */
 
   if (flags & RCM_FORTRAN_INDICES)
-    {
-      --mask;
-      --xadj;
-      --adj;
-    }
+  {
+    --mask;
+    --xadj;
+    --adj;
+  }
 
-  #ifdef DEBUG
-	ASSERT (!mask[root]);
-  #endif
-  mask[root] = 1;		/* mask root */
+#ifdef DEBUG
+  ASSERT(!mask[root]);
+#endif
+  mask[root] = 1; /* mask root */
 
   /* init first level */
   *nlvl = 0;
@@ -539,46 +557,44 @@ ROOTLS (const INT root, const int flags,
    * level, and lvl_end-1 points to the end of this level.
    */
   do
+  {
+    /*
+     * Generate the next level by finding all the non-masked
+     * neighbors of all the nodes in the current level.
+     */
+    for (i = lvl_begin; i < lvl_end; ++i)
     {
-      /*
-       * Generate the next level by finding all the non-masked
-       * neighbors of all the nodes in the current level.
-       */
-      for (i = lvl_begin; i < lvl_end; ++i)
-	{
-	  node = ls[i];
-	  for (j = xadj[node]; j < xadj[node + 1]; ++j)
-	    {
-	      nbr = adj[j];
-	      if (!mask[nbr])
-		{
-		  mask[nbr] = 1;
-		  ls[*ccsize] = nbr;
-		  ++(*ccsize);
-		}
-	    }
-	}
-
-      /*
-       * Reset lvl_begin and lvl_end to iterate over the now
-       * generated next level.
-       */
-      *last_lvl = lvl_begin;
-      lvl_begin = lvl_end;
-      lvl_end = *ccsize;
-      ++(*nlvl);
+      node = ls[i];
+      for (j = xadj[node]; j < xadj[node + 1]; ++j)
+      {
+        nbr = adj[j];
+        if (!mask[nbr])
+        {
+          mask[nbr] = 1;
+          ls[*ccsize] = nbr;
+          ++(*ccsize);
+        }
+      }
     }
-  while (lvl_end - lvl_begin > 0);
+
+    /*
+     * Reset lvl_begin and lvl_end to iterate over the now
+     * generated next level.
+     */
+    *last_lvl = lvl_begin;
+    lvl_begin = lvl_end;
+    lvl_end = *ccsize;
+    ++(*nlvl);
+  } while (lvl_end - lvl_begin > 0);
 
   /*
    * Reset mask to zero for the nodes in the level structure,
    * i.e. the nodes are again unmasked.
    */
   for (i = 0; i < *ccsize; ++i)
-    {
-      mask[ls[i]] = 0;
-    }
-
+  {
+    mask[ls[i]] = 0;
+  }
 }
 
 /**
@@ -590,57 +606,58 @@ ROOTLS (const INT root, const int flags,
  *
  * @copydoc fnrooti()
  */
-void
-FNROOT (INT * restrict root, const int flags,
-	const INT * restrict xadj, const INT * restrict adj,
-	const INT * restrict deg,
-	INT * restrict ccsize, signed char *restrict mask, INT * restrict ls)
+void FNROOT(INT *restrict root,
+            const int flags,
+            const INT *restrict xadj,
+            const INT *restrict adj,
+            const INT *restrict deg,
+            INT *restrict ccsize,
+            signed char *restrict mask,
+            INT *restrict ls)
 {
   INT j, new_nlvl, last_lvl, node, ndeg, mindeg;
   INT nlvl = 1;
 
   if (flags & RCM_FORTRAN_INDICES)
-    {
-      --deg;
-    }
+  {
+    --deg;
+  }
 
   nlvl = 1;
 
   while (1)
+  {
+    ROOTLS(*root, flags, xadj, adj, mask, ccsize, &new_nlvl, &last_lvl, ls);
+    /*
+     * Return if the number of levels stays the same
+     * or if we have reached the maximum level count.
+     * The number of levels can not decrease.
+     */
+    CHECK(new_nlvl > 0);
+    CHECK(new_nlvl >= nlvl);
+    CHECK(new_nlvl <= *ccsize);
+    if (new_nlvl == nlvl || new_nlvl == *ccsize)
     {
-      ROOTLS (*root, flags, xadj, adj,
-	      mask, ccsize, &new_nlvl, &last_lvl, ls);
-      /*
-       * Return if the number of levels stays the same
-       * or if we have reached the maximum level count.
-       * The number of levels can not decrease.
-       */
-      CHECK (new_nlvl > 0);
-      CHECK (new_nlvl >= nlvl);
-      CHECK (new_nlvl <= *ccsize);
-      if (new_nlvl == nlvl || new_nlvl == *ccsize)
-	{
-	  break;
-	}
-      nlvl = new_nlvl;
-      /*
-       * Pick a node with minimum degree from the last level.
-       * last_lvl points to the start of the last level.
-       */
-      mindeg = *ccsize;
-      for (j = last_lvl; j < *ccsize; ++j)
-	{
-	  node = ls[j];
-	  ndeg = deg[node];
-	  if (ndeg < mindeg)
-	    {
-	      *root = node;
-	      mindeg = ndeg;
-	    }
-	}
+      break;
     }
+    nlvl = new_nlvl;
+    /*
+     * Pick a node with minimum degree from the last level.
+     * last_lvl points to the start of the last level.
+     */
+    mindeg = *ccsize;
+    for (j = last_lvl; j < *ccsize; ++j)
+    {
+      node = ls[j];
+      ndeg = deg[node];
+      if (ndeg < mindeg)
+      {
+        *root = node;
+        mindeg = ndeg;
+      }
+    }
+  }
 }
-
 
 /**
  * @brief Sifts down a heap element, helper for @c HEAPSORT().
@@ -649,36 +666,37 @@ FNROOT (INT * restrict root, const int flags,
  * Sifts down the value @a t in the heap between @a i and <i>n</i>-1.
  *
  */
-static void
-SIFT (const INT i, const INT n, const INT t, INT * restrict perm,
-      const INT * restrict deg)
+static void SIFT(const INT i,
+                 const INT n,
+                 const INT t,
+                 INT *restrict perm,
+                 const INT *restrict deg)
 {
   INT j, w;
   j = i;
   w = i * 2 + 1;
 
   while (w < n)
+  {
+    if ((w + 1 < n) && (deg[perm[w]] < deg[perm[w + 1]]))
     {
-      if ((w + 1 < n) && (deg[perm[w]] < deg[perm[w + 1]]))
-	{
-	  ++w;
-	}
-      if (deg[t] < deg[perm[w]])
-	{
-	  /* we have to exchange/rotate and to go further down */
-	  perm[j] = perm[w];
-	  j = w;
-	  w = j * 2 + 1;
-	}
-      else
-	{
-	  /* v has heap property */
-	  break;
-	}
+      ++w;
     }
+    if (deg[t] < deg[perm[w]])
+    {
+      /* we have to exchange/rotate and to go further down */
+      perm[j] = perm[w];
+      j = w;
+      w = j * 2 + 1;
+    }
+    else
+    {
+      /* v has heap property */
+      break;
+    }
+  }
   perm[j] = t;
 }
-
 
 /**
  * @brief Heapsort for RCM; sorts after the degree of nodes.
@@ -694,24 +712,25 @@ SIFT (const INT i, const INT n, const INT t, INT * restrict perm,
  * @param[in] deg       degrees of the nodes
  *
  */
-inline static void
-HEAPSORT (const INT sz, INT * restrict perm, const INT * restrict deg)
+inline static void HEAPSORT(const INT sz,
+                            INT *restrict perm,
+                            const INT *restrict deg)
 {
   INT n = sz;
   INT i, t;
 
   for (i = n / 2; i > 0;)
-    {
-      --i;
-      SIFT (i, n, perm[i], perm, deg);
-    }
+  {
+    --i;
+    SIFT(i, n, perm[i], perm, deg);
+  }
   for (; n > 1;)
-    {
-      --n;
-      t = perm[n];
-      perm[n] = perm[0];
-      SIFT (i, n, t, perm, deg);
-    }
+  {
+    --n;
+    t = perm[n];
+    perm[n] = perm[0];
+    SIFT(i, n, t, perm, deg);
+  }
 }
 
 /**
@@ -727,24 +746,23 @@ HEAPSORT (const INT sz, INT * restrict perm, const INT * restrict deg)
  * @param[in] deg       degrees of the nodes
  *
  */
-inline static void
-INSERTION_SORT (const INT sz, INT * restrict perm, const INT * restrict deg)
+inline static void INSERTION_SORT(const INT sz,
+                                  INT *restrict perm,
+                                  const INT *restrict deg)
 {
   INT k, l;
   INT nbr;
 
   for (k = sz - 1; k > 0; --k)
+  {
+    nbr = perm[k - 1];
+    for (l = k; l < sz && deg[perm[l]] < deg[nbr]; ++l)
     {
-      nbr = perm[k - 1];
-      for (l = k; l < sz && deg[perm[l]] < deg[nbr]; ++l)
-	{
-	  perm[l - 1] = perm[l];
-	}
-      perm[l - 1] = nbr;
+      perm[l - 1] = perm[l];
     }
+    perm[l - 1] = nbr;
+  }
 }
-
-
 
 /**
  * @brief Generic @c rcmX() code (see @c rcmi()).
@@ -755,11 +773,14 @@ INSERTION_SORT (const INT sz, INT * restrict perm, const INT * restrict deg)
  *
  * @copydoc rcmi()
  */
-void
-RCM (const INT root, const int flags,
-     const INT * restrict xadj, const INT * restrict adj,
-     const INT * restrict deg,
-     signed char *restrict mask, INT * restrict perm, INT * restrict ccsize)
+void RCM(const INT root,
+         const int flags,
+         const INT *restrict xadj,
+         const INT *restrict adj,
+         const INT *restrict deg,
+         signed char *restrict mask,
+         INT *restrict perm,
+         INT *restrict ccsize)
 {
   INT i, j;
   INT nbr, node;
@@ -779,18 +800,18 @@ RCM (const INT root, const int flags,
    */
 
   if (flags & RCM_FORTRAN_INDICES)
-    {
-      --xadj;
-      --adj;
-      --mask;
-      --perm;
-      --deg;
-    }
+  {
+    --xadj;
+    --adj;
+    --mask;
+    --perm;
+    --deg;
+  }
 
   perm[base] = root;
-  #ifdef DEBUG
-    ASSERT (!mask[root]);
-  #endif
+#ifdef DEBUG
+  ASSERT(!mask[root]);
+#endif
   mask[root] = -1;
 
   lvl_begin = 0 + base;
@@ -802,70 +823,68 @@ RCM (const INT root, const int flags,
    * beginning and behind the end of the current level respectively.
    */
   do
+  {
+    /* iterate over all nodes in the current level */
+    for (i = lvl_begin; i < lvl_end; ++i)
     {
-      /* iterate over all nodes in the current level */
-      for (i = lvl_begin; i < lvl_end; ++i)
-	{
-	  node = perm[i];
-	  CHECK (mask[node] == -1);
-	  /*
-	   * Find the non-masked neighbors of node.
-	   * fnbr and lnbr keep track of where these nodes are
-	   * copied to in perm.
-	   */
-	  fnbr = lnbr;
-	  for (j = xadj[node]; j < xadj[node + 1]; ++j)
-	    {
-	      nbr = adj[j];
-	      if (!mask[nbr])
-		{
-		  mask[nbr] = -1;
-		  perm[lnbr] = nbr;
-		  ++lnbr;
-		}
-	    }
-	  if (lnbr - fnbr > 1 && sort)
-	    {
-	      if ((flags & RCM_INSERTION_SORT))
-		{
-		  INSERTION_SORT (lnbr - fnbr, perm + fnbr, deg);
-		}
-	      else
-		{
-		  HEAPSORT (lnbr - fnbr, perm + fnbr, deg);
-		}
-	    }
-	}
-      lvl_begin = lvl_end;
-      lvl_end = lnbr;
+      node = perm[i];
+      CHECK(mask[node] == -1);
+      /*
+       * Find the non-masked neighbors of node.
+       * fnbr and lnbr keep track of where these nodes are
+       * copied to in perm.
+       */
+      fnbr = lnbr;
+      for (j = xadj[node]; j < xadj[node + 1]; ++j)
+      {
+        nbr = adj[j];
+        if (!mask[nbr])
+        {
+          mask[nbr] = -1;
+          perm[lnbr] = nbr;
+          ++lnbr;
+        }
+      }
+      if (lnbr - fnbr > 1 && sort)
+      {
+        if ((flags & RCM_INSERTION_SORT))
+        {
+          INSERTION_SORT(lnbr - fnbr, perm + fnbr, deg);
+        }
+        else
+        {
+          HEAPSORT(lnbr - fnbr, perm + fnbr, deg);
+        }
+      }
     }
-  while (lvl_end - lvl_begin > 0);
+    lvl_begin = lvl_end;
+    lvl_end = lnbr;
+  } while (lvl_end - lvl_begin > 0);
 
-  #ifdef DEBUG
-    ASSERT (lnbr > 0);		/* check that no overflow occured */
-  #endif
+#ifdef DEBUG
+  ASSERT(lnbr > 0); /* check that no overflow occured */
+#endif
 
   /* we now have a Cuthill-McKee ordering in perm */
 
   if (flags & RCM_FORTRAN_INDICES)
-    {
-      ++perm;
-      --lnbr;
-    }
+  {
+    ++perm;
+    --lnbr;
+  }
   *ccsize = lnbr;
 
   /* reverse perm if reversal is not explicitly unwanted */
   if (!(flags & RCM_NO_REVERSE))
+  {
+    j = lnbr - 1;
+    for (i = 0; i < lnbr / 2; ++i, --j)
     {
-      j = lnbr - 1;
-      for (i = 0; i < lnbr / 2; ++i, --j)
-	{
-	  node = perm[j];
-	  perm[j] = perm[i];
-	  perm[i] = node;
-	}
+      node = perm[j];
+      perm[j] = perm[i];
+      perm[i] = node;
     }
+  }
 }
-
 
 #endif /* RCM__DRIVER */
